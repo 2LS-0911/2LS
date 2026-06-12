@@ -7,6 +7,7 @@ import { getModels, getEngines, CHINESE_BRANDS_LIST } from "./data/vehicleData";
 import { CAR_BRANDS } from "./data/presets";
 import AdminPanel from "./AdminPanel";
 import RepDashboard from "./RepDashboard";
+import StaffPortal from "./StaffPortal";
 
 const API_URL = "/api";
 
@@ -35,6 +36,8 @@ const TOOL_CHIPS = [
 
 function getRouteFromURL() {
   const p = new URLSearchParams(window.location.search);
+  if (p.get("panel") === "staff") return { type: "staff" as const };
+  // backward compat
   if (p.get("admin") === "1" && p.get("key")) return { type: "admin" as const, key: p.get("key")! };
   if (p.get("rep_token")) return { type: "rep" as const, token: p.get("rep_token")! };
   return null;
@@ -42,6 +45,7 @@ function getRouteFromURL() {
 
 export default function App() {
   const route = getRouteFromURL();
+  if (route?.type === "staff") return <StaffPortal />;
   if (route?.type === "admin") return <AdminPanel adminKey={route.key} />;
   if (route?.type === "rep") return <RepDashboard repToken={route.token} />;
   return <DiagApp />;
