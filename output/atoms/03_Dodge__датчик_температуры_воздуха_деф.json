@@ -1,0 +1,36 @@
+{
+  "id": "03_Dodge__датчик_температуры_воздуха_деф",
+  "atom_type": "reference",
+  "vehicle": {
+    "make": null,
+    "model": null,
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "title": "03_Dodge_ датчик температуры воздуха дефект",
+  "symptom": null,
+  "dtc_codes": [],
+  "system": "прочее",
+  "content": null,
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неисправность",
+    "shape_description": null
+  },
+  "image": null,
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\6. Осциллограммы датчиковой аппаратуры\\03_Dodge_ датчик температуры воздуха дефект.mwf",
+    "type": "oscilloscope_mwf",
+    "locator": ""
+  },
+  "confidence": "low",
+  "needs_human_review": true,
+  "review_notes": "Формат .mwf требует экспорта из родного ПО (PNG/CSV); данные не прочитаны"
+}

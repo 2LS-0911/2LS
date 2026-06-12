@@ -1,0 +1,37 @@
+{
+  "id": "09_Skoda_Fabia_1.2_перескочила цепь",
+  "atom_type": "reference",
+  "title": "09_Skoda_Fabia_1.2_перескочила цепь",
+  "system": "механика/ЦПГ",
+  "vehicle": {
+    "make": "Skoda",
+    "model": null,
+    "year": null,
+    "engine": null
+  },
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неизвестно",
+    "channels": 1,
+    "sample_count": 275088,
+    "periodic": true,
+    "features": {
+      "baseline_adc": 2016,
+      "peak_adc": 3515,
+      "peak_amplitude_rel": 1499,
+      "trough_adc": 1898,
+      "event_index": 22275313,
+      "periodic": true,
+      "units_note": "сырые единицы АЦП/отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": null
+  },
+  "image": "output\\oscilloscope\\09_Skoda_Fabia_1.2_перескочила цепь.png",
+  "source": {
+    "file": "09_Skoda_Fabia_1.2_перескочила цепь.md3",
+    "type": "oscilloscope_osc"
+  },
+  "confidence": "low",
+  "needs_human_review": true,
+  "review_notes": "посмотреть PNG и заполнить shape_description"
+}

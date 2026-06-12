@@ -1,0 +1,46 @@
+{
+  "id": "22_2112 2ц обрыв провода",
+  "atom_type": "reference",
+  "title": "ВАЗ-2112 цилиндр 2 — обрыв ВВ-провода",
+  "system": "зажигание",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неисправность",
+    "channels": 3,
+    "sample_count": 237924,
+    "features": {
+      "baseline_adc": 2047,
+      "turnoff_peak_adc": 3537,
+      "peak_amplitude_rel": 1490,
+      "dwell_trough_adc": 1657,
+      "event_index": 194594,
+      "burn_len_samples": 1,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": "Базовая линия с мелкой рябью. Двойная структура события: предпиковый всплеск ~2750, главная игла ~3520 АЦП и второй пик ~3520 АЦП, после чего отрицательный провал ~1710 АЦП. Хаотичные колебания ~1000 отсчётов. Двойная игла и провал — признак обрыва в ВВ-проводе: разряд ищет альтернативный путь."
+  },
+  "image": "output\\oscilloscope\\22_2112 2ц обрыв провода.png",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\5. Осциллограммы систем зажигания\\22_2112 2ц обрыв провода.md3",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "high",
+  "needs_human_review": false,
+  "review_notes": "PNG создан; требует просмотра формы и заполнения shape_description",
+  "vehicle": {
+    "make": "Lada",
+    "model": "2112",
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "symptom": null,
+  "dtc_codes": [],
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "content": null
+}

@@ -1,0 +1,29 @@
+{
+  "id": "03_2112_выпуск_позже_на_2 зуба",
+  "atom_type": "reference",
+  "title": "03_2112_выпуск_позже_на_2 зуба",
+  "system": "прочее",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неизвестно",
+    "channels": 2,
+    "sample_count": 54008,
+    "features": {
+      "baseline_adc": 2050,
+      "turnoff_peak_adc": 3396,
+      "peak_amplitude_rel": 1346,
+      "dwell_trough_adc": 788,
+      "event_index": 54167,
+      "burn_len_samples": 1,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    }
+  },
+  "image": "output\\oscilloscope\\03_2112_выпуск_позже_на_2 зуба.png",
+  "source": {
+    "file": "03_2112_выпуск_позже_на_2 зуба.osc",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "low",
+  "needs_human_review": true,
+  "review_notes": "проверить метку и форму вручную"
+}

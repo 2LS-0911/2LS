@@ -1,0 +1,29 @@
+{
+  "id": "02_2108_На два зуба раньше",
+  "atom_type": "reference",
+  "title": "02_2108_На два зуба раньше",
+  "system": "прочее",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неизвестно",
+    "channels": 1,
+    "sample_count": 54760,
+    "features": {
+      "baseline_adc": 2028,
+      "turnoff_peak_adc": 2672,
+      "peak_amplitude_rel": 644,
+      "dwell_trough_adc": 2010,
+      "event_index": 2439,
+      "burn_len_samples": 5817,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    }
+  },
+  "image": "output\\oscilloscope\\02_2108_На два зуба раньше.png",
+  "source": {
+    "file": "02_2108_На два зуба раньше.osc",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "low",
+  "needs_human_review": true,
+  "review_notes": "проверить метку и форму вручную"
+}

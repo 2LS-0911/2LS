@@ -1,0 +1,37 @@
+{
+  "id": "01_ДПДЗ_неисправность",
+  "atom_type": "reference",
+  "title": "01_ДПДЗ_неисправность",
+  "system": "питание",
+  "vehicle": {
+    "make": null,
+    "model": null,
+    "year": null,
+    "engine": null
+  },
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неисправность",
+    "channels": 1,
+    "sample_count": 1000000,
+    "periodic": true,
+    "features": {
+      "baseline_adc": 2277,
+      "peak_adc": 2621,
+      "peak_amplitude_rel": 344,
+      "trough_adc": 2106,
+      "event_index": 955563,
+      "periodic": true,
+      "units_note": "сырые единицы АЦП/отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": null
+  },
+  "image": "output\\oscilloscope\\01_ДПДЗ_неисправность.png",
+  "source": {
+    "file": "01_ДПДЗ_неисправность.md3",
+    "type": "oscilloscope_osc"
+  },
+  "confidence": "medium",
+  "needs_human_review": true,
+  "review_notes": "посмотреть PNG и заполнить shape_description"
+}

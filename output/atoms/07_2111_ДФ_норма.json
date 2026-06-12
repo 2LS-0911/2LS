@@ -1,0 +1,46 @@
+{
+  "id": "07_2111_ДФ_норма",
+  "atom_type": "reference",
+  "title": "ВАЗ-2111 ДПРВ (датчик фаз) — норма",
+  "system": "запуск",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "норма",
+    "channels": 2,
+    "sample_count": 271940,
+    "features": {
+      "baseline_adc": 2197,
+      "turnoff_peak_adc": 3693,
+      "peak_amplitude_rel": 1496,
+      "dwell_trough_adc": 1883,
+      "event_index": 131808,
+      "burn_len_samples": 1,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": "Периодический прямоугольный сигнал датчика фаз. Высокий уровень ~3620 АЦП, низкий ~1970 АЦП, ~6-7 полных периодов. Стабильная амплитуда и равные интервалы. Норма ДПРВ (датчика фаз) ВАЗ-2111."
+  },
+  "image": "output\\oscilloscope\\07_2111_ДФ_норма.png",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\6. Осциллограммы датчиковой аппаратуры\\07_2111_ДФ_норма.md3",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "high",
+  "needs_human_review": false,
+  "review_notes": "PNG создан; требует просмотра формы и заполнения shape_description",
+  "vehicle": {
+    "make": "Lada",
+    "model": "2111",
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "symptom": null,
+  "dtc_codes": [],
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "content": null
+}

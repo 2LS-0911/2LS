@@ -1,0 +1,46 @@
+{
+  "id": "17_ДМРВ_116_норма_снап",
+  "atom_type": "reference",
+  "title": "ДМРВ Bosch 116 — норма (снэп-тест)",
+  "system": "питание",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "норма",
+    "channels": 1,
+    "sample_count": 1000000,
+    "features": {
+      "baseline_adc": 2226,
+      "turnoff_peak_adc": 2633,
+      "peak_amplitude_rel": 407,
+      "dwell_trough_adc": 2202,
+      "event_index": 237323,
+      "burn_len_samples": 0,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": "Снэп-тест ДМРВ Bosch тип 116: резкий подъём от базы (~2226 АЦП) до пика ~2630 АЦП, затем 3-4 затухающих горба с убывающей амплитудой (~2450→2400→2325 АЦП). Чёткий острый пик и плавно затухающие колебания — норма данного типа ДМРВ."
+  },
+  "image": "output\\oscilloscope\\17_ДМРВ_116_норма_снап.png",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\6. Осциллограммы датчиковой аппаратуры\\17_ДМРВ_116_норма_снап.md3",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "high",
+  "needs_human_review": false,
+  "review_notes": "PNG создан; требует просмотра формы и заполнения shape_description",
+  "vehicle": {
+    "make": null,
+    "model": null,
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "symptom": null,
+  "dtc_codes": [],
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "content": null
+}

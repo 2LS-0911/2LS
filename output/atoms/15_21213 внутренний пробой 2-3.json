@@ -1,0 +1,46 @@
+{
+  "id": "15_21213 внутренний пробой 2-3",
+  "atom_type": "reference",
+  "title": "ВАЗ-21213 катушка 2-3 — внутренний пробой",
+  "system": "зажигание",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неисправность",
+    "channels": 2,
+    "sample_count": 265860,
+    "features": {
+      "baseline_adc": 2044,
+      "turnoff_peak_adc": 3512,
+      "peak_amplitude_rel": 1468,
+      "dwell_trough_adc": 1791,
+      "event_index": 204817,
+      "burn_len_samples": 146,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": "До события: мелкая регулярная рябь (~±15 АЦП). Острая игла ~3520 АЦП. После иглы: резкое биполярное событие — провал до ~1780 АЦП, затем широкая заполненная полоса медленно затухающих колебаний ~2000-2200 АЦП (~6000 отсчётов). Характерно для внутреннего пробоя катушки с нестабильной дугой после."
+  },
+  "image": "output\\oscilloscope\\15_21213 внутренний пробой 2-3.png",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\5. Осциллограммы систем зажигания\\15_21213 внутренний пробой 2-3.md3",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "high",
+  "needs_human_review": false,
+  "review_notes": "PNG создан; требует просмотра формы и заполнения shape_description",
+  "vehicle": {
+    "make": "Lada",
+    "model": "21213",
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "symptom": null,
+  "dtc_codes": [],
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "content": null
+}

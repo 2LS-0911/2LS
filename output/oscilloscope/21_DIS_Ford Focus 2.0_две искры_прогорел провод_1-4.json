@@ -1,0 +1,29 @@
+{
+  "id": "21_DIS_Ford Focus 2.0_две искры_прогорел провод_1-4",
+  "atom_type": "reference",
+  "title": "21_DIS_Ford Focus 2.0_две искры_прогорел провод_1-4",
+  "system": "прочее",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неизвестно",
+    "channels": 1,
+    "sample_count": 69470,
+    "features": {
+      "baseline_adc": 2049,
+      "turnoff_peak_adc": 3547,
+      "peak_amplitude_rel": 1498,
+      "dwell_trough_adc": 1550,
+      "event_index": 39410,
+      "burn_len_samples": 1,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    }
+  },
+  "image": "output\\oscilloscope\\21_DIS_Ford Focus 2.0_две искры_прогорел провод_1-4.png",
+  "source": {
+    "file": "21_DIS_Ford Focus 2.0_две искры_прогорел провод_1-4.osc",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "low",
+  "needs_human_review": true,
+  "review_notes": "проверить метку и форму вручную"
+}

@@ -1,0 +1,29 @@
+{
+  "id": "05_VW Polo 1.2_2002_3 цилиндра_ОК",
+  "atom_type": "reference",
+  "title": "05_VW Polo 1.2_2002_3 цилиндра_ОК",
+  "system": "прочее",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неизвестно",
+    "channels": 1,
+    "sample_count": 52776,
+    "features": {
+      "baseline_adc": 2057,
+      "turnoff_peak_adc": 2715,
+      "peak_amplitude_rel": 658,
+      "dwell_trough_adc": 2028,
+      "event_index": 1729,
+      "burn_len_samples": 5197,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    }
+  },
+  "image": "output\\oscilloscope\\05_VW Polo 1.2_2002_3 цилиндра_ОК.png",
+  "source": {
+    "file": "05_VW Polo 1.2_2002_3 цилиндра_ОК.osc",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "low",
+  "needs_human_review": true,
+  "review_notes": "проверить метку и форму вручную"
+}

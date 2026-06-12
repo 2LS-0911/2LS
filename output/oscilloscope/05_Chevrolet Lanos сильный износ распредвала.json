@@ -1,0 +1,37 @@
+{
+  "id": "05_Chevrolet Lanos сильный износ распредвала",
+  "atom_type": "reference",
+  "title": "05_Chevrolet Lanos сильный износ распредвала",
+  "system": "механика/ЦПГ",
+  "vehicle": {
+    "make": "Chevrolet",
+    "model": null,
+    "year": null,
+    "engine": null
+  },
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неизвестно",
+    "channels": 3,
+    "sample_count": 289086,
+    "periodic": true,
+    "features": {
+      "baseline_adc": 2046,
+      "peak_adc": 3322,
+      "peak_amplitude_rel": 1276,
+      "trough_adc": 1881,
+      "event_index": 226889,
+      "periodic": true,
+      "units_note": "сырые единицы АЦП/отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": null
+  },
+  "image": "output\\oscilloscope\\05_Chevrolet Lanos сильный износ распредвала.png",
+  "source": {
+    "file": "05_Chevrolet Lanos сильный износ распредвала.md3",
+    "type": "oscilloscope_osc"
+  },
+  "confidence": "low",
+  "needs_human_review": true,
+  "review_notes": "посмотреть PNG и заполнить shape_description"
+}

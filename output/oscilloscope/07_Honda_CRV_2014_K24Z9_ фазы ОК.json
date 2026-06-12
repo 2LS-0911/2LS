@@ -1,0 +1,37 @@
+{
+  "id": "07_Honda_CRV_2014_K24Z9_ фазы ОК",
+  "atom_type": "reference",
+  "title": "07_Honda_CRV_2014_K24Z9_ фазы ОК",
+  "system": "механика/ЦПГ",
+  "vehicle": {
+    "make": "Honda",
+    "model": null,
+    "year": null,
+    "engine": null
+  },
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неизвестно",
+    "channels": 1,
+    "sample_count": 295994,
+    "periodic": true,
+    "features": {
+      "baseline_adc": 1999,
+      "peak_adc": 2589,
+      "peak_amplitude_rel": 590,
+      "trough_adc": 1945,
+      "event_index": 9335,
+      "periodic": true,
+      "units_note": "сырые единицы АЦП/отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": null
+  },
+  "image": "output\\oscilloscope\\07_Honda_CRV_2014_K24Z9_ фазы ОК.png",
+  "source": {
+    "file": "07_Honda_CRV_2014_K24Z9_ фазы ОК.md3",
+    "type": "oscilloscope_osc"
+  },
+  "confidence": "low",
+  "needs_human_review": true,
+  "review_notes": "посмотреть PNG и заполнить shape_description"
+}

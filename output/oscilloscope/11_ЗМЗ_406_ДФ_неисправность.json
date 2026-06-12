@@ -1,0 +1,37 @@
+{
+  "id": "11_ЗМЗ_406_ДФ_неисправность",
+  "atom_type": "reference",
+  "title": "11_ЗМЗ_406_ДФ_неисправность",
+  "system": "прочее",
+  "vehicle": {
+    "make": null,
+    "model": null,
+    "year": null,
+    "engine": null
+  },
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неисправность",
+    "channels": 1,
+    "sample_count": 822468,
+    "periodic": false,
+    "features": {
+      "baseline_adc": 2051,
+      "peak_adc": 3542,
+      "peak_amplitude_rel": 1491,
+      "trough_adc": 1621,
+      "event_index": 417274,
+      "periodic": false,
+      "units_note": "сырые единицы АЦП/отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": null
+  },
+  "image": "output\\oscilloscope\\11_ЗМЗ_406_ДФ_неисправность.png",
+  "source": {
+    "file": "11_ЗМЗ_406_ДФ_неисправность.md3",
+    "type": "oscilloscope_osc"
+  },
+  "confidence": "medium",
+  "needs_human_review": true,
+  "review_notes": "посмотреть PNG и заполнить shape_description"
+}

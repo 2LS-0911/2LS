@@ -1,0 +1,29 @@
+{
+  "id": "17_катушка 2-3 неисправна",
+  "atom_type": "reference",
+  "title": "17_катушка 2-3 неисправна",
+  "system": "зажигание",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "норма",
+    "channels": 1,
+    "sample_count": 54938,
+    "features": {
+      "baseline_adc": 2056,
+      "turnoff_peak_adc": 3319,
+      "peak_amplitude_rel": 1263,
+      "dwell_trough_adc": 1883,
+      "event_index": 1689,
+      "burn_len_samples": 15,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    }
+  },
+  "image": "output\\oscilloscope\\17_катушка 2-3 неисправна.png",
+  "source": {
+    "file": "17_катушка 2-3 неисправна.osc",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "medium",
+  "needs_human_review": false,
+  "review_notes": ""
+}

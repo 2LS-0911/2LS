@@ -1,0 +1,36 @@
+{
+  "id": "Седло_2",
+  "atom_type": "case",
+  "vehicle": {
+    "make": null,
+    "model": null,
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "title": "Peugeot/Citroen EP6 — разрушение седла/сухарей клапана (крупный план)",
+  "symptom": null,
+  "dtc_codes": [],
+  "system": "прочее",
+  "content": null,
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "reference_data": {
+    "kind": "photo",
+    "shape_description": "Крупный план камеры сгорания EP6. Тарелка выпускного клапана покрыта нагаром, видна выступающая пружина и нарушенная геометрия посадочного места — стопорные сухари вышли из проточки штока клапана. Критическое разрушение: клапан может провалиться в цилиндр.",
+    "verdict": "неисправность"
+  },
+  "image": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\10. Диагностика двигателя ЕР6\\Седло 2.jpg",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\10. Диагностика двигателя ЕР6\\Седло 2.jpg",
+    "type": "image",
+    "locator": "Седло 2"
+  },
+  "confidence": "high",
+  "needs_human_review": false,
+  "review_notes": ""
+}

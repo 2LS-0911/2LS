@@ -1,0 +1,46 @@
+{
+  "id": "18_ДМРВ_037_норма_снап",
+  "atom_type": "reference",
+  "title": "ДМРВ Bosch 037 — норма (снэп-тест)",
+  "system": "питание",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "норма",
+    "channels": 1,
+    "sample_count": 712228,
+    "features": {
+      "baseline_adc": 2244,
+      "turnoff_peak_adc": 2623,
+      "peak_amplitude_rel": 379,
+      "dwell_trough_adc": 2171,
+      "event_index": 434473,
+      "burn_len_samples": 3817,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": "Снэп-тест ДМРВ Bosch тип 037: резкий подъём до пика ~2620 АЦП от базы ~2244 АЦП, затем 3-4 затухающих горба (~2480→2350→2470→2160 АЦП). Картина аналогична типу 116, незначительные отличия формы. Норма."
+  },
+  "image": "output\\oscilloscope\\18_ДМРВ_037_норма_снап.png",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\6. Осциллограммы датчиковой аппаратуры\\18_ДМРВ_037_норма_снап.md3",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "high",
+  "needs_human_review": false,
+  "review_notes": "PNG создан; требует просмотра формы и заполнения shape_description",
+  "vehicle": {
+    "make": null,
+    "model": null,
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "symptom": null,
+  "dtc_codes": [],
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "content": null
+}

@@ -1,0 +1,29 @@
+{
+  "id": "10_ДС_неисправность",
+  "atom_type": "reference",
+  "title": "10_ДС_неисправность",
+  "system": "прочее",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "норма",
+    "channels": 1,
+    "sample_count": 200000,
+    "features": {
+      "baseline_adc": 2351,
+      "turnoff_peak_adc": 3061,
+      "peak_amplitude_rel": 710,
+      "dwell_trough_adc": 3057,
+      "event_index": 55,
+      "burn_len_samples": 0,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    }
+  },
+  "image": "output\\oscilloscope\\10_ДС_неисправность.png",
+  "source": {
+    "file": "10_ДС_неисправность.osc",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "medium",
+  "needs_human_review": false,
+  "review_notes": ""
+}

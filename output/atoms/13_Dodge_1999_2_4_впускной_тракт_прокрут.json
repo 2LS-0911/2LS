@@ -1,0 +1,36 @@
+{
+  "id": "13_Dodge_1999_2_4_впускной_тракт_прокрут",
+  "atom_type": "reference",
+  "vehicle": {
+    "make": null,
+    "model": null,
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "title": "13_Dodge 1999_2.4_впускной тракт прокрутка",
+  "symptom": null,
+  "dtc_codes": [],
+  "system": "запуск",
+  "content": null,
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неизвестно",
+    "shape_description": null
+  },
+  "image": null,
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\7. Интересные осциллограммы. Часть 1\\13_Dodge 1999_2.4_впускной тракт прокрутка.mwf",
+    "type": "oscilloscope_mwf",
+    "locator": ""
+  },
+  "confidence": "low",
+  "needs_human_review": true,
+  "review_notes": "Формат .mwf требует экспорта из родного ПО (PNG/CSV); данные не прочитаны"
+}

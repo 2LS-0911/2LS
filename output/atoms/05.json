@@ -1,0 +1,36 @@
+{
+  "id": "05",
+  "atom_type": "case",
+  "vehicle": {
+    "make": "Chevrolet",
+    "model": "Niva",
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "title": "Chevrolet Niva — постель распредвала в ГБЦ (вид снаружи)",
+  "symptom": null,
+  "dtc_codes": [],
+  "system": "прочее",
+  "content": null,
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "reference_data": {
+    "kind": "photo",
+    "shape_description": "ГБЦ Chevrolet Niva с извлечённым распредвалом. Видны постели распредвала. Следы масла и нагара. Возможны следы задира на постелях. Иллюстрирует состояние ГБЦ при сильном износе распредвала.",
+    "verdict": "неисправность"
+  },
+  "image": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\2. Качество питания и «массы»\\18_Chevrolet_Niva распредвал\\05.jpg",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\2. Качество питания и «массы»\\18_Chevrolet_Niva распредвал\\05.jpg",
+    "type": "image",
+    "locator": "05"
+  },
+  "confidence": "medium",
+  "needs_human_review": false,
+  "review_notes": ""
+}

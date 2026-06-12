@@ -1,0 +1,36 @@
+{
+  "id": "03",
+  "atom_type": "case",
+  "vehicle": {
+    "make": "Chevrolet",
+    "model": "Niva",
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "title": "Chevrolet Niva — изношенный кулачок распредвала",
+  "symptom": "Нестабильная работа двигателя, диагностирован сильный износ распредвала",
+  "dtc_codes": [],
+  "system": "прочее",
+  "content": null,
+  "diagnostic_steps": [],
+  "root_cause": "Износ кулачка распредвала (предположительно из-за масляного голодания)",
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "reference_data": {
+    "kind": "photo",
+    "shape_description": "Снятый распредвал на земле. Кулачок с сильно сточенным профилем: рабочая поверхность кулачка блестит (свежий износ), форма кулачка практически полностью уничтожена. Характерный результат масляного голодания.",
+    "verdict": "неисправность"
+  },
+  "image": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\2. Качество питания и «массы»\\18_Chevrolet_Niva распредвал\\03.jpg",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\2. Качество питания и «массы»\\18_Chevrolet_Niva распредвал\\03.jpg",
+    "type": "image",
+    "locator": "03"
+  },
+  "confidence": "high",
+  "needs_human_review": false,
+  "review_notes": ""
+}

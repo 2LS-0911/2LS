@@ -1,0 +1,36 @@
+{
+  "id": "02_Ford_Zetec_1_8",
+  "atom_type": "reference",
+  "vehicle": {
+    "make": null,
+    "model": null,
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "title": "02_Ford Zetec 1.8",
+  "symptom": null,
+  "dtc_codes": [],
+  "system": "прочее",
+  "content": null,
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "reference_data": {
+    "kind": null,
+    "verdict": null,
+    "shape_description": null
+  },
+  "image": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\4. Тест Рх Андрея Шульгина\\13_Ford Zetec 1.8 сбитые фазы\\02_Ford Zetec 1.8.jpg",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\4. Тест Рх Андрея Шульгина\\13_Ford Zetec 1.8 сбитые фазы\\02_Ford Zetec 1.8.jpg",
+    "type": "image",
+    "locator": "02_Ford Zetec 1.8"
+  },
+  "confidence": "low",
+  "needs_human_review": true,
+  "review_notes": "изображение требует просмотра агентом для заполнения reference_data"
+}

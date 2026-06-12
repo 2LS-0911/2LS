@@ -1,0 +1,29 @@
+{
+  "id": "03_Chevrolet Lanos OK",
+  "atom_type": "reference",
+  "title": "03_Chevrolet Lanos OK",
+  "system": "прочее",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "норма",
+    "channels": 1,
+    "sample_count": 52544,
+    "features": {
+      "baseline_adc": 2020,
+      "turnoff_peak_adc": 2668,
+      "peak_amplitude_rel": 648,
+      "dwell_trough_adc": 2002,
+      "event_index": 2143,
+      "burn_len_samples": 5631,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    }
+  },
+  "image": "output\\oscilloscope\\03_Chevrolet Lanos OK.png",
+  "source": {
+    "file": "03_Chevrolet Lanos OK.osc",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "medium",
+  "needs_human_review": false,
+  "review_notes": ""
+}

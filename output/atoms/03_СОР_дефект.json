@@ -1,0 +1,46 @@
+{
+  "id": "03_СОР_дефект",
+  "atom_type": "reference",
+  "title": "СОР — дефект (короткая линия горения)",
+  "system": "зажигание",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неисправность",
+    "channels": 1,
+    "sample_count": 288930,
+    "features": {
+      "baseline_adc": 2102,
+      "turnoff_peak_adc": 2911,
+      "peak_amplitude_rel": 809,
+      "dwell_trough_adc": 2052,
+      "event_index": 153185,
+      "burn_len_samples": 21,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": "Период накопления менее выражен чем у нормы. Игла пробоя выше нормы. Линия горения аномально короткая — искра гасится практически сразу после иглы. Признак межвиткового замыкания или внутреннего пробоя катушки: ток замыкается по короткому пути, не поддерживая дугу."
+  },
+  "image": "output\\oscilloscope\\03_СОР_дефект.png",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\5. Осциллограммы систем зажигания\\03_СОР_дефект.md3",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "high",
+  "needs_human_review": false,
+  "review_notes": "PNG создан; требует просмотра формы и заполнения shape_description",
+  "vehicle": {
+    "make": null,
+    "model": null,
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "symptom": null,
+  "dtc_codes": [],
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "content": null
+}

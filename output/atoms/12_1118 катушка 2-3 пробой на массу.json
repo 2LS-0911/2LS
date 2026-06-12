@@ -1,0 +1,46 @@
+{
+  "id": "12_1118 катушка 2-3 пробой на массу",
+  "atom_type": "reference",
+  "title": "ВАЗ-2118 катушка 2-3 — пробой на массу",
+  "system": "зажигание",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неисправность",
+    "channels": 3,
+    "sample_count": 287640,
+    "features": {
+      "baseline_adc": 2052,
+      "turnoff_peak_adc": 3476,
+      "peak_amplitude_rel": 1424,
+      "dwell_trough_adc": 1985,
+      "event_index": 8935,
+      "burn_len_samples": 1845,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": "Нет чёткой отдельной иглы пробоя. После события: широкая шумная полоса ~2200-2800 АЦП (~1000 отсчётов), второй горб с интенсивными колебаниями (~2650 АЦП). Высокий уровень помех по всей записи. Признак пробоя ВН на массу: высокое напряжение проходит через нештатный путь (корпус)."
+  },
+  "image": "output\\oscilloscope\\12_1118 катушка 2-3 пробой на массу.png",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\5. Осциллограммы систем зажигания\\12_1118 катушка 2-3 пробой на массу.md3",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "high",
+  "needs_human_review": false,
+  "review_notes": "PNG создан; требует просмотра формы и заполнения shape_description",
+  "vehicle": {
+    "make": "Lada",
+    "model": "2118",
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "symptom": null,
+  "dtc_codes": [],
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "content": null
+}

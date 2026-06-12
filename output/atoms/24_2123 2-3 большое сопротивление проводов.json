@@ -1,0 +1,46 @@
+{
+  "id": "24_2123 2-3 большое сопротивление проводов",
+  "atom_type": "reference",
+  "title": "ВАЗ-2123 цилиндры 2-3 — большое сопротивление ВВ-проводов",
+  "system": "зажигание",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неисправность",
+    "channels": 2,
+    "sample_count": 267864,
+    "features": {
+      "baseline_adc": 2041,
+      "turnoff_peak_adc": 3507,
+      "peak_amplitude_rel": 1466,
+      "dwell_trough_adc": 1925,
+      "event_index": 8289,
+      "burn_len_samples": 2,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": "Базовая линия с мелкой рябью (~±40 АЦП). Острая высокая игла ~3500 АЦП. После иглы: нестабильные колебания ~2050-2100 АЦП (~2000 отсчётов), второй горб ~2200 с быстро затухающими колебаниями. Плавный второй горб и короткая линия горения — признак большого сопротивления ВВ-проводов."
+  },
+  "image": "output\\oscilloscope\\24_2123 2-3 большое сопротивление проводов.png",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\5. Осциллограммы систем зажигания\\24_2123 2-3 большое сопротивление проводов.md3",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "high",
+  "needs_human_review": false,
+  "review_notes": "PNG создан; требует просмотра формы и заполнения shape_description",
+  "vehicle": {
+    "make": "Lada",
+    "model": "2123",
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "symptom": null,
+  "dtc_codes": [],
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "content": null
+}

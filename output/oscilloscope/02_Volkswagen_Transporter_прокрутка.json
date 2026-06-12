@@ -1,0 +1,37 @@
+{
+  "id": "02_Volkswagen_Transporter_прокрутка",
+  "atom_type": "reference",
+  "title": "02_Volkswagen_Transporter_прокрутка",
+  "system": "прочее",
+  "vehicle": {
+    "make": "Volkswagen",
+    "model": null,
+    "year": null,
+    "engine": null
+  },
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неизвестно",
+    "channels": 4,
+    "sample_count": 836480,
+    "periodic": true,
+    "features": {
+      "baseline_adc": 2047,
+      "peak_adc": 1106,
+      "peak_amplitude_rel": -941,
+      "trough_adc": 1106,
+      "event_index": 286862,
+      "periodic": true,
+      "units_note": "сырые единицы АЦП/отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": null
+  },
+  "image": "output\\oscilloscope\\02_Volkswagen_Transporter_прокрутка.png",
+  "source": {
+    "file": "02_Volkswagen_Transporter_прокрутка.md3",
+    "type": "oscilloscope_osc"
+  },
+  "confidence": "low",
+  "needs_human_review": true,
+  "review_notes": "посмотреть PNG и заполнить shape_description"
+}

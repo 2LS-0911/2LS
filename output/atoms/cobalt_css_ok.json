@@ -1,0 +1,52 @@
+{
+  "id": "cobalt_css_ok",
+  "atom_type": "case",
+  "vehicle": {
+    "make": "Chevrolet",
+    "model": "Cobalt",
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "title": "Chevrolet Cobalt — стабильный ХХ после очистки дроссельной заслонки",
+  "symptom": "Нестабильный холостой ход (устранён)",
+  "dtc_codes": [],
+  "system": "питание",
+  "content": null,
+  "diagnostic_steps": [
+    {
+      "action": "CSS-тест (Diamag-2) после очистки дроссельной заслонки, 104 об/мин",
+      "measurement": "Ускорение на холостых %: цил.1=86, цил.3=81, цил.4=100, цил.2=87",
+      "expected": "Равномерность цилиндров",
+      "result": "Цилиндры выровнялись. Цил.4 = 100% (был 82%)"
+    }
+  ],
+  "root_cause": "Загрязнённая дроссельная заслонка (устранено очисткой)",
+  "solution": "Очистка дроссельной заслонки карбклинером",
+  "parts": [],
+  "visual_facts": [
+    {
+      "locator": "05_Css_OK.png",
+      "description": "Скриншот Diamag-2 после очистки: все цилиндры в пределах нормы",
+      "reading": "Цилиндры 1-4: 86/81/100/87% — без явных аутсайдеров"
+    },
+    {
+      "locator": "04_отмытая заслонка.JPG",
+      "description": "Дроссельная заслонка Cobalt после очистки: чистые стенки патрубка",
+      "reading": null
+    }
+  ],
+  "reference_data": {
+    "kind": null
+  },
+  "image": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)/8. Интересные осциллограммы. Часть 2/14_Chevrolet_Cobalt_холостой ход/05_Сss_OK.png",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)/8. Интересные осциллограммы. Часть 2/14_Chevrolet_Cobalt_холостой ход/",
+    "type": "image",
+    "locator": "05_Css_OK.png"
+  },
+  "confidence": "high",
+  "needs_human_review": false,
+  "review_notes": ""
+}

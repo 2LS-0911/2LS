@@ -1,0 +1,46 @@
+{
+  "id": "08_21214_ДФ_ неисправность_разная ширина",
+  "atom_type": "reference",
+  "title": "ВАЗ-21214 ДПРВ — неисправность (разная ширина импульсов)",
+  "system": "запуск",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неисправность",
+    "channels": 4,
+    "sample_count": 290952,
+    "features": {
+      "baseline_adc": 2050,
+      "turnoff_peak_adc": 3549,
+      "peak_amplitude_rel": 1499,
+      "dwell_trough_adc": 1876,
+      "event_index": 431089,
+      "burn_len_samples": 1,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": "Прямоугольный сигнал с неравномерной шириной импульсов: одни шире, другие уже нормы. Два аномальных высоких всплеска (~3540 и ~3030 АЦП). Нерегулярная скважность — дефект задающего диска или нарушение установки распредвала."
+  },
+  "image": "output\\oscilloscope\\08_21214_ДФ_ неисправность_разная ширина.png",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\6. Осциллограммы датчиковой аппаратуры\\08_21214_ДФ_ неисправность_разная ширина.md3",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "high",
+  "needs_human_review": false,
+  "review_notes": "PNG создан; требует просмотра формы и заполнения shape_description",
+  "vehicle": {
+    "make": "Lada",
+    "model": "21214",
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "symptom": null,
+  "dtc_codes": [],
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "content": null
+}

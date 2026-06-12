@@ -1,0 +1,29 @@
+{
+  "id": "07_Забитый катализатор",
+  "atom_type": "reference",
+  "title": "07_Забитый катализатор",
+  "system": "прочее",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неизвестно",
+    "channels": 2,
+    "sample_count": 3824,
+    "features": {
+      "baseline_adc": 2049,
+      "turnoff_peak_adc": 3543,
+      "peak_amplitude_rel": 1494,
+      "dwell_trough_adc": 2011,
+      "event_index": 371,
+      "burn_len_samples": 1,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    }
+  },
+  "image": "output\\oscilloscope\\07_Забитый катализатор.png",
+  "source": {
+    "file": "07_Забитый катализатор.osc",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "low",
+  "needs_human_review": true,
+  "review_notes": "проверить метку и форму вручную"
+}

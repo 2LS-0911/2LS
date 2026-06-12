@@ -1,0 +1,36 @@
+{
+  "id": "01_Css_bad",
+  "atom_type": "case",
+  "vehicle": {
+    "make": "Chevrolet",
+    "model": "Cobalt",
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "title": "CSS Diamag-2 — Chevrolet Cobalt до очистки (скриншот эффективности)",
+  "symptom": "Нестабильный холостой ход, цилиндр 4 — 82% эффективности",
+  "dtc_codes": [],
+  "system": "питание",
+  "content": null,
+  "diagnostic_steps": [],
+  "root_cause": "Загрязнённая дроссельная заслонка",
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "reference_data": {
+    "kind": "screenshot",
+    "shape_description": "Скриншот программы Diamag-2, режим «Эффективность работы цилиндров», 17 об/мин. Порядок работы 1-3-4-2. Ускорение на холостых: цил.1=100%, цил.3=93%, цил.4=82%, цил.2=89%. Ускорение под нагрузкой: цил.1=100%, цил.3=85%, цил.4=97%, цил.2=92%. Относительная компрессия: цил.1=93%, цил.3=100%, цил.4=94%, цил.2=99%. Цил.4 снижен на ХХ — диагноз загрязнённая заслонка.",
+    "verdict": "неисправность"
+  },
+  "image": "[freekurses.site] Анализ осциллограмм. .../14_Chevrolet_Cobalt_холостой ход/01_Css_bad.png",
+  "source": {
+    "file": "...",
+    "type": "image",
+    "locator": "01_Css_bad.png"
+  },
+  "confidence": "high",
+  "needs_human_review": false,
+  "review_notes": ""
+}

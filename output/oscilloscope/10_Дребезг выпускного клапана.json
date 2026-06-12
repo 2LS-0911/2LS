@@ -1,0 +1,29 @@
+{
+  "id": "10_Дребезг выпускного клапана",
+  "atom_type": "reference",
+  "title": "10_Дребезг выпускного клапана",
+  "system": "прочее",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неизвестно",
+    "channels": 1,
+    "sample_count": 71602,
+    "features": {
+      "baseline_adc": 2033,
+      "turnoff_peak_adc": 2391,
+      "peak_amplitude_rel": 358,
+      "dwell_trough_adc": 2033,
+      "event_index": 3353,
+      "burn_len_samples": 6937,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    }
+  },
+  "image": "output\\oscilloscope\\10_Дребезг выпускного клапана.png",
+  "source": {
+    "file": "10_Дребезг выпускного клапана.osc",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "low",
+  "needs_human_review": true,
+  "review_notes": "проверить метку и форму вручную"
+}

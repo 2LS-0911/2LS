@@ -1,0 +1,36 @@
+{
+  "id": "infiniti-m37-engine",
+  "atom_type": "reference",
+  "vehicle": {
+    "make": "Infiniti",
+    "model": "M37",
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "title": "Infiniti M37 — подкапотное пространство (общий вид)",
+  "symptom": null,
+  "dtc_codes": [],
+  "system": "прочее",
+  "content": null,
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "reference_data": {
+    "kind": "photo",
+    "shape_description": "Фото подкапотного пространства Infiniti M37. Двигатель VQ37 V6, видны: крышка ГРМ с логотипом Infiniti и маркировкой «V6», воздушный фильтр, патрубки системы охлаждения. Используется как иллюстрация к кейсу ElPower на Infiniti M37.",
+    "verdict": null
+  },
+  "image": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\3. Осциллограмма давления в цилиндре\\01_Фазы ОК\\09_Infiniti M37\\infiniti-m37-engine.jpg",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\3. Осциллограмма давления в цилиндре\\01_Фазы ОК\\09_Infiniti M37\\infiniti-m37-engine.jpg",
+    "type": "image",
+    "locator": "infiniti-m37-engine"
+  },
+  "confidence": "high",
+  "needs_human_review": false,
+  "review_notes": ""
+}

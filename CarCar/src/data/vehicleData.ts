@@ -1,0 +1,405 @@
+// Каталог: Марка → Модели → Двигатели
+// Названия движков соответствуют терминологии в базе атомов
+
+export interface ModelEngines {
+  engines: string[];
+}
+
+export type VehicleData = Record<string, Record<string, ModelEngines>>;
+
+export const VEHICLE_DATA: VehicleData = {
+  "BMW": {
+    "3 серия E36 (1990–2000)": { engines: ["M40B16 1.6", "M43B16 1.6", "M43B18 1.8", "M44B19 1.9", "M50B20 2.0", "M52B20 2.0", "M52B25 2.5", "M52B28 2.8", "M51D25 2.5 TD"] },
+    "3 серия E46 (1998–2006)": { engines: ["M43B16 1.6", "M43B18 1.8", "M44B19 1.9", "M52B20 2.0", "M52B25 2.5", "M54B22 2.2", "M54B25 2.5", "M54B30 3.0", "M47D20 2.0d", "M57D30 3.0d"] },
+    "3 серия E90/E91 (2005–2012)": { engines: ["N43B20 2.0", "N46B20 2.0", "N52B25 2.5", "N52B30 3.0", "N54B30 3.0T", "N55B30 3.0T", "N47D20 2.0d", "N57D30 3.0d"] },
+    "3 серия F30 (2011–2019)": { engines: ["N20B20 2.0T", "N26B20 2.0T", "N55B30 3.0T", "B48B20 2.0T", "B58B30 3.0T", "N47D20 2.0d", "N57D30 3.0d", "B47D20 2.0d"] },
+    "5 серия E39 (1996–2003)": { engines: ["M52B20 2.0", "M52B25 2.5", "M52B28 2.8", "M54B25 2.5", "M54B30 3.0", "M62B44 4.4", "M47D20 2.0d", "M57D25 2.5d", "M57D30 3.0d"] },
+    "5 серия E60/E61 (2003–2010)": { engines: ["N43B20 2.0", "N52B25 2.5", "N52B30 3.0", "N53B30 3.0", "N54B30 3.0T", "N62B44 4.4", "N47D20 2.0d", "N57D30 3.0d"] },
+    "5 серия F10 (2009–2017)": { engines: ["N20B20 2.0T", "N52B30 3.0", "N55B30 3.0T", "N63B44 4.4T", "B48B20 2.0T", "N47D20 2.0d", "N57D30 3.0d"] },
+    "X3 E83 (2003–2010)": { engines: ["M54B25 2.5", "M54B30 3.0", "N52B25 2.5", "N52B30 3.0", "M47D20 2.0d", "M57D30 3.0d"] },
+    "X3 F25 (2010–2017)": { engines: ["N20B20 2.0T", "N52B30 3.0", "N55B30 3.0T", "N47D20 2.0d", "N57D30 3.0d"] },
+    "X5 E53 (2000–2006)": { engines: ["M54B30 3.0", "M62B44 4.4", "M57D30 3.0d"] },
+    "X5 E70 (2006–2013)": { engines: ["N52B30 3.0", "N55B30 3.0T", "N63B44 4.4T", "M57D30 3.0d", "N57D30 3.0d"] },
+    "X5 F15 (2013–2018)": { engines: ["N55B30 3.0T", "N63B44 4.4T", "N57D30 3.0d"] },
+    "7 серия E38 (1994–2001)": { engines: ["M52B28 2.8", "M62B44 4.4", "M62B54 5.4", "M57D30 3.0d"] },
+    "7 серия E65 (2001–2008)": { engines: ["N52B30 3.0", "N62B44 4.4", "N73B60 6.0", "M57D30 3.0d"] },
+  },
+
+  "Mercedes-Benz": {
+    "C-класс W202 (1993–2000)": { engines: ["M111 2.0", "M111 2.2", "M104 2.8", "M111 2.0 (компрессор)", "OM604 2.2d", "OM605 2.5d"] },
+    "C-класс W203 (2000–2007)": { engines: ["M111 2.0", "M271 1.8T", "M271 2.0T", "M112 2.6", "M112 3.2", "OM611 2.1CDi", "OM646 2.1CDi"] },
+    "C-класс W204 (2007–2014)": { engines: ["M271 1.8T", "M272 2.5", "M272 3.0", "M272 3.5", "M156 6.2", "OM651 2.1CDi"] },
+    "E-класс W210 (1995–2002)": { engines: ["M111 2.0", "M111 2.3 (компрессор)", "M112 2.8", "M112 3.2", "M113 5.0", "OM605 2.5d", "OM606 3.0d", "OM613 3.2CDi"] },
+    "E-класс W211 (2002–2009)": { engines: ["M271 1.8T", "M272 2.6", "M272 3.0", "M272 3.5", "M113 5.0", "OM646 2.1CDi", "OM647 3.2CDi", "OM648 3.2CDi"] },
+    "E-класс W212 (2009–2016)": { engines: ["M271 1.8T", "M272 3.5", "M278 4.7T", "M157 5.5T", "OM651 2.1CDi"] },
+    "G-класс W463 (1990–н.в.)": { engines: ["M111 2.3", "M112 2.8", "M112 3.2", "M113 5.0", "M113 5.5", "OM612 3.0CDi", "OM642 3.0CDi"] },
+    "Sprinter W901-905 (1995–2006)": { engines: ["OM611 2.1CDi", "OM612 2.7CDi", "OM601 2.3d"] },
+    "Sprinter W906 (2006–2018)": { engines: ["OM651 2.1CDi", "OM642 3.0CDi", "OM646 2.1CDi"] },
+  },
+
+  "Audi": {
+    "A4 B5 (1994–2001)": { engines: ["ADR 1.6", "APT 1.8", "ANB 1.8T", "AEB 1.8T", "ACK 2.6 V6", "APR 2.8 V6", "AFB 2.5TDi", "AKN 2.5TDi"] },
+    "A4 B6 (2000–2004)": { engines: ["ALT 1.8T", "AMB 1.8T", "AWA 2.0", "BFB 2.0", "BCZ 1.9TDi", "AVF 1.9TDi", "AWX 1.9TDi", "BDG 2.5TDi"] },
+    "A4 B7 (2004–2008)": { engines: ["BWT 1.8T", "BUL 2.0T", "BGB 2.0T", "BWE 2.0T (EA113)", "BNA 2.0 FSI", "BPY 2.0T FSI", "BLB 2.0TDi", "BRE 2.0TDi"] },
+    "A4 B8 (2007–2015)": { engines: ["CDNB 1.8T (EA888)", "CDNC 2.0T (EA888)", "CDAA 2.0T (EA888)", "CAGA 2.0TDi CR", "CAHA 2.7TDi", "CGKA 3.0TDi"] },
+    "A6 C5 (1997–2005)": { engines: ["AML 2.4", "APS 2.4 V6", "AKS 2.4 V6", "BDV 2.4 V6", "ANF 2.8 V6", "ARE 2.7T biturbo", "AZX 2.7T", "AFB 2.5TDi", "AKN 2.5TDi"] },
+    "A6 C6 (2004–2011)": { engines: ["BKH 2.4 V6", "BDW 2.4 V6", "BXH 3.2 FSI", "ASB 3.0TDi", "BMK 3.0TDi", "CDYA 3.0TDi CR"] },
+    "Q5 8R (2008–2017)": { engines: ["CDNB 2.0T TFSI", "CDNC 2.0T TFSI", "CAHA 2.0TDi CR", "CGLA 3.0TDi"] },
+    "Q7 4L (2005–2015)": { engines: ["BHK 3.6 V6 FSI", "BAR 4.2 V8 FSI", "BUG 3.0TDi", "BTR 4.2TDi"] },
+  },
+
+  "Toyota": {
+    "Corolla E120 (2001–2006)": { engines: ["3ZZ-FE 1.6", "4ZZ-FE 1.4", "1ZZ-FE 1.8", "2ZZ-GE 1.8", "1CD-FTV 2.0d"] },
+    "Corolla E150 (2006–2013)": { engines: ["1ZR-FE 1.6", "1NR-FE 1.3", "2ZR-FE 1.8", "1AD-FTV 2.0d", "2AD-FTV 2.2d"] },
+    "Corolla E160/E170 (2013–2019)": { engines: ["1ZR-FAE 1.6 VVT-i", "2ZR-FE 1.8", "2ZR-FAE 1.8 Dual VVT-i"] },
+    "Camry V30 (2001–2006)": { engines: ["1AZ-FE 2.0", "2AZ-FE 2.4", "1MZ-FE 3.0 V6"] },
+    "Camry V40 (2006–2011)": { engines: ["2AZ-FE 2.4", "2GR-FE 3.5 V6"] },
+    "Camry V50 (2011–2017)": { engines: ["2AR-FE 2.5", "2GR-FE 3.5 V6", "6AR-FSE 2.5 Hybrid"] },
+    "Avensis (2003–2008)": { engines: ["1ZZ-FE 1.8", "1AZ-FSE 2.0 D-4", "2AZ-FSE 2.4 D-4", "2AD-FTV 2.2d", "1CD-FTV 2.0d"] },
+    "RAV4 (2005–2012)": { engines: ["1ZR-FE 1.6", "3ZR-FAE 2.0", "2AZ-FE 2.4", "2AD-FTV 2.2d"] },
+    "Land Cruiser 80 (1990–1997)": { engines: ["1HZ 4.2d", "1FZ-FE 4.5", "1HD-T 4.2 TD", "1HD-FT 4.2 TD"] },
+    "Land Cruiser 100 (1998–2007)": { engines: ["2UZ-FE 4.7", "1HD-FTE 4.2 TD"] },
+    "Land Cruiser 200 (2007–н.в.)": { engines: ["1VD-FTV 4.5 TD V8", "2UZ-FE 4.7", "3UR-FE 5.7"] },
+    "Land Cruiser Prado 120 (2002–2009)": { engines: ["1GR-FE 4.0 V6", "2TR-FE 2.7", "1KD-FTV 3.0d", "1KZ-TE 3.0i"] },
+  },
+
+  "Volkswagen": {
+    "Polo (2009–2020)": { engines: ["CFNA 1.6 MPI", "CFNB 1.6 MPI", "CHFA 1.2 TSI (EA111)", "CBZB 1.2 TSI", "CAYB 1.2 TDI", "CAYA 1.6 TDI"] },
+    "Golf IV (1997–2005)": { engines: ["AEH 1.4", "AXP 1.4 16V", "AEE 1.6", "APF 1.6", "AVU 1.6", "AZD 1.6 FSI", "AWT 1.8T (20V)", "AGU 1.8T (20V)", "ARZ 1.8T", "AUM 1.8T", "AQY 2.0", "AZJ 2.0", "ALH 1.9 TDI", "AHF 1.9 TDI", "ATD 1.9 TDI"] },
+    "Golf V/VI (2003–2012)": { engines: ["BLF 1.6 FSI", "BSE 1.6 MPI", "BSF 1.6 MPI", "BLR 2.0 FSI", "AXX 2.0 GTI (EA113)", "BWA 2.0 GTI", "CDLF 1.2 TSI", "CBZB 1.2 TSI", "BKD 2.0 TDI CR", "BMM 2.0 TDI PD"] },
+    "Golf VII (2012–2019)": { engines: ["CHPA 1.2 TSI", "CJZA 1.2 TSI", "CWVA 1.4 TSI (EA211)", "CXSA 1.4 TSI (EA211)", "CPTA 1.4 TSI GTE", "CRBC 2.0 TDI CR", "CUNA 2.0 GTI"] },
+    "Passat B5 (1996–2005)": { engines: ["ADP 1.6", "AHL 1.6", "ARM 1.6", "APT 1.8", "ANB 1.8T", "AWT 1.8T", "AZM 2.0", "AZX 2.8T VR6", "ACK 2.8 V6", "AFB 2.5TDI", "AKN 2.5TDI", "AVB 1.9TDI", "AWX 1.9TDI", "AVF 1.9TDI"] },
+    "Passat B6/B7 (2005–2014)": { engines: ["BLF 1.6 FSI", "BVY 2.0 FSI", "AXX 2.0 TSI (EA113)", "CCTA 2.0 TSI (EA888)", "BKD 2.0 TDI CR", "BMR 2.0 TDI PD", "CBAB 2.0 TDI CR"] },
+    "Tiguan (2007–2016)": { engines: ["BLG 1.4 TSI (EA111)", "CAXA 1.4 TSI (EA111)", "BWA 2.0 TSI (EA113)", "CBFA 2.0 TSI (EA888)", "CFGB 2.0 TDI CR", "CBAB 2.0 TDI CR"] },
+    "Transporter T5 (2003–2015)": { engines: ["AXC 1.9 TDI PD", "AXB 1.9 TDI PD", "BRR 2.5 TDI PD", "BNZ 2.5 TDI PD", "CAAC 2.0 BiTDI", "CFCA 2.0 TDI"] },
+  },
+
+  "Hyundai": {
+    "Accent / Solaris (2010–2020)": { engines: ["G4FA 1.4 MPI", "G4FC 1.6 MPI", "D4FA 1.5 CRDi"] },
+    "Getz (2002–2010)": { engines: ["G4HE 1.1", "G4HD 1.3", "G4EE 1.4", "G4EC 1.5", "G4ED 1.6 DOHC", "D3EA 1.5 CRDi"] },
+    "Elantra XD (2000–2006)": { engines: ["G4ED 1.6 DOHC", "G4GC 2.0 DOHC"] },
+    "Elantra HD/MD (2006–2016)": { engines: ["G4FC 1.6", "G4FG 1.6 GDI", "G4NA 2.0 GDI"] },
+    "Sonata NF (2004–2010)": { engines: ["G4KA 2.0 MPI", "G4KD 2.0 MPI", "G6BA 2.4 MPI", "G6BV 2.7 V6", "D5EA 2.0 CRDi"] },
+    "Sonata YF/LF (2010–2019)": { engines: ["G4KA 2.0 MPI", "G4KD 2.0 MPI", "G4KJ 2.4 GDI", "G4NA 2.0 GDI", "D4HA 2.0 CRDi"] },
+    "Tucson / ix35 (2004–2015)": { engines: ["G4GC 2.0 MPI", "G4KD 2.0 MPI", "G6BA 2.4 MPI", "D4EA 2.0 CRDi", "D4HA 2.0 CRDi"] },
+    "Santa Fe (2000–2012)": { engines: ["G6BA 2.4 MPI", "G6BV 2.7 V6", "D4EA 2.0 CRDi", "D4CB 2.2 CRDi"] },
+    "Creta (2016–н.в.)": { engines: ["G4FA 1.4 MPI", "G4FG 1.6 GDI", "D4FC 1.6 CRDi"] },
+  },
+
+  "Kia": {
+    "Rio I (2000–2005)": { engines: ["A3E 1.3 SOHC", "A5D 1.5 SOHC", "B3E 1.3 DOHC", "B5D 1.5 DOHC"] },
+    "Rio II / Pride (2005–2011)": { engines: ["G4EE 1.4 DOHC", "G4ED 1.6 DOHC", "D4FA 1.5 CRDi"] },
+    "Rio III / IV (2011–н.в.)": { engines: ["G4FA 1.4 MPI", "G4FC 1.6 MPI", "G4FG 1.6 GDI"] },
+    "Spectra (2000–2009)": { engines: ["S6D 1.5 SOHC", "S6E 1.6 DOHC", "G6E 1.6 DOHC"] },
+    "Ceed (2006–2018)": { engines: ["G4FC 1.6 MPI", "G4FJ 1.6 T-GDI", "G4NA 2.0 MPI", "D4FB 1.6 CRDi"] },
+    "Sportage (2004–2015)": { engines: ["G4GC 2.0 DOHC", "G4KD 2.0 MPI", "G6BA 2.4 MPI", "D4EA 2.0 CRDi", "D4HA 2.0 CRDi"] },
+    "Sorento (2002–2012)": { engines: ["G6CU 3.5 V6", "D4CB 2.5 CRDi", "D4HA 2.2 CRDi"] },
+    "Cerato / Forte (2004–2013)": { engines: ["G4ED 1.6 DOHC", "G4GC 2.0 DOHC", "G4FC 1.6 MPI", "D4FA 1.5 CRDi", "D4FB 1.6 CRDi"] },
+  },
+
+  "Nissan": {
+    "Almera N15 (1995–2000)": { engines: ["GA14DE 1.4", "GA16DE 1.6", "SR18DE 1.8", "CD20 2.0d"] },
+    "Almera N16 (2000–2006)": { engines: ["QG15DE 1.5", "QG18DE 1.8", "YD22DDT 2.2d"] },
+    "Almera G15 / Классик (2006–2018)": { engines: ["QG15DE 1.5", "K4M 1.6 (Renault)"] },
+    "Primera P12 (2001–2007)": { engines: ["QG18DE 1.8", "QR20DE 2.0", "SR20VE 2.0 NEO VVL"] },
+    "Qashqai J10 (2006–2013)": { engines: ["HR16DE 1.6", "MR20DE 2.0", "R9M 1.6 dCi", "M9R 2.0 dCi"] },
+    "X-Trail T30 (2000–2007)": { engines: ["QR20DE 2.0", "QR25DE 2.5", "YD22ETi 2.2d"] },
+    "X-Trail T31 (2007–2014)": { engines: ["MR20DE 2.0", "QR25DE 2.5", "M9R 2.0 dCi"] },
+    "Maxima A33 (2000–2006)": { engines: ["VQ20DE 2.0 V6", "VQ30DE 3.0 V6"] },
+    "Pathfinder R51 (2004–2014)": { engines: ["VQ40DE 4.0 V6", "V9X 2.5d V6", "YD25DDTi 2.5d"] },
+    "Teana J31/J32 (2003–2013)": { engines: ["QR25DE 2.5", "VQ23DE 2.3 V6", "VQ35DE 3.5 V6"] },
+  },
+
+  "Renault": {
+    "Logan I (2004–2014)": { engines: ["K7J 1.4 MPI", "K7M 1.6 MPI", "F8Q 1.9d", "K9K 1.5 dCi"] },
+    "Logan II (2014–н.в.)": { engines: ["H4M 1.6 16V", "K7M 1.6 MPI", "K9K 1.5 dCi 90л.с.", "K9K 1.5 dCi 110л.с."] },
+    "Sandero I/II (2007–н.в.)": { engines: ["K7J 1.4 MPI", "K7M 1.6 MPI", "H4M 1.6 16V", "K9K 1.5 dCi"] },
+    "Duster (2010–н.в.)": { engines: ["K7M 1.6 MPI 4x2", "H4M 1.6 16V 4x2", "F4R 2.0 4x4", "K9K 1.5 dCi 4x2", "K9K 1.5 dCi 4x4"] },
+    "Megane II (2002–2009)": { engines: ["K4M 1.6 MPI", "F4R 2.0 MPI", "F4R 2.0T (RS)", "M9R 2.0 dCi", "K9K 1.5 dCi", "G9U 1.9 dCi"] },
+    "Megane III (2009–2016)": { engines: ["K4M 1.6 MPI", "H4M 1.6 16V", "M5R 2.0T (RS)", "K9K 1.5 dCi", "M9R 2.0 dCi"] },
+    "Scenic II/III (2003–2016)": { engines: ["K4M 1.6 MPI", "F4R 2.0 MPI", "K9K 1.5 dCi", "M9R 2.0 dCi", "G9U 1.9 dCi"] },
+    "Laguna II/III (2001–2015)": { engines: ["K4M 1.6", "F4R 2.0", "L7X 3.0 V6", "G9U 1.9 dCi", "M9R 2.0 dCi", "P9X 3.0 dCi V6"] },
+    "Kangoo (1998–н.в.)": { engines: ["E7J 1.4 MPI", "K7M 1.6 MPI", "K9K 1.5 dCi"] },
+  },
+
+  "Ford": {
+    "Focus I (1998–2004)": { engines: ["Zetec 1.4 16V", "Zetec 1.6 16V", "Zetec-E 1.8 16V", "Zetec 2.0 16V", "Endura 1.8 TD"] },
+    "Focus II (2004–2011)": { engines: ["Duratec 1.4 16V", "Duratec 1.6 16V", "Duratec 1.8 16V", "Duratec 2.0 16V", "Duratorq 1.6 TDCi", "Duratorq 1.8 TDCi", "Duratorq 2.0 TDCi"] },
+    "Focus III (2011–2018)": { engines: ["Duratec 1.6 Ti-VCT", "EcoBoost 1.0 3цил", "EcoBoost 1.6 Ti-VCT", "Duratec 2.0", "Duratorq 1.6 TDCi", "Duratorq 2.0 TDCi"] },
+    "Mondeo III (2000–2007)": { engines: ["Duratec 1.8 16V", "Duratec 2.0 16V", "Duratec 2.5 V6", "Duratec-ST 2.2T", "Duratorq 2.0 TDCi", "Duratorq 2.2 TDCi"] },
+    "Mondeo IV (2007–2014)": { engines: ["Duratec 1.6 Ti-VCT", "Duratec 2.0 Ti-VCT", "Duratec 2.3 Ti-VCT", "Duratorq 1.8 TDCi", "Duratorq 2.0 TDCi"] },
+    "Transit (2000–2014)": { engines: ["Duratorq 2.0 TDCi FWD", "Duratorq 2.4 TDCi FWD", "Duratorq 2.2 TDCi RWD", "Duratorq 2.4 TDCi RWD"] },
+    "Fusion (2001–2012)": { engines: ["Duratec 1.4 16V", "Duratec 1.6 16V", "Duratorq 1.4 TDCi", "Duratorq 1.6 TDCi"] },
+  },
+
+  "Opel": {
+    "Astra G (1998–2004)": { engines: ["X14XE 1.4", "Z14XE 1.4", "X16XEL 1.6", "Z16XEP 1.6", "X18XE 1.8", "X20XEV 2.0", "Y20DTH 2.0 DTI", "Z20DTH 2.0 DTI"] },
+    "Astra H (2004–2011)": { engines: ["Z14XEP 1.4 Twinport", "Z16XER 1.6", "Z16XE 1.6", "Z18XER 1.8", "Z20LEH 2.0T OPC", "Z17DTH 1.7 CDTi", "Z19DTH 1.9 CDTi"] },
+    "Astra J (2009–2018)": { engines: ["A14NET 1.4T", "A16XER 1.6", "A16XNT 1.6T", "A18XER 1.8", "A20NFT 2.0T OPC", "A17DTS 1.7 CDTi", "A20DTH 2.0 CDTi"] },
+    "Vectra B (1995–2002)": { engines: ["X14XE 1.4", "X16XEL 1.6", "X18XE 1.8", "X20XEV 2.0", "X25XE 2.5 V6", "Y20DTH 2.0 DTI"] },
+    "Vectra C (2002–2008)": { engines: ["Z16XER 1.6", "Z18XER 1.8", "Z20NET 2.0T", "Z32SE 3.2 V6", "Z19DTH 1.9 CDTi", "Z20DMH 2.0 CDTi"] },
+    "Zafira A/B (1999–2014)": { engines: ["X18XE 1.8", "Z18XER 1.8", "Z20NET 2.0T OPC", "Y20DTH 2.0 DTI", "Z19DTH 1.9 CDTi"] },
+    "Sintra (1996–1999)": { engines: ["X22SZR 2.2", "X30XE 3.0 V6", "X25DT 2.5 TD"] },
+  },
+
+  "Honda": {
+    "Civic VI (1995–2001)": { engines: ["D14A 1.4", "D16A 1.6", "D16Y 1.6", "B16A2 VTEC 1.6"] },
+    "Civic VII (2001–2005)": { engines: ["D14Z6 1.4", "D16V1 1.6", "D17A 1.7", "K20A4 2.0 VTEC"] },
+    "Civic VIII (2006–2011)": { engines: ["R16A 1.6 i-VTEC", "R18A 1.8 i-VTEC", "K20Z4 2.0 i-VTEC Type-R", "N22A 2.2 i-CTDi"] },
+    "Accord VI (1998–2003)": { engines: ["F18B2 1.8", "F20B6 2.0", "H22A7 2.2 VTEC", "J30A1 3.0 V6"] },
+    "Accord VII/VIII (2003–2012)": { engines: ["K20A6 2.0", "K24A 2.4 i-VTEC", "J30A5 3.0 V6", "N22A 2.2 i-CTDi", "N22B2 2.2 i-DTEC"] },
+    "CR-V I/II (1997–2006)": { engines: ["B20B 2.0 DOHC", "B20Z2 2.0 DOHC", "K20A4 2.0 i-VTEC"] },
+    "CR-V III/IV (2006–2016)": { engines: ["R20A 2.0 i-VTEC", "K24Z1 2.4 i-VTEC", "N22A 2.2 i-CTDi", "N22B2 2.2 i-DTEC"] },
+  },
+
+  "Mitsubishi": {
+    "Lancer IX (2003–2010)": { engines: ["4A90 1.3", "4G13 1.3", "4G18 1.6", "4G15 1.5", "4G93 1.8", "4G69 2.0"] },
+    "Lancer X (2007–2017)": { engines: ["4A91 1.5 SOHC", "4A92 1.6 SOHC", "4B10 1.8", "4B11 2.0", "4B11T 2.0 (Ralliart)", "4B12 2.4"] },
+    "Outlander I (2001–2006)": { engines: ["4G63 2.0 4WD", "4G69 2.4 4WD"] },
+    "Outlander II (2006–2012)": { engines: ["4B11 2.0", "4B12 2.4", "4G63 2.0 4WD", "4N13 1.8 DI-D"] },
+    "Outlander III (2012–н.в.)": { engines: ["4J11 2.0 MIVEC", "4J12 2.4 MIVEC", "4N14 2.2 DI-D"] },
+    "Pajero III (1999–2006)": { engines: ["6G74 3.5 V6 GDI", "4M41 3.2 DI-D", "4D56 2.5 TD"] },
+    "Pajero IV (2006–н.в.)": { engines: ["6G75 3.8 MIVEC V6", "4M41 3.2 DI-D", "4D56T 2.5 TD"] },
+    "Space Wagon (1991–2004)": { engines: ["4G63 2.0", "4G69 2.4", "4D68 2.0 TD"] },
+  },
+
+  "Chevrolet": {
+    "Aveo T200 (2002–2008)": { engines: ["B10D1 1.0 SOHC", "B12D1 1.2 SOHC", "LXT 1.4 DOHC", "LY4 1.6 DOHC"] },
+    "Aveo T250/T300 (2006–2015)": { engines: ["LDT 1.2 DOHC", "LXT 1.4 DOHC", "L91 1.6 DOHC"] },
+    "Lanos (1997–2009)": { engines: ["A14SMS 1.4 SOHC", "A15SMS 1.5 SOHC", "A16DMS 1.6 DOHC"] },
+    "Lacetti (2002–2013)": { engines: ["A14XER 1.4", "Z16XER 1.6", "F16D3 1.6 DOHC", "F18D3 1.8 DOHC", "Z20DMH 2.0 CDTi"] },
+    "Cobalt (2011–н.в.)": { engines: ["L2C 1.5 DOHC 105л.с."] },
+    "Captiva (2006–2018)": { engines: ["Z24XE 2.4", "Z24XED 2.4", "LF1 3.2 V6", "Z20DMH 2.0 CDTi", "Z20D1 2.0 VCDi"] },
+    "Spark M200 (2005–2010)": { engines: ["B10D1 1.0", "B10S1 1.0"] },
+    "Niva (2002–н.в.)": { engines: ["Z16XER 1.6 16V"] },
+  },
+
+  "Skoda": {
+    "Fabia I/II (1999–2014)": { engines: ["AZQ 1.2 MPI", "BME 1.2 MPI", "CHFA 1.2 TSI", "BCA 1.4 16V", "BKY 1.4 MPI", "BLF 1.6 FSI", "BJB 1.4 TDI", "BNM 1.4 TDI", "AXR 1.9 TDI"] },
+    "Octavia A5 (2004–2013)": { engines: ["BSE 1.6 MPI", "BSF 1.6 MPI", "BLF 1.6 FSI", "BVY 2.0 FSI", "BWA 2.0 TFSI (EA113)", "CCZA 2.0 TFSI RS", "BKD 2.0 TDI CR", "BMM 2.0 TDI PD"] },
+    "Octavia A7 (2012–н.в.)": { engines: ["CHPA 1.2 TSI", "CWVA 1.4 TSI (EA211)", "CZDA 1.4 TSI (EA211)", "CJXA 1.8 TSI (EA888)", "CJZB 2.0 TSI RS", "CRBC 2.0 TDI CR"] },
+    "Superb II/III (2008–н.в.)": { engines: ["CBFA 2.0 TSI (EA888)", "CJXE 1.8 TSI", "CDAA 2.0 TSI", "CLHA 3.6 V6 FSI", "CAGA 2.0 TDI CR", "CGMA 2.0 TDI"] },
+  },
+
+  "Peugeot": {
+    "206 (1998–2010)": { engines: ["TU3 1.4 MPI", "TU5JP 1.6 MPI", "EW10J4 2.0", "TU3A 1.4 HDi", "TU9M 1.9d", "DW8 1.9d", "DW10TD 2.0 HDi"] },
+    "307 (2001–2008)": { engines: ["TU5JP4 1.6 VTi", "EW10J4 2.0", "EW10A 2.0 16V", "EW7J4 1.8 16V", "DV6TED4 1.6 HDi", "DW10ATED4 2.0 HDi"] },
+    "308 / CC (2007–2014)": { engines: ["EP6 1.6 VTi (5FW)", "EP6C 1.6 THP (5FK)", "EW10A 2.0 16V", "DV6DTED 1.6 e-HDi", "DW10BTED4 2.0 HDi"] },
+    "407 / 508 (2004–2018)": { engines: ["EW10A 2.0 16V", "EW12J4 2.2 16V", "ES9A 3.0 V6", "DW10ATED4 2.0 HDi", "DW12MTED4 2.7 HDi"] },
+    "3008 / 5008 (2009–н.в.)": { engines: ["EP6 1.6 VTi", "EP6CDT 1.6 THP", "EB2 1.2 PureTech", "DV6DTED 1.6 e-HDi", "DW10CTED4 2.0 HDi"] },
+  },
+
+  "Lada (ВАЗ)": {
+    "2108 / 2109 / 2115": { engines: ["2108 1.3 8кл", "21081 1.1 8кл", "2111 1.5 8кл", "2112 1.5 16кл", "21128 1.7 8кл"] },
+    "2110 / 2111 / 2112": { engines: ["2110 1.5 8кл", "2111 1.5 8кл", "2112 1.5 16кл", "21124 1.6 16кл"] },
+    "Priora (2110–2013+)": { engines: ["21116 1.6 8кл", "21126 1.6 16кл", "21127 1.6 16кл"] },
+    "Kalina": { engines: ["11183 1.6 8кл", "21116 1.6 8кл", "11186 1.6 8кл"] },
+    "Granta": { engines: ["11183 1.6 8кл", "21116 1.6 8кл", "11186 1.6 8кл", "21127 1.6 16кл"] },
+    "4x4 (Нива)": { engines: ["21213 1.7 8кл КАРБ", "21214 1.7 8кл ИНЖЕКТ", "21214-30 1.7 8кл Евро-3"] },
+    "Largus": { engines: ["K4M 1.6 16кл", "K7M 1.6 8кл"] },
+  },
+
+  "ГАЗ": {
+    "3110 / 3102 Волга": { engines: ["402 2.4 карб", "4021 2.45 карб", "406 2.3 инжект", "405 2.5 инжект"] },
+    "ГАЗель 3302": { engines: ["402 2.4 карб", "4021 карб", "406 2.3 инжект", "405 2.5 инжект", "Cummins ISF 2.8", "Cummins B3.3", "УМЗ-4216"] },
+    "ГАЗель Next": { engines: ["Cummins ISF 2.8 дизель", "UMZ-A274 2.7 газ/бензин", "YaMZ-534 дизель"] },
+    "Соболь": { engines: ["406 2.3 инжект", "405 2.5 инжект", "Cummins ISF 2.8"] },
+  },
+
+  "УАЗ": {
+    "Patriot (2005–н.в.)": { engines: ["ZMZ-409 2.7 инжект", "ZMZ-40906 2.7 Euro-5", "Iveco F1A 2.3 TD"] },
+    "Hunter / 469": { engines: ["ZMZ-402 2.4 карб", "ZMZ-409 2.7 инжект", "ZMZ-40906 2.7"] },
+    "Буханка (3741/2206)": { engines: ["ZMZ-402 2.4 карб", "ZMZ-4104 2.9", "ZMZ-409 2.7 инжект"] },
+  },
+
+  "Daewoo": {
+    "Matiz": { engines: ["B10S1 0.8 SOHC", "B10D1 1.0 SOHC"] },
+    "Nexia": { engines: ["G15MF 1.5 SOHC", "A15SMS 1.5 SOHC"] },
+    "Lanos": { engines: ["A14SMS 1.4 SOHC", "A15SMS 1.5 SOHC", "A16DMS 1.6 DOHC"] },
+  },
+
+  "Mazda": {
+    "3 BK (2003–2009)": { engines: ["Z6 1.6", "LF 2.0", "L3 2.3", "RF Turbo 2.0d MZR-CD"] },
+    "3 BL/BM (2009–2019)": { engines: ["Z6 1.6", "P5 1.5 SkyActiv-G", "PE 2.0 SkyActiv-G", "PY 2.5 SkyActiv-G", "SH 2.2 SkyActiv-D"] },
+    "6 GG/GH (2002–2012)": { engines: ["LF 2.0", "L3 2.3", "L3T 2.3T MPS", "R2AA 2.2d MZR-CD"] },
+    "6 GJ (2012–н.в.)": { engines: ["PE 2.0 SkyActiv-G", "PY 2.5 SkyActiv-G", "SH 2.2 SkyActiv-D"] },
+    "CX-5 (2011–н.в.)": { engines: ["PE 2.0 SkyActiv-G", "PY 2.5 SkyActiv-G", "SH 2.2 SkyActiv-D"] },
+  },
+
+  "Subaru": {
+    "Impreza GD/GG (2000–2007)": { engines: ["EJ152 1.5", "EJ154 1.5", "EJ164 1.6", "EJ204 2.0 AVCS", "EJ20T 2.0T (WRX)", "EJ207 2.0T (STI)", "EJ202 2.0 SOHC"] },
+    "Impreza GH/GR (2007–2012)": { engines: ["EL154 1.5 DOHC", "EL15 1.5", "EJ204 2.0 AVCS", "EJ20X 2.0 WRX", "EJ257 2.5T STI"] },
+    "Forester SG (2002–2008)": { engines: ["EJ202 2.0 SOHC", "EJ204 2.0 AVCS", "EJ205 2.0T (XT)", "EJ25 2.5"] },
+    "Forester SH/SJ (2008–н.в.)": { engines: ["EJ204 2.0 AVCS", "FB20 2.0", "FB25 2.5", "EJ255 2.5T XT", "EJ257 2.5T XT"] },
+    "Legacy B4 (2003–2009)": { engines: ["EJ202 2.0 SOHC", "EJ204 2.0 AVCS", "EJ20X 2.0T", "EJ253 2.5 AVCS", "EJ30D 3.0 6цил"] },
+    "Outback (2003–2009)": { engines: ["EJ251 2.5 AVCS", "EJ253 2.5 AVCS", "EJ30D 3.0 6цил", "EE20Z 2.0d Boxer Diesel"] },
+  },
+};
+
+// ── Китайские бренды ─────────────────────────────────────────────
+
+export const CHINESE_VEHICLE_DATA: VehicleData = {
+
+  "Geely": {
+    "Emgrand EC7 (2011–2019)": { engines: ["JL4G15 1.5 MT", "JL4G15 1.5 AT", "JL4G18 1.8 AT", "JL4G20 2.0 AT"] },
+    "Emgrand X7 / Emgrand GT (2013–2020)": { engines: ["JL4G18 1.8 AT", "JLD-4G20 2.0 AT", "JLH-3G15TD 1.5T AT"] },
+    "Atlas / Atlas Pro (2016–н.в.)": { engines: ["JLD-4G20 2.0 AT", "JLH-4G15TDB 1.8T AT", "JLH-3G15TD 1.5T 7DCT"] },
+    "Coolray / Binyue (2019–н.в.)": { engines: ["JLH-3G15TD 1.5T 7DCT DD"] },
+    "Tugella (2020–н.в.)": { engines: ["JLH-3G15TD 1.5T 7DCT", "JLD-4G20D 2.0T 8AT"] },
+    "Monjaro / Xingyue L (2022–н.в.)": { engines: ["JLH-3G15TD 1.5T MHEV 7DCT", "JLD-4G20D 2.0T 8AT"] },
+    "Icon (2020–2023)": { engines: ["JLH-3G15TD 1.5T 7DCT"] },
+    "Preface / Xingrui (2021–н.в.)": { engines: ["JLH-4G15TDB 1.8T 7DCT", "JLH-3G15TD 1.5T 7DCT"] },
+  },
+
+  "Haval": {
+    "H6 2G (2017–2020)": { engines: ["GW4C20B 2.0T 6DCT"] },
+    "H6 3G (2021–н.в.)": { engines: ["GW4B15B 1.5T 7DCT", "GW4C20B 2.0T 7DCT"] },
+    "H6 DHH (2022–н.в.)": { engines: ["GW4B15B 1.5T HEV 7DCT"] },
+    "Jolion (2021–н.в.)": { engines: ["GW4B15B 1.5T 7DCT", "GW4B15B 1.5T HEV"] },
+    "Dargo (2021–н.в.)": { engines: ["GW4C20B 2.0T 7DCT 4WD"] },
+    "F7 / F7x (2018–2022)": { engines: ["GW4C20B 2.0T 7DCT"] },
+    "H2 (2014–2020)": { engines: ["GW4G15B 1.5T MT", "GW4G15B 1.5T DCT"] },
+    "H4 (2018–2022)": { engines: ["GW4N20 2.0T DCT"] },
+    "H9 (2014–н.в.)": { engines: ["4G69S4T 2.0T MT/AT", "GW4C20B 2.0T AT", "GW6C30H 3.0T V6 HEV"] },
+    "Raptor (2023–н.в.)": { engines: ["GW6C30H 3.0T V6 HEV 9AT"] },
+  },
+
+  "Chery": {
+    "Tiggo 2 (2017–2022)": { engines: ["SQRE4T15B 1.5T MT", "SQRE4T15B 1.5T CVT"] },
+    "Tiggo 4 (2017–2021)": { engines: ["SQRE4T15B 1.5T MT", "SQRE4T15B 1.5T CVT"] },
+    "Tiggo 4 Pro (2022–н.в.)": { engines: ["SQRE4T15C 1.5T 7DCT"] },
+    "Tiggo 7 Pro (2020–н.в.)": { engines: ["SQRE4T15B 1.5T CVT", "SQRE4T15C 1.5T 7DCT"] },
+    "Tiggo 7 Pro Max (2022–н.в.)": { engines: ["SQRE4T15C 1.5T 7DCT"] },
+    "Tiggo 8 Pro (2020–н.в.)": { engines: ["SQRF4J16 1.6T 7DCT", "SQRF4J16 1.6T 7DCT AWD"] },
+    "Tiggo 8 Pro Max (2022–н.в.)": { engines: ["SQRF4J16T 1.6T MAX 7DCT"] },
+    "Arrizo 5 (2016–2022)": { engines: ["SQRE4G15D 1.5 CVT", "SQRE4G16D 1.6 CVT"] },
+    "Arrizo 6 Pro (2020–н.в.)": { engines: ["SQRE4T15B 1.5T CVT", "SQRE4T15C 1.5T 7DCT"] },
+    "Arrizo 8 (2022–н.в.)": { engines: ["SQRF4J16T 1.6T MAX 7DCT"] },
+    "Bonus 3 (2012–2018)": { engines: ["SQR481F 1.3 MT", "SQR481FC 1.3T MT"] },
+  },
+
+  "Changan": {
+    "Alsvin (2020–н.в.)": { engines: ["JL465Q 1.4T MT", "JL465Q 1.4T CVT"] },
+    "CS35 Plus (2018–н.в.)": { engines: ["JL4G15C5A 1.5 AT", "JL473ZQ5 1.4T DCT"] },
+    "CS55 Plus (2021–н.в.)": { engines: ["JL473QA 1.5T DCT", "JL483Q 1.8T AT"] },
+    "CS75 Plus (2018–н.в.)": { engines: ["JL483Q 1.8T AT", "JL486ZQ4 2.0T AT"] },
+    "CS85 Coupe (2021–н.в.)": { engines: ["JL486ZQ4 2.0T AT"] },
+    "UNI-T (2021–н.в.)": { engines: ["JL473ZQ5 1.4T 7DCT"] },
+    "UNI-K (2021–н.в.)": { engines: ["JL486ZQ4 2.0T 8AT AWD"] },
+    "Eado Plus (2020–н.в.)": { engines: ["JL473QA 1.5T DCT"] },
+    "Hunter (2022–н.в.)": { engines: ["JL486ZQ4 2.0T 8AT 4WD"] },
+  },
+
+  "BYD": {
+    "F3 (2014–2020)": { engines: ["BYD371QA 1.5 MT", "BYD371QA 1.5 AT"] },
+    "Song Plus DMi (2021–н.в.)": { engines: ["BYD1.5 DM-i + Motor CVT"] },
+    "Han EV (2020–н.в.)": { engines: ["EV 222кВт RWD", "EV AWD 380кВт"] },
+    "Han DM (2020–н.в.)": { engines: ["BYD1.5T DM 4WD"] },
+    "Atto 3 / Yuan Plus EV (2022–н.в.)": { engines: ["EV 150кВт"] },
+    "Seal / Seal EV (2022–н.в.)": { engines: ["EV 150кВт RWD", "EV AWD 390кВт"] },
+    "Tang DM-i (2021–н.в.)": { engines: ["BYD2.0T DM-i AWD"] },
+    "Dolphin EV (2023–н.в.)": { engines: ["EV 70кВт", "EV 130кВт"] },
+  },
+
+  "Omoda": {
+    "C5 (2022–н.в.)": { engines: ["SQRE4T15C 1.5T 7DCT"] },
+    "C5 Pro (2024–н.в.)": { engines: ["SQRE4T15C 1.5T 7DCT"] },
+    "S5 GT (2023–н.в.)": { engines: ["SQRF4J16T 1.6T MAX 7DCT"] },
+    "C9 (2024–н.в.)": { engines: ["SQRF4J16T 1.6T MAX 7DCT AWD"] },
+  },
+
+  "Exeed": {
+    "TXL (2020–н.в.)": { engines: ["SQRF4J16 1.6T 7DCT"] },
+    "VX (2022–н.в.)": { engines: ["SQRF4J16T 1.6T MAX 7DCT AWD"] },
+    "RX (2023–н.в.)": { engines: ["SQRF4J16T 1.6T MAX 7DCT"] },
+    "LX (2023–н.в.)": { engines: ["SQRF4J16T 1.6T MAX 7DCT AWD"] },
+  },
+
+  "Jetour": {
+    "X70 (2018–2021)": { engines: ["SQRE4T15B 1.5T MT", "SQRE4T15B 1.5T CVT"] },
+    "X70 Plus (2020–н.в.)": { engines: ["SQRE4T15B 1.5T CVT"] },
+    "X90 Plus (2022–н.в.)": { engines: ["SQRF4J16 1.6T 7DCT AWD"] },
+    "Dashing (2022–н.в.)": { engines: ["SQRE4T15C 1.5T 7DCT"] },
+    "T2 (2023–н.в.)": { engines: ["SQRE4T15C 1.5T 7DCT"] },
+  },
+
+  "JAC": {
+    "S3 (2015–2020)": { engines: ["HFC4GA1-2E2 1.5 MT/AT"] },
+    "S4 (2018–2021)": { engines: ["HFC4GB2 1.5T DCT"] },
+    "JS4 (2021–н.в.)": { engines: ["HFC4GB2 1.5T DCT"] },
+    "J7 (2021–н.в.)": { engines: ["HFC4GB2 1.5T DCT"] },
+    "T8 Pro (2022–н.в.)": { engines: ["HFC4GA3 2.0T AT 4WD"] },
+    "JS6 (2022–н.в.)": { engines: ["HFC4GB2 1.5T AT"] },
+  },
+
+  "Москвич": {
+    "Москвич 3 (2022–н.в.)": { engines: ["HFC4GB2 1.5T 6AT", "BEV 150кВт"] },
+    "Москвич 6 (2023–н.в.)": { engines: ["HFC4GB2 1.5T 6AT", "BEV 150кВт"] },
+    "Москвич 3е EV (2023–н.в.)": { engines: ["BEV 150кВт"] },
+  },
+
+  "Tank": {
+    "Tank 300 (2021–н.в.)": { engines: ["GW4C20A 2.0T 8AT 4WD"] },
+    "Tank 400 Hi4-T (2023–н.в.)": { engines: ["GW4C20A 2.0T HEV 8AT 4WD"] },
+    "Tank 500 (2022–н.в.)": { engines: ["GW6C30H 3.0T V6 HEV 9AT 4WD"] },
+  },
+
+  "Lixiang": {
+    "Lixiang ONE (2019–2022)": { engines: ["1.2T EREV Range Extender"] },
+    "L6 (2023–н.в.)": { engines: ["1.5T EREV Range Extender"] },
+    "L7 (2022–н.в.)": { engines: ["1.5T EREV Range Extender"] },
+    "L8 (2022–н.в.)": { engines: ["1.5T EREV Range Extender AWD"] },
+    "L9 (2022–н.в.)": { engines: ["1.5T EREV Range Extender AWD"] },
+    "MEGA EV (2024–н.в.)": { engines: ["BEV AWD 400кВт"] },
+  },
+
+  "BAIC": {
+    "U5 Plus (2021–н.в.)": { engines: ["BJ486EQ 1.5T DCT"] },
+    "X35 (2019–2022)": { engines: ["BJ415A 1.5 MT/AT"] },
+    "X55 II (2021–н.в.)": { engines: ["BJ486EQ 1.5T DCT"] },
+    "BJ40 (2015–н.в.)": { engines: ["4G69S4T 2.0T MT", "4G63 2.0T MT"] },
+    "Senova X55 (2015–2019)": { engines: ["BJ415A 1.5T AT"] },
+  },
+
+  "FAW Bestune": {
+    "T77 (2019–н.в.)": { engines: ["CA4GB15TD 1.5T DCT", "CA4GB15TD 1.5T 4WD DCT"] },
+    "T99 (2021–н.в.)": { engines: ["CA4GC20TD 2.0T AT AWD"] },
+    "T55 (2019–н.в.)": { engines: ["CA4GB15TD 1.5T DCT"] },
+    "B70S (2020–н.в.)": { engines: ["CA4GB15TD 1.5T DCT"] },
+  },
+
+  "Dongfeng": {
+    "AX7 Pro (2020–н.в.)": { engines: ["DFM488Q1A 2.0T DCT AWD"] },
+    "Fengon 500 (2019–н.в.)": { engines: ["DFM476ZL 1.5T MT/CVT"] },
+    "Aeolus AX5 (2019–н.в.)": { engines: ["DFM476ZL 1.5T CVT"] },
+    "M-Terrain (2022–н.в.)": { engines: ["DFM488Q 2.0T 8AT 4WD"] },
+  },
+
+  "Great Wall": {
+    "Hover H3 (2010–2014)": { engines: ["4G63S4M 2.0 MT", "GW4G64 2.0 MT"] },
+    "Hover H5 (2010–2015)": { engines: ["4G93T 2.0T MT", "GW4D20 2.0d MT 4WD"] },
+    "Hover H6 Classic (2011–2017)": { engines: ["4G63S4M 2.0 MT", "GW4C20 2.0T AT"] },
+  },
+
+};
+
+// Список китайских брендов для UI
+export const CHINESE_BRANDS_LIST = Object.keys(CHINESE_VEHICLE_DATA);
+
+// Возвращает список моделей для марки (обычные + китайские)
+export function getModels(brand: string): string[] {
+  if (!brand) return [];
+  if (VEHICLE_DATA[brand]) return Object.keys(VEHICLE_DATA[brand]);
+  if (CHINESE_VEHICLE_DATA[brand]) return Object.keys(CHINESE_VEHICLE_DATA[brand]);
+  return [];
+}
+
+// Возвращает список двигателей для марки+модели (обычные + китайские)
+export function getEngines(brand: string, model: string): string[] {
+  if (!brand || !model) return [];
+  return (
+    VEHICLE_DATA[brand]?.[model]?.engines ??
+    CHINESE_VEHICLE_DATA[brand]?.[model]?.engines ??
+    []
+  );
+}

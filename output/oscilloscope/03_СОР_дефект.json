@@ -1,0 +1,37 @@
+{
+  "id": "03_СОР_дефект",
+  "atom_type": "reference",
+  "title": "03_СОР_дефект",
+  "system": "зажигание",
+  "vehicle": {
+    "make": null,
+    "model": null,
+    "year": null,
+    "engine": null
+  },
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неисправность",
+    "channels": 1,
+    "sample_count": 288930,
+    "periodic": false,
+    "features": {
+      "baseline_adc": 2102,
+      "peak_adc": 2911,
+      "peak_amplitude_rel": 809,
+      "trough_adc": 2052,
+      "event_index": 153185,
+      "periodic": false,
+      "units_note": "сырые единицы АЦП/отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": null
+  },
+  "image": "output\\oscilloscope\\03_СОР_дефект.png",
+  "source": {
+    "file": "03_СОР_дефект.md3",
+    "type": "oscilloscope_osc"
+  },
+  "confidence": "medium",
+  "needs_human_review": true,
+  "review_notes": "посмотреть PNG и заполнить shape_description"
+}

@@ -1,0 +1,46 @@
+{
+  "id": "02_СОР_первичка_норма",
+  "atom_type": "reference",
+  "title": "СОР первичная обмотка — норма",
+  "system": "зажигание",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "норма",
+    "channels": 1,
+    "sample_count": 298616,
+    "features": {
+      "baseline_adc": 2102,
+      "turnoff_peak_adc": 2791,
+      "peak_amplitude_rel": 689,
+      "dwell_trough_adc": 1998,
+      "event_index": 158465,
+      "burn_len_samples": 2983,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": "Чистая базовая линия. Чёткий период накопления (dwell) — незначительное понижение перед событием. Острая игла пробоя умеренной высоты. После иглы: стабильная линия горения выше базы (~50 АЦП) протяжённостью ~3500 отсчётов с одним небольшим вторичным горбом, затем чистый возврат. Эталон нормы первичного сигнала катушки типа COP."
+  },
+  "image": "output\\oscilloscope\\02_СОР_первичка_норма.png",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\5. Осциллограммы систем зажигания\\02_СОР_первичка_норма.md3",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "high",
+  "needs_human_review": false,
+  "review_notes": "",
+  "vehicle": {
+    "make": null,
+    "model": null,
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "symptom": null,
+  "dtc_codes": [],
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "content": null
+}

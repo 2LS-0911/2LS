@@ -1,0 +1,37 @@
+{
+  "id": "18_ДМРВ_037_норма_снап",
+  "atom_type": "reference",
+  "title": "18_ДМРВ_037_норма_снап",
+  "system": "прочее",
+  "vehicle": {
+    "make": null,
+    "model": null,
+    "year": null,
+    "engine": null
+  },
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "норма",
+    "channels": 1,
+    "sample_count": 712228,
+    "periodic": true,
+    "features": {
+      "baseline_adc": 2244,
+      "peak_adc": 2623,
+      "peak_amplitude_rel": 379,
+      "trough_adc": 2137,
+      "event_index": 434473,
+      "periodic": true,
+      "units_note": "сырые единицы АЦП/отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": null
+  },
+  "image": "output\\oscilloscope\\18_ДМРВ_037_норма_снап.png",
+  "source": {
+    "file": "18_ДМРВ_037_норма_снап.md3",
+    "type": "oscilloscope_osc"
+  },
+  "confidence": "medium",
+  "needs_human_review": true,
+  "review_notes": "посмотреть PNG и заполнить shape_description"
+}

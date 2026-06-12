@@ -1,0 +1,46 @@
+{
+  "id": "aveo_intake_manifold_variable",
+  "atom_type": "case",
+  "vehicle": {
+    "make": "Chevrolet",
+    "model": "Aveo",
+    "year": 2015,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "title": "Chevrolet Aveo — впускной коллектор с переменной длиной впуска",
+  "symptom": "Диагностика системы переменной длины впуска",
+  "dtc_codes": [],
+  "system": "питание",
+  "content": "Снятый двухкамерный впускной коллектор Chevrolet Aveo с системой переменной длины впускного тракта. Коллектор разобран на две части: нижняя часть с 4 впускными каналами (оранжевые уплотнения) и верхняя часть с механизмом переключения длины.",
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [
+    {
+      "name": "Впускной коллектор с переменной длиной (двухкамерный)",
+      "part_number": null
+    }
+  ],
+  "visual_facts": [
+    {
+      "locator": "20150907_205650.jpg",
+      "description": "Впускной коллектор Aveo снят с двигателя, вид на впускные каналы (4 отверстия с оранжевыми прокладками)",
+      "reading": null
+    }
+  ],
+  "reference_data": {
+    "kind": "photo",
+    "shape_description": "Двухкамерный впускной коллектор Chevrolet Aveo с переменной длиной. Видны 4 впускных канала с оранжевыми резиновыми уплотнениями, разделённые на высокооборотную и низкооборотную секции."
+  },
+  "image": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)/4. Тест Рх Андрея Шульгина/09_Chevrolet Aveo переменная длина впуска/20150907_205650.jpg",
+  "source": {
+    "file": "...",
+    "type": "image",
+    "locator": "20150907_205650.jpg"
+  },
+  "confidence": "medium",
+  "needs_human_review": false,
+  "review_notes": ""
+}

@@ -1,0 +1,36 @@
+{
+  "id": "03_Px35_Longer_4й_ц",
+  "atom_type": "reference",
+  "vehicle": {
+    "make": null,
+    "model": null,
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "title": "03_Px35+Longer 4й ц",
+  "symptom": null,
+  "dtc_codes": [],
+  "system": "прочее",
+  "content": null,
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неизвестно",
+    "shape_description": null
+  },
+  "image": null,
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\2. Качество питания и «массы»\\19_Приора 21126 тесты Css и Рх\\03_Px35+Longer 4й ц.mwf",
+    "type": "oscilloscope_mwf",
+    "locator": ""
+  },
+  "confidence": "low",
+  "needs_human_review": true,
+  "review_notes": "Формат .mwf требует экспорта из родного ПО (PNG/CSV); данные не прочитаны"
+}

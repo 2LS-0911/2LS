@@ -1,0 +1,46 @@
+{
+  "id": "04_ДПДЗ_УАЗ_Хантер_неисправность",
+  "atom_type": "reference",
+  "title": "ДПДЗ УАЗ Хантер — неисправность (сигнал застрял)",
+  "system": "питание",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неисправность",
+    "channels": 2,
+    "sample_count": 1000000,
+    "features": {
+      "baseline_adc": 2407,
+      "turnoff_peak_adc": 2454,
+      "peak_amplitude_rel": 47,
+      "dwell_trough_adc": 2075,
+      "event_index": 0,
+      "burn_len_samples": 0,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": "Полностью заполненный прямоугольник: сигнал ~2407 АЦП статично занимает весь диапазон без каких-либо изменений. ДПДЗ застрял в фиксированном положении — обрыв резистивного трека или механическое заклинивание."
+  },
+  "image": "output\\oscilloscope\\04_ДПДЗ_УАЗ_Хантер_неисправность.png",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\7. Интересные осциллограммы. Часть 1\\04_ДПДЗ_УАЗ_Хантер_неисправность.md3",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "high",
+  "needs_human_review": false,
+  "review_notes": "PNG создан; требует просмотра формы и заполнения shape_description",
+  "vehicle": {
+    "make": "UAZ",
+    "model": "Hunter",
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "symptom": null,
+  "dtc_codes": [],
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "content": null
+}

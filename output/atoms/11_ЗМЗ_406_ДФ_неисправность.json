@@ -1,0 +1,46 @@
+{
+  "id": "11_ЗМЗ_406_ДФ_неисправность",
+  "atom_type": "reference",
+  "title": "ЗМЗ-406 датчик фаз — неисправность (нет сигнала)",
+  "system": "запуск",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неисправность",
+    "channels": 1,
+    "sample_count": 822468,
+    "features": {
+      "baseline_adc": 2051,
+      "turnoff_peak_adc": 3542,
+      "peak_amplitude_rel": 1491,
+      "dwell_trough_adc": 1921,
+      "event_index": 417274,
+      "burn_len_samples": 1,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": "Плоская базовая линия ~2051 АЦП с редкими мелкими зубцами. Три хаотично расположенные аномальные одиночные иглы (~2400, ~3560, ~2100 АЦП). Нет периодичности и нет нормального прямоугольного сигнала ДФ. Датчик фаз ЗМЗ-406 фактически неисправен: генерирует только паразитные выбросы."
+  },
+  "image": "output\\oscilloscope\\11_ЗМЗ_406_ДФ_неисправность.png",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\6. Осциллограммы датчиковой аппаратуры\\11_ЗМЗ_406_ДФ_неисправность.md3",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "high",
+  "needs_human_review": true,
+  "review_notes": "Автодекодер выдал метку 'норма', но визуально полное отсутствие нормального сигнала. Метка исправлена.",
+  "vehicle": {
+    "make": null,
+    "model": null,
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "symptom": null,
+  "dtc_codes": [],
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "content": null
+}

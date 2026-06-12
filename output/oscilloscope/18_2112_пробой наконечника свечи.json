@@ -1,0 +1,29 @@
+{
+  "id": "18_2112_пробой наконечника свечи",
+  "atom_type": "reference",
+  "title": "18_2112_пробой наконечника свечи",
+  "system": "прочее",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неисправность",
+    "channels": 2,
+    "sample_count": 46660,
+    "features": {
+      "baseline_adc": 2047,
+      "turnoff_peak_adc": 3179,
+      "peak_amplitude_rel": 1132,
+      "dwell_trough_adc": 1824,
+      "event_index": 36633,
+      "burn_len_samples": 363,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    }
+  },
+  "image": "output\\oscilloscope\\18_2112_пробой наконечника свечи.png",
+  "source": {
+    "file": "18_2112_пробой наконечника свечи.osc",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "medium",
+  "needs_human_review": false,
+  "review_notes": ""
+}

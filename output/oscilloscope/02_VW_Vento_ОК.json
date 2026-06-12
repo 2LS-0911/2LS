@@ -1,0 +1,29 @@
+{
+  "id": "02_VW_Vento_ОК",
+  "atom_type": "reference",
+  "title": "02_VW_Vento_ОК",
+  "system": "прочее",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неизвестно",
+    "channels": 2,
+    "sample_count": 54040,
+    "features": {
+      "baseline_adc": 2046,
+      "turnoff_peak_adc": 2562,
+      "peak_amplitude_rel": 516,
+      "dwell_trough_adc": 2006,
+      "event_index": 2915,
+      "burn_len_samples": 1,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    }
+  },
+  "image": "output\\oscilloscope\\02_VW_Vento_ОК.png",
+  "source": {
+    "file": "02_VW_Vento_ОК.osc",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "low",
+  "needs_human_review": true,
+  "review_notes": "проверить метку и форму вручную"
+}

@@ -1,0 +1,29 @@
+{
+  "id": "11_Сломана пружина впускного клапана",
+  "atom_type": "reference",
+  "title": "11_Сломана пружина впускного клапана",
+  "system": "прочее",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неизвестно",
+    "channels": 2,
+    "sample_count": 59240,
+    "features": {
+      "baseline_adc": 2046,
+      "turnoff_peak_adc": 2348,
+      "peak_amplitude_rel": 302,
+      "dwell_trough_adc": 1981,
+      "event_index": 1809,
+      "burn_len_samples": 11,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    }
+  },
+  "image": "output\\oscilloscope\\11_Сломана пружина впускного клапана.png",
+  "source": {
+    "file": "11_Сломана пружина впускного клапана.osc",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "low",
+  "needs_human_review": true,
+  "review_notes": "проверить метку и форму вручную"
+}

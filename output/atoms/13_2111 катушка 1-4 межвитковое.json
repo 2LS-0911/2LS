@@ -1,0 +1,46 @@
+{
+  "id": "13_2111 катушка 1-4 межвитковое",
+  "atom_type": "reference",
+  "title": "ВАЗ-2111 катушка 1-4 — межвитковое замыкание",
+  "system": "зажигание",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неисправность",
+    "channels": 2,
+    "sample_count": 284856,
+    "features": {
+      "baseline_adc": 2047,
+      "turnoff_peak_adc": 3494,
+      "peak_amplitude_rel": 1447,
+      "dwell_trough_adc": 1960,
+      "event_index": 8928,
+      "burn_len_samples": 1,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": "Чёткий период накопления (dwell). Высокая острая игла ~3500 АЦП. После иглы: короткие беспорядочные затухающие колебания ~2150-2300 АЦП на ~1000 отсчётов, затем постепенный спад к базе. Линия горения очень короткая и неровная. Признак межвиткового замыкания: катушка не удерживает дугу."
+  },
+  "image": "output\\oscilloscope\\13_2111 катушка 1-4 межвитковое.png",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\5. Осциллограммы систем зажигания\\13_2111 катушка 1-4 межвитковое.md3",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "high",
+  "needs_human_review": false,
+  "review_notes": "PNG создан; требует просмотра формы и заполнения shape_description",
+  "vehicle": {
+    "make": "Lada",
+    "model": "2111",
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "symptom": null,
+  "dtc_codes": [],
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "content": null
+}

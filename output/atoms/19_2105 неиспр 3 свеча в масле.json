@@ -1,0 +1,46 @@
+{
+  "id": "19_2105 неиспр 3 свеча в масле",
+  "atom_type": "reference",
+  "title": "ВАЗ-2105 цилиндр 3 — свеча в масле",
+  "system": "зажигание",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неисправность",
+    "channels": 2,
+    "sample_count": 267364,
+    "features": {
+      "baseline_adc": 2047,
+      "turnoff_peak_adc": 3289,
+      "peak_amplitude_rel": 1242,
+      "dwell_trough_adc": 1903,
+      "event_index": 141111,
+      "burn_len_samples": 1,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": "Острая игла пробоя ~3270 АЦП. После иглы: широкая заполненная полоса горения с несколькими аномальными скачками/пиками (~2200-2480 АЦП, ~3000 отсчётов). Нерегулярные всплески и нестабильность линии горения — признак загрязнения свечного колодца маслом: переменное сопротивление по нагару."
+  },
+  "image": "output\\oscilloscope\\19_2105 неиспр 3 свеча в масле.png",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\5. Осциллограммы систем зажигания\\19_2105 неиспр 3 свеча в масле.md3",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "high",
+  "needs_human_review": true,
+  "review_notes": "Автодекодер выдал метку 'норма', но визуально это неисправность. Метка исправлена.",
+  "vehicle": {
+    "make": "Lada",
+    "model": "2105",
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "symptom": null,
+  "dtc_codes": [],
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "content": null
+}

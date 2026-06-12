@@ -1,0 +1,36 @@
+{
+  "id": "p016_img00",
+  "atom_type": "reference",
+  "title": "p016_img00.png",
+  "system": "прочее",
+  "content": null,
+  "reference_data": {
+    "kind": null,
+    "verdict": null,
+    "shape_description": null
+  },
+  "image": "output\\raw\\4.2 Скрипт Рх - автоматический анализ графика давления в цилиндре\\images\\p016_img00.png",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\4.2 Скрипт Рх - автоматический анализ графика давления в цилиндре.pdf",
+    "type": "pdf",
+    "locator": "p016_img00"
+  },
+  "confidence": "low",
+  "needs_human_review": true,
+  "review_notes": "изображение не просмотрено агентом; требует описания вручную",
+  "vehicle": {
+    "make": null,
+    "model": null,
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "dtc_codes": [],
+  "parts": [],
+  "diagnostic_steps": [],
+  "symptom": null,
+  "root_cause": null,
+  "solution": null,
+  "visual_facts": []
+}

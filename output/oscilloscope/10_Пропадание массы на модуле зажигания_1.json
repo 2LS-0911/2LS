@@ -1,0 +1,29 @@
+{
+  "id": "10_Пропадание массы на модуле зажигания_1",
+  "atom_type": "reference",
+  "title": "10_Пропадание массы на модуле зажигания_1",
+  "system": "зажигание",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неизвестно",
+    "channels": 4,
+    "sample_count": 57592,
+    "features": {
+      "baseline_adc": 2053,
+      "turnoff_peak_adc": 3297,
+      "peak_amplitude_rel": 1244,
+      "dwell_trough_adc": 1904,
+      "event_index": 2591193,
+      "burn_len_samples": 1,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    }
+  },
+  "image": "output\\oscilloscope\\10_Пропадание массы на модуле зажигания_1.png",
+  "source": {
+    "file": "10_Пропадание массы на модуле зажигания_1.osc",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "low",
+  "needs_human_review": true,
+  "review_notes": "проверить метку и форму вручную"
+}

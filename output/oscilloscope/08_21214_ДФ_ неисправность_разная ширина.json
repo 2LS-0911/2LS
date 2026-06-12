@@ -1,0 +1,37 @@
+{
+  "id": "08_21214_ДФ_ неисправность_разная ширина",
+  "atom_type": "reference",
+  "title": "08_21214_ДФ_ неисправность_разная ширина",
+  "system": "прочее",
+  "vehicle": {
+    "make": null,
+    "model": null,
+    "year": null,
+    "engine": null
+  },
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неисправность",
+    "channels": 4,
+    "sample_count": 290952,
+    "periodic": true,
+    "features": {
+      "baseline_adc": 2050,
+      "peak_adc": 3549,
+      "peak_amplitude_rel": 1499,
+      "trough_adc": 1743,
+      "event_index": 431089,
+      "periodic": true,
+      "units_note": "сырые единицы АЦП/отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": null
+  },
+  "image": "output\\oscilloscope\\08_21214_ДФ_ неисправность_разная ширина.png",
+  "source": {
+    "file": "08_21214_ДФ_ неисправность_разная ширина.md3",
+    "type": "oscilloscope_osc"
+  },
+  "confidence": "medium",
+  "needs_human_review": true,
+  "review_notes": "посмотреть PNG и заполнить shape_description"
+}

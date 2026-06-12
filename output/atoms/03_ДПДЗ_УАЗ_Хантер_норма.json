@@ -1,0 +1,46 @@
+{
+  "id": "03_ДПДЗ_УАЗ_Хантер_норма",
+  "atom_type": "reference",
+  "title": "ДПДЗ УАЗ Хантер — норма",
+  "system": "питание",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "норма",
+    "channels": 2,
+    "sample_count": 1000000,
+    "features": {
+      "baseline_adc": 2265,
+      "turnoff_peak_adc": 2455,
+      "peak_amplitude_rel": 190,
+      "dwell_trough_adc": 2074,
+      "event_index": 135532,
+      "burn_len_samples": 0,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": "Трапециевидная форма: монотонный линейный рост сигнала с ~2150 до ~2450 АЦП при плавном открытии дроссельной заслонки. Нет пропусков, ступенек, аномалий. Норма потенциометрического ДПДЗ."
+  },
+  "image": "output\\oscilloscope\\03_ДПДЗ_УАЗ_Хантер_норма.png",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\7. Интересные осциллограммы. Часть 1\\03_ДПДЗ_УАЗ_Хантер_норма.md3",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "high",
+  "needs_human_review": false,
+  "review_notes": "PNG создан; требует просмотра формы и заполнения shape_description",
+  "vehicle": {
+    "make": "UAZ",
+    "model": "Hunter",
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "symptom": null,
+  "dtc_codes": [],
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "content": null
+}

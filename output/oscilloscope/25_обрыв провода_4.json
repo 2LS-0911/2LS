@@ -1,0 +1,29 @@
+{
+  "id": "25_обрыв провода_4",
+  "atom_type": "reference",
+  "title": "25_обрыв провода_4",
+  "system": "прочее",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неисправность",
+    "channels": 1,
+    "sample_count": 54192,
+    "features": {
+      "baseline_adc": 2050,
+      "turnoff_peak_adc": 3511,
+      "peak_amplitude_rel": 1461,
+      "dwell_trough_adc": 1784,
+      "event_index": 1708,
+      "burn_len_samples": 1,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    }
+  },
+  "image": "output\\oscilloscope\\25_обрыв провода_4.png",
+  "source": {
+    "file": "25_обрыв провода_4.osc",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "medium",
+  "needs_human_review": false,
+  "review_notes": ""
+}

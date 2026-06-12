@@ -1,0 +1,36 @@
+{
+  "id": "2112_залегшее_кольцо",
+  "atom_type": "reference",
+  "vehicle": {
+    "make": null,
+    "model": null,
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "title": "2112 залегшее кольцо",
+  "symptom": null,
+  "dtc_codes": [],
+  "system": "прочее",
+  "content": null,
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "reference_data": {
+    "kind": null,
+    "verdict": null,
+    "shape_description": null
+  },
+  "image": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\4. Тест Рх Андрея Шульгина\\16_ВАЗ 2112 залегло компрессионное кольцо\\2112 залегшее кольцо.jpg",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\4. Тест Рх Андрея Шульгина\\16_ВАЗ 2112 залегло компрессионное кольцо\\2112 залегшее кольцо.jpg",
+    "type": "image",
+    "locator": "2112 залегшее кольцо"
+  },
+  "confidence": "low",
+  "needs_human_review": true,
+  "review_notes": "изображение требует просмотра агентом для заполнения reference_data"
+}

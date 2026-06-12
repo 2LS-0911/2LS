@@ -1,0 +1,29 @@
+{
+  "id": "05_Chevrolet Niva на зуб позже",
+  "atom_type": "reference",
+  "title": "05_Chevrolet Niva на зуб позже",
+  "system": "прочее",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неизвестно",
+    "channels": 2,
+    "sample_count": 52132,
+    "features": {
+      "baseline_adc": 2048,
+      "turnoff_peak_adc": 3478,
+      "peak_amplitude_rel": 1430,
+      "dwell_trough_adc": 1913,
+      "event_index": 40761,
+      "burn_len_samples": 415,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    }
+  },
+  "image": "output\\oscilloscope\\05_Chevrolet Niva на зуб позже.png",
+  "source": {
+    "file": "05_Chevrolet Niva на зуб позже.osc",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "low",
+  "needs_human_review": true,
+  "review_notes": "проверить метку и форму вручную"
+}

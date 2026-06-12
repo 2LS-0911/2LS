@@ -1,0 +1,29 @@
+{
+  "id": "03_Mazda_323_6цил_ОК",
+  "atom_type": "reference",
+  "title": "03_Mazda_323_6цил_ОК",
+  "system": "прочее",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неизвестно",
+    "channels": 1,
+    "sample_count": 44072,
+    "features": {
+      "baseline_adc": 2038,
+      "turnoff_peak_adc": 2485,
+      "peak_amplitude_rel": 447,
+      "dwell_trough_adc": 2004,
+      "event_index": 2205,
+      "burn_len_samples": 4451,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    }
+  },
+  "image": "output\\oscilloscope\\03_Mazda_323_6цил_ОК.png",
+  "source": {
+    "file": "03_Mazda_323_6цил_ОК.osc",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "low",
+  "needs_human_review": true,
+  "review_notes": "проверить метку и форму вручную"
+}

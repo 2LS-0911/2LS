@@ -1,0 +1,46 @@
+{
+  "id": "09_Skoda_Fabia_1.2_перескочила цепь",
+  "atom_type": "reference",
+  "title": "Skoda Fabia 1.2 — перескочила цепь ГРМ",
+  "system": "прочее",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неисправность",
+    "channels": 1,
+    "sample_count": 275088,
+    "features": {
+      "baseline_adc": 2016,
+      "turnoff_peak_adc": 3515,
+      "peak_amplitude_rel": 1499,
+      "dwell_trough_adc": 2016,
+      "event_index": 22275313,
+      "burn_len_samples": 4,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": "Форма «пила»: линейно нарастающий сигнал от ~2740 до ~3500 АЦП, затем мгновенное вертикальное падение до базы. Нет нормального горбообразного профиля давления. Указывает на значительный сдвиг фаз из-за перескакивания цепи ГРМ."
+  },
+  "image": "output\\oscilloscope\\09_Skoda_Fabia_1.2_перескочила цепь.png",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\3. Осциллограмма давления в цилиндре\\03_Сбитые фазы\\09_Skoda_Fabia_1.2_перескочила цепь.md3",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "high",
+  "needs_human_review": false,
+  "review_notes": "PNG создан; требует просмотра формы и заполнения shape_description",
+  "vehicle": {
+    "make": "Skoda",
+    "model": "Fabia",
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "symptom": null,
+  "dtc_codes": [],
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "content": null
+}

@@ -1,0 +1,46 @@
+{
+  "id": "07_Nissan_March_сильно сбитые фазы",
+  "atom_type": "reference",
+  "title": "Nissan March — сильно сбитые фазы ГРМ",
+  "system": "прочее",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неисправность",
+    "channels": 1,
+    "sample_count": 259316,
+    "features": {
+      "baseline_adc": 2003,
+      "turnoff_peak_adc": 2915,
+      "peak_amplitude_rel": 912,
+      "dwell_trough_adc": 2003,
+      "event_index": 16819589,
+      "burn_len_samples": 0,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": "Плавная горбообразная кривая Px/фазы. Маркерный вертикальный импульс явно смещён от ожидаемой позиции пика — указывает на значительный угловой сдвиг фаз ГРМ. Без нормативного графика сдвиг точно не измеряем."
+  },
+  "image": "output\\oscilloscope\\07_Nissan_March_сильно сбитые фазы.png",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\3. Осциллограмма давления в цилиндре\\03_Сбитые фазы\\07_Nissan_March_сильно сбитые фазы.md3",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "medium",
+  "needs_human_review": false,
+  "review_notes": "PNG создан; требует просмотра формы и заполнения shape_description",
+  "vehicle": {
+    "make": "Nissan",
+    "model": "March",
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "symptom": null,
+  "dtc_codes": [],
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "content": null
+}

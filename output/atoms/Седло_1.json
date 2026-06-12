@@ -1,0 +1,36 @@
+{
+  "id": "Седло_1",
+  "atom_type": "case",
+  "vehicle": {
+    "make": null,
+    "model": null,
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "title": "Peugeot/Citroen EP6 — выпавшие пружины клапанов в ГБЦ",
+  "symptom": "Двигатель EP6 — выпадение стопорных колец/сухарей клапанов",
+  "dtc_codes": [],
+  "system": "прочее",
+  "content": null,
+  "diagnostic_steps": [],
+  "root_cause": "Дефект конструкции привода клапанов EP6 (Valvetronic/VVT): прогрессирующий износ",
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "reference_data": {
+    "kind": "photo",
+    "shape_description": "Вид на камеру сгорания ГБЦ двигателя EP6 (Peugeot/Citroen). Видны 4 тарелки клапанов двух цилиндров. На нижних (выпускных) клапанах видны выпавшие пружинные стопорные кольца — пружины вышли из посадочных мест. Характерная неисправность EP6: 'подвисание' клапанов и выпадение стопорных сухарей.",
+    "verdict": "неисправность"
+  },
+  "image": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\10. Диагностика двигателя ЕР6\\Седло 1.jpg",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\10. Диагностика двигателя ЕР6\\Седло 1.jpg",
+    "type": "image",
+    "locator": "Седло 1"
+  },
+  "confidence": "high",
+  "needs_human_review": false,
+  "review_notes": ""
+}

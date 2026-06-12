@@ -1,0 +1,46 @@
+{
+  "id": "08_2112 провернут задающий диск дпкв+дд16",
+  "atom_type": "reference",
+  "title": "ВАЗ-2112 — провёрнут задающий диск ДПКВ",
+  "system": "запуск",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неисправность",
+    "channels": 2,
+    "sample_count": 1000000,
+    "features": {
+      "baseline_adc": 2048,
+      "turnoff_peak_adc": 3547,
+      "peak_amplitude_rel": 1499,
+      "dwell_trough_adc": 2036,
+      "event_index": 603773,
+      "burn_len_samples": 1,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": "Широкая заполненная «полка» 3430-3560 АЦП на ~6000 отсчётов (зубья задающего диска слились в непрерывный сигнал), затем резкий обрыв до базы ~2048 АЦП. Провёрнутый диск ДПКВ: пропасть между зубьями не различима, ЭБУ не может определить ВМТ."
+  },
+  "image": "output\\oscilloscope\\08_2112 провернут задающий диск дпкв+дд16.png",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\3. Осциллограмма давления в цилиндре\\04_Другие дефекты\\08_2112 провернут задающий диск дпкв+дд16.md3",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "high",
+  "needs_human_review": false,
+  "review_notes": "PNG создан; требует просмотра формы и заполнения shape_description",
+  "vehicle": {
+    "make": "Lada",
+    "model": "2112",
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "symptom": null,
+  "dtc_codes": [],
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "content": null
+}

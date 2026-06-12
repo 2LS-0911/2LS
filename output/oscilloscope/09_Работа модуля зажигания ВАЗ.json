@@ -1,0 +1,29 @@
+{
+  "id": "09_Работа модуля зажигания ВАЗ",
+  "atom_type": "reference",
+  "title": "09_Работа модуля зажигания ВАЗ",
+  "system": "зажигание",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неизвестно",
+    "channels": 4,
+    "sample_count": 55848,
+    "features": {
+      "baseline_adc": 2067,
+      "turnoff_peak_adc": 3112,
+      "peak_amplitude_rel": 1045,
+      "dwell_trough_adc": 1925,
+      "event_index": 85609,
+      "burn_len_samples": 1,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    }
+  },
+  "image": "output\\oscilloscope\\09_Работа модуля зажигания ВАЗ.png",
+  "source": {
+    "file": "09_Работа модуля зажигания ВАЗ.osc",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "low",
+  "needs_human_review": true,
+  "review_notes": "проверить метку и форму вручную"
+}

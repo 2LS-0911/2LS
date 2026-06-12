@@ -1,0 +1,46 @@
+{
+  "id": "04_СОР_дефект_еще один",
+  "atom_type": "reference",
+  "title": "СОР — дефект (нет линии горения, провал после иглы)",
+  "system": "зажигание",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неисправность",
+    "channels": 1,
+    "sample_count": 79298,
+    "features": {
+      "baseline_adc": 2100,
+      "turnoff_peak_adc": 3469,
+      "peak_amplitude_rel": 1369,
+      "dwell_trough_adc": 1902,
+      "event_index": 62400,
+      "burn_len_samples": 1,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": "Очень высокая острая одиночная игла пробоя (~3470 АЦП). После иглы: кратковременный провал ниже базы, несколько быстро затухающих колебаний, стремительный возврат к базе. Линия горения практически отсутствует. Характерно для обрыва ВВ-цепи или пробоя по альтернативному пути с низким сопротивлением."
+  },
+  "image": "output\\oscilloscope\\04_СОР_дефект_еще один.png",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\5. Осциллограммы систем зажигания\\04_СОР_дефект_еще один.md3",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "high",
+  "needs_human_review": false,
+  "review_notes": "PNG создан; требует просмотра формы и заполнения shape_description",
+  "vehicle": {
+    "make": null,
+    "model": null,
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "symptom": null,
+  "dtc_codes": [],
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "content": null
+}

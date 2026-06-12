@@ -1,0 +1,46 @@
+{
+  "id": "08_Opel_Vectra_2007_Z18XER_сильно сбитые фазы",
+  "atom_type": "reference",
+  "title": "Opel Vectra 2007 Z18XER — сильно сбитые фазы ГРМ",
+  "system": "прочее",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неисправность",
+    "channels": 1,
+    "sample_count": 8696,
+    "features": {
+      "baseline_adc": 2031,
+      "turnoff_peak_adc": 3530,
+      "peak_amplitude_rel": 1499,
+      "dwell_trough_adc": 2031,
+      "event_index": 558045,
+      "burn_len_samples": 26,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": "Двойная «ступенчатая» структура: линейный рост до ~3540 АЦП с вертикальным спуском до базы, небольшая пауза, затем повтор. Два маркерных импульса со смещённым расположением. Характерно для сильно сбитых фаз ГРМ DOHC — оба распредвала рассинхронизированы."
+  },
+  "image": "output\\oscilloscope\\08_Opel_Vectra_2007_Z18XER_сильно сбитые фазы.png",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\3. Осциллограмма давления в цилиндре\\03_Сбитые фазы\\08_Opel_Vectra_2007_Z18XER_сильно сбитые фазы.md3",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "medium",
+  "needs_human_review": false,
+  "review_notes": "PNG создан; требует просмотра формы и заполнения shape_description",
+  "vehicle": {
+    "make": "Opel",
+    "model": "Vectra",
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "symptom": null,
+  "dtc_codes": [],
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "content": null
+}

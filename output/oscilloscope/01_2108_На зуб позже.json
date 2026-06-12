@@ -1,0 +1,29 @@
+{
+  "id": "01_2108_На зуб позже",
+  "atom_type": "reference",
+  "title": "01_2108_На зуб позже",
+  "system": "прочее",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неизвестно",
+    "channels": 2,
+    "sample_count": 50256,
+    "features": {
+      "baseline_adc": 2045,
+      "turnoff_peak_adc": 2725,
+      "peak_amplitude_rel": 680,
+      "dwell_trough_adc": 1963,
+      "event_index": 13929,
+      "burn_len_samples": 679,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    }
+  },
+  "image": "output\\oscilloscope\\01_2108_На зуб позже.png",
+  "source": {
+    "file": "01_2108_На зуб позже.osc",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "low",
+  "needs_human_review": true,
+  "review_notes": "проверить метку и форму вручную"
+}

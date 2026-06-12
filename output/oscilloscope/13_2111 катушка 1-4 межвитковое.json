@@ -1,0 +1,37 @@
+{
+  "id": "13_2111 катушка 1-4 межвитковое",
+  "atom_type": "reference",
+  "title": "13_2111 катушка 1-4 межвитковое",
+  "system": "зажигание",
+  "vehicle": {
+    "make": null,
+    "model": null,
+    "year": null,
+    "engine": null
+  },
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неизвестно",
+    "channels": 2,
+    "sample_count": 284856,
+    "periodic": true,
+    "features": {
+      "baseline_adc": 2047,
+      "peak_adc": 3494,
+      "peak_amplitude_rel": 1447,
+      "trough_adc": 1910,
+      "event_index": 8928,
+      "periodic": true,
+      "units_note": "сырые единицы АЦП/отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": null
+  },
+  "image": "output\\oscilloscope\\13_2111 катушка 1-4 межвитковое.png",
+  "source": {
+    "file": "13_2111 катушка 1-4 межвитковое.md3",
+    "type": "oscilloscope_osc"
+  },
+  "confidence": "low",
+  "needs_human_review": true,
+  "review_notes": "посмотреть PNG и заполнить shape_description"
+}

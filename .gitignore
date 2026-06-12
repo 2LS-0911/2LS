@@ -1,0 +1,35 @@
+# Secrets — никогда не коммитить
+.env
+.env.local
+*.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+.venv/
+env/
+
+# Тяжёлые данные — не для репозитория
+output/atoms_clean.jsonl
+output/atoms_clean.jsonl.bak
+output/mwf_screenshots/
+output/raw/
+output/archive/
+output/raw_atoms/
+output/transcripts/
+output/qdrant_test_results.txt
+*.log
+*.tmp
+*.mp3
+
+# Node
+node_modules/
+dist/
+
+# IDE
+.vscode/
+.idea/

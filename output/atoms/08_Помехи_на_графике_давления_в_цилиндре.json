@@ -1,0 +1,36 @@
+{
+  "id": "08_Помехи_на_графике_давления_в_цилиндре",
+  "atom_type": "reference",
+  "vehicle": {
+    "make": null,
+    "model": null,
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "title": "08_Помехи на графике давления в цилиндре",
+  "symptom": null,
+  "dtc_codes": [],
+  "system": "питание",
+  "content": null,
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неизвестно",
+    "shape_description": null
+  },
+  "image": null,
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\8. Интересные осциллограммы. Часть 2\\08_Помехи на графике давления в цилиндре.dm2",
+    "type": "oscilloscope_dm2",
+    "locator": ""
+  },
+  "confidence": "low",
+  "needs_human_review": true,
+  "review_notes": "Формат .dm2 требует экспорта из родного ПО (PNG/CSV); данные не прочитаны"
+}

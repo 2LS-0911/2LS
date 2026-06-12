@@ -1,0 +1,29 @@
+{
+  "id": "04_Chevrolet Lanos износ кулачка распредвала",
+  "atom_type": "reference",
+  "title": "04_Chevrolet Lanos износ кулачка распредвала",
+  "system": "прочее",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неизвестно",
+    "channels": 1,
+    "sample_count": 52980,
+    "features": {
+      "baseline_adc": 2003,
+      "turnoff_peak_adc": 2644,
+      "peak_amplitude_rel": 641,
+      "dwell_trough_adc": 2003,
+      "event_index": 2161,
+      "burn_len_samples": 6735,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    }
+  },
+  "image": "output\\oscilloscope\\04_Chevrolet Lanos износ кулачка распредвала.png",
+  "source": {
+    "file": "04_Chevrolet Lanos износ кулачка распредвала.osc",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "low",
+  "needs_human_review": true,
+  "review_notes": "проверить метку и форму вручную"
+}

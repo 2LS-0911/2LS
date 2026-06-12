@@ -1,0 +1,36 @@
+{
+  "id": "Px35_Longer00_4й_ц_сопротивление_выхлопа",
+  "atom_type": "reference",
+  "vehicle": {
+    "make": null,
+    "model": null,
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "title": "Px35+Longer00 4й ц сопротивление выхлопа + негерметичность",
+  "symptom": null,
+  "dtc_codes": [],
+  "system": "питание",
+  "content": null,
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неизвестно",
+    "shape_description": null
+  },
+  "image": null,
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\4. Тест Рх Андрея Шульгина\\15_Забитый катализатор в одном блоке V-образного двигателя\\Px35+Longer00 4й ц сопротивление выхлопа + негерметичность.mwf",
+    "type": "oscilloscope_mwf",
+    "locator": ""
+  },
+  "confidence": "low",
+  "needs_human_review": true,
+  "review_notes": "Формат .mwf требует экспорта из родного ПО (PNG/CSV); данные не прочитаны"
+}

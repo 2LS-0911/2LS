@@ -1,0 +1,46 @@
+{
+  "id": "05_ ЗМЗ 406 дефект ЭБУ",
+  "atom_type": "reference",
+  "title": "ЗМЗ-406 — дефект ЭБУ (аномальный управляющий сигнал)",
+  "system": "зажигание",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неисправность",
+    "channels": 1,
+    "sample_count": 201726,
+    "features": {
+      "baseline_adc": 1994,
+      "turnoff_peak_adc": 2056,
+      "peak_amplitude_rel": 62,
+      "dwell_trough_adc": 963,
+      "event_index": 154926,
+      "burn_len_samples": 2,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": "Ровная базовая линия ~2000 АЦП, затем серия из ~14 прямоугольных импульсов: провалы до ~950-1100 АЦП с равномерным интервалом, резкие фронты. Зона затухающих колебаний в конце. Нештатный паттерн управляющего сигнала — характерен для зависания выходного драйвера ЭБУ."
+  },
+  "image": "output\\oscilloscope\\05_ ЗМЗ 406 дефект ЭБУ.png",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\5. Осциллограммы систем зажигания\\05_ ЗМЗ 406 дефект ЭБУ.md3",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "medium",
+  "needs_human_review": false,
+  "review_notes": "PNG создан; требует просмотра формы и заполнения shape_description",
+  "vehicle": {
+    "make": null,
+    "model": null,
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "symptom": null,
+  "dtc_codes": [],
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "content": null
+}

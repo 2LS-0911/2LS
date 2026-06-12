@@ -1,0 +1,36 @@
+{
+  "id": "05_Dx_форсука_катушка_",
+  "atom_type": "reference",
+  "vehicle": {
+    "make": null,
+    "model": null,
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "title": "05_Dx форсука катушка.",
+  "symptom": null,
+  "dtc_codes": [],
+  "system": "зажигание",
+  "content": null,
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неизвестно",
+    "shape_description": null
+  },
+  "image": null,
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\10. Диагностика двигателя ЕР6\\Осциллограммы для урока\\05_Dx форсука катушка..mwf",
+    "type": "oscilloscope_mwf",
+    "locator": ""
+  },
+  "confidence": "low",
+  "needs_human_review": true,
+  "review_notes": "Формат .mwf требует экспорта из родного ПО (PNG/CSV); данные не прочитаны"
+}

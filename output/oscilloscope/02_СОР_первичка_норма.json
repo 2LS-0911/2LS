@@ -1,0 +1,37 @@
+{
+  "id": "02_СОР_первичка_норма",
+  "atom_type": "reference",
+  "title": "02_СОР_первичка_норма",
+  "system": "зажигание",
+  "vehicle": {
+    "make": null,
+    "model": null,
+    "year": null,
+    "engine": null
+  },
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "норма",
+    "channels": 1,
+    "sample_count": 298616,
+    "periodic": false,
+    "features": {
+      "baseline_adc": 2102,
+      "peak_adc": 2791,
+      "peak_amplitude_rel": 689,
+      "trough_adc": 1998,
+      "event_index": 158465,
+      "periodic": false,
+      "units_note": "сырые единицы АЦП/отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": null
+  },
+  "image": "output\\oscilloscope\\02_СОР_первичка_норма.png",
+  "source": {
+    "file": "02_СОР_первичка_норма.md3",
+    "type": "oscilloscope_osc"
+  },
+  "confidence": "medium",
+  "needs_human_review": true,
+  "review_notes": "посмотреть PNG и заполнить shape_description"
+}

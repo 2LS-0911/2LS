@@ -1,0 +1,46 @@
+{
+  "id": "01_Шаговый_РХХ_открытие",
+  "atom_type": "reference",
+  "title": "Шаговый РХХ — процесс открытия (норма)",
+  "system": "питание",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "норма",
+    "channels": 2,
+    "sample_count": 531476,
+    "features": {
+      "baseline_adc": 3593,
+      "turnoff_peak_adc": 3998,
+      "peak_amplitude_rel": 405,
+      "dwell_trough_adc": 2813,
+      "event_index": 261947,
+      "burn_len_samples": 1,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": "Серия парных прямоугольных импульсов. Высокий уровень ~3600 АЦП, каждая пара — два близко стоящих скачка до ~3970 АЦП с резким спуском. Пары разделены паузами. Нормальный сигнал управления шаговым мотором РХХ при открытии."
+  },
+  "image": "output\\oscilloscope\\01_Шаговый_РХХ_открытие.png",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\7. Интересные осциллограммы. Часть 1\\01_Шаговый_РХХ_открытие.md3",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "high",
+  "needs_human_review": false,
+  "review_notes": "PNG создан; требует просмотра формы и заполнения shape_description",
+  "vehicle": {
+    "make": null,
+    "model": null,
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "symptom": null,
+  "dtc_codes": [],
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "content": null
+}

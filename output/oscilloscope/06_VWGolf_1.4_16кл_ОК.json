@@ -1,0 +1,29 @@
+{
+  "id": "06_VWGolf_1.4_16кл_ОК",
+  "atom_type": "reference",
+  "title": "06_VWGolf_1.4_16кл_ОК",
+  "system": "прочее",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неизвестно",
+    "channels": 2,
+    "sample_count": 58364,
+    "features": {
+      "baseline_adc": 2045,
+      "turnoff_peak_adc": 2629,
+      "peak_amplitude_rel": 584,
+      "dwell_trough_adc": 2020,
+      "event_index": 2167,
+      "burn_len_samples": 97,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    }
+  },
+  "image": "output\\oscilloscope\\06_VWGolf_1.4_16кл_ОК.png",
+  "source": {
+    "file": "06_VWGolf_1.4_16кл_ОК.osc",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "low",
+  "needs_human_review": true,
+  "review_notes": "проверить метку и форму вручную"
+}

@@ -1,0 +1,46 @@
+{
+  "id": "01_ДПДЗ_неисправность",
+  "atom_type": "reference",
+  "title": "ДПДЗ — неисправность (сигнал застрял)",
+  "system": "питание",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неисправность",
+    "channels": 1,
+    "sample_count": 1000000,
+    "features": {
+      "baseline_adc": 2277,
+      "turnoff_peak_adc": 2621,
+      "peak_amplitude_rel": 344,
+      "dwell_trough_adc": 2616,
+      "event_index": 955563,
+      "burn_len_samples": 0,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": "Абсолютно прямая горизонтальная линия ~2618 АЦП на всей записи (>13000 отсчётов). Никакого изменения сигнала при движении заслонки. ДПДЗ застрял в фиксированном положении — обрыв резистивного трека или механическое заклинивание."
+  },
+  "image": "output\\oscilloscope\\01_ДПДЗ_неисправность.png",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\6. Осциллограммы датчиковой аппаратуры\\01_ДПДЗ_неисправность.md3",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "high",
+  "needs_human_review": true,
+  "review_notes": "Автодекодер выдал метку 'норма', но визуально это неисправность (статичный сигнал). Метка исправлена.",
+  "vehicle": {
+    "make": null,
+    "model": null,
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "symptom": null,
+  "dtc_codes": [],
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "content": null
+}

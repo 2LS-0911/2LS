@@ -1,0 +1,29 @@
+{
+  "id": "02_16 кл 1.5л 2112_Смещение на зуб вперед",
+  "atom_type": "reference",
+  "title": "02_16 кл 1.5л 2112_Смещение на зуб вперед",
+  "system": "прочее",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неизвестно",
+    "channels": 2,
+    "sample_count": 56836,
+    "features": {
+      "baseline_adc": 2048,
+      "turnoff_peak_adc": 3287,
+      "peak_amplitude_rel": 1239,
+      "dwell_trough_adc": 1905,
+      "event_index": 912857,
+      "burn_len_samples": 1,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    }
+  },
+  "image": "output\\oscilloscope\\02_16 кл 1.5л 2112_Смещение на зуб вперед.png",
+  "source": {
+    "file": "02_16 кл 1.5л 2112_Смещение на зуб вперед.osc",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "low",
+  "needs_human_review": true,
+  "review_notes": "проверить метку и форму вручную"
+}

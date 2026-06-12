@@ -1,0 +1,37 @@
+{
+  "id": "03_ДПДЗ_УАЗ_Хантер_норма",
+  "atom_type": "reference",
+  "title": "03_ДПДЗ_УАЗ_Хантер_норма",
+  "system": "питание",
+  "vehicle": {
+    "make": "УАЗ",
+    "model": null,
+    "year": null,
+    "engine": null
+  },
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "норма",
+    "channels": 2,
+    "sample_count": 1000000,
+    "periodic": true,
+    "features": {
+      "baseline_adc": 2265,
+      "peak_adc": 2074,
+      "peak_amplitude_rel": -191,
+      "trough_adc": 2074,
+      "event_index": 135532,
+      "periodic": true,
+      "units_note": "сырые единицы АЦП/отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": null
+  },
+  "image": "output\\oscilloscope\\03_ДПДЗ_УАЗ_Хантер_норма.png",
+  "source": {
+    "file": "03_ДПДЗ_УАЗ_Хантер_норма.md3",
+    "type": "oscilloscope_osc"
+  },
+  "confidence": "medium",
+  "needs_human_review": true,
+  "review_notes": "посмотреть PNG и заполнить shape_description"
+}

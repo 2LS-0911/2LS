@@ -1,0 +1,36 @@
+{
+  "id": "05_CSS_ВАЗ_21093_8кл_Маркерный_диск_разб",
+  "atom_type": "reference",
+  "vehicle": {
+    "make": null,
+    "model": null,
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "title": "05_CSS ВАЗ 21093 8кл Маркерный диск разбит",
+  "symptom": null,
+  "dtc_codes": [],
+  "system": "запуск",
+  "content": null,
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неизвестно",
+    "shape_description": null
+  },
+  "image": null,
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\9. Интересные осциллограммы. Часть 3\\05_CSS ВАЗ 21093 8кл Маркерный диск разбит.mwf",
+    "type": "oscilloscope_mwf",
+    "locator": ""
+  },
+  "confidence": "low",
+  "needs_human_review": true,
+  "review_notes": "Формат .mwf требует экспорта из родного ПО (PNG/CSV); данные не прочитаны"
+}

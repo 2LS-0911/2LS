@@ -1,0 +1,29 @@
+{
+  "id": "06_Nissan Almera катализатор",
+  "atom_type": "reference",
+  "title": "06_Nissan Almera катализатор",
+  "system": "прочее",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неизвестно",
+    "channels": 2,
+    "sample_count": 33040,
+    "features": {
+      "baseline_adc": 2049,
+      "turnoff_peak_adc": 3548,
+      "peak_amplitude_rel": 1499,
+      "dwell_trough_adc": 1993,
+      "event_index": 17714,
+      "burn_len_samples": 1,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    }
+  },
+  "image": "output\\oscilloscope\\06_Nissan Almera катализатор.png",
+  "source": {
+    "file": "06_Nissan Almera катализатор.osc",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "low",
+  "needs_human_review": true,
+  "review_notes": "проверить метку и форму вручную"
+}

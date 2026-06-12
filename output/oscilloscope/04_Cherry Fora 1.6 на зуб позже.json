@@ -1,0 +1,29 @@
+{
+  "id": "04_Cherry Fora 1.6 на зуб позже",
+  "atom_type": "reference",
+  "title": "04_Cherry Fora 1.6 на зуб позже",
+  "system": "прочее",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неизвестно",
+    "channels": 2,
+    "sample_count": 62876,
+    "features": {
+      "baseline_adc": 2048,
+      "turnoff_peak_adc": 2162,
+      "peak_amplitude_rel": 114,
+      "dwell_trough_adc": 1015,
+      "event_index": 33124,
+      "burn_len_samples": 16,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    }
+  },
+  "image": "output\\oscilloscope\\04_Cherry Fora 1.6 на зуб позже.png",
+  "source": {
+    "file": "04_Cherry Fora 1.6 на зуб позже.osc",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "low",
+  "needs_human_review": true,
+  "review_notes": "проверить метку и форму вручную"
+}

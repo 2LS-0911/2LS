@@ -1,0 +1,37 @@
+{
+  "id": "19_2105 неиспр 3 свеча в масле",
+  "atom_type": "reference",
+  "title": "19_2105 неиспр 3 свеча в масле",
+  "system": "зажигание",
+  "vehicle": {
+    "make": null,
+    "model": null,
+    "year": null,
+    "engine": null
+  },
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неисправность",
+    "channels": 2,
+    "sample_count": 267364,
+    "periodic": true,
+    "features": {
+      "baseline_adc": 2047,
+      "peak_adc": 3289,
+      "peak_amplitude_rel": 1242,
+      "trough_adc": 1836,
+      "event_index": 141111,
+      "periodic": true,
+      "units_note": "сырые единицы АЦП/отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": null
+  },
+  "image": "output\\oscilloscope\\19_2105 неиспр 3 свеча в масле.png",
+  "source": {
+    "file": "19_2105 неиспр 3 свеча в масле.md3",
+    "type": "oscilloscope_osc"
+  },
+  "confidence": "medium",
+  "needs_human_review": true,
+  "review_notes": "посмотреть PNG и заполнить shape_description"
+}

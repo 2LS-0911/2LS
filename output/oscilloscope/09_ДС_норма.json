@@ -1,0 +1,29 @@
+{
+  "id": "09_ДС_норма",
+  "atom_type": "reference",
+  "title": "09_ДС_норма",
+  "system": "прочее",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "норма",
+    "channels": 1,
+    "sample_count": 200000,
+    "features": {
+      "baseline_adc": 3286,
+      "turnoff_peak_adc": 3291,
+      "peak_amplitude_rel": 5,
+      "dwell_trough_adc": 2054,
+      "event_index": 1054,
+      "burn_len_samples": 1141,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    }
+  },
+  "image": "output\\oscilloscope\\09_ДС_норма.png",
+  "source": {
+    "file": "09_ДС_норма.osc",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "medium",
+  "needs_human_review": false,
+  "review_notes": ""
+}

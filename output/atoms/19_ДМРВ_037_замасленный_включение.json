@@ -1,0 +1,46 @@
+{
+  "id": "19_ДМРВ_037_замасленный_включение",
+  "atom_type": "reference",
+  "title": "ДМРВ Bosch 037 — замасленный (момент включения)",
+  "system": "питание",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неисправность",
+    "channels": 1,
+    "sample_count": 1000000,
+    "features": {
+      "baseline_adc": 2048,
+      "turnoff_peak_adc": 2348,
+      "peak_amplitude_rel": 300,
+      "dwell_trough_adc": 2014,
+      "event_index": 513969,
+      "burn_len_samples": 0,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": "Момент включения зажигания. Прямая базовая линия ~2050 АЦП, затем резкий скачок до ~2350 АЦП, плавный спуск и стабилизация на повышенном уровне ~2185 АЦП. При исправном датчике сигнал быстро падает к минимуму; стабилизация выше нормы — признак замасливания нагревательного элемента."
+  },
+  "image": "output\\oscilloscope\\19_ДМРВ_037_замасленный_включение.png",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\6. Осциллограммы датчиковой аппаратуры\\19_ДМРВ_037_замасленный_включение.md3",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "medium",
+  "needs_human_review": false,
+  "review_notes": "PNG создан; требует просмотра формы и заполнения shape_description",
+  "vehicle": {
+    "make": null,
+    "model": null,
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "symptom": null,
+  "dtc_codes": [],
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "content": null
+}

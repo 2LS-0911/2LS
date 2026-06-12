@@ -1,0 +1,46 @@
+{
+  "id": "05_Chevrolet Lanos сильный износ распредвала",
+  "atom_type": "reference",
+  "title": "Chevrolet Lanos — сильный износ распредвала",
+  "system": "прочее",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неисправность",
+    "channels": 3,
+    "sample_count": 289086,
+    "features": {
+      "baseline_adc": 2046,
+      "turnoff_peak_adc": 3322,
+      "peak_amplitude_rel": 1276,
+      "dwell_trough_adc": 1884,
+      "event_index": 226889,
+      "burn_len_samples": 2037,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": "До события: мелкая рябь/вибрации базовой линии (~±50 АЦП). Высокая широкая заполненная игла ~3300 АЦП. После иглы: очень широкая зашумлённая полоса (~2200-2450 АЦП, ~6000 отсчётов) с несколькими провалами ниже базы; затухание медленное, нерегулярное. Признак сильного износа распредвала: нестабильное открытие клапанов."
+  },
+  "image": "output\\oscilloscope\\05_Chevrolet Lanos сильный износ распредвала.png",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\3. Осциллограмма давления в цилиндре\\04_Другие дефекты\\05_Chevrolet Lanos сильный износ распредвала.md3",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "high",
+  "needs_human_review": false,
+  "review_notes": "PNG создан; требует просмотра формы и заполнения shape_description",
+  "vehicle": {
+    "make": "Chevrolet",
+    "model": "Lanos",
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "symptom": null,
+  "dtc_codes": [],
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "content": null
+}

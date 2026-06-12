@@ -1,0 +1,29 @@
+{
+  "id": "16_КИА_Спектра дохлая катушка",
+  "atom_type": "reference",
+  "title": "16_КИА_Спектра дохлая катушка",
+  "system": "зажигание",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неизвестно",
+    "channels": 1,
+    "sample_count": 60596,
+    "features": {
+      "baseline_adc": 2047,
+      "turnoff_peak_adc": 3176,
+      "peak_amplitude_rel": 1129,
+      "dwell_trough_adc": 1792,
+      "event_index": 47435,
+      "burn_len_samples": 479,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    }
+  },
+  "image": "output\\oscilloscope\\16_КИА_Спектра дохлая катушка.png",
+  "source": {
+    "file": "16_КИА_Спектра дохлая катушка.osc",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "low",
+  "needs_human_review": true,
+  "review_notes": "проверить метку и форму вручную"
+}

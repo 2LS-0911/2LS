@@ -1,0 +1,46 @@
+{
+  "id": "02_Nissan_SkyLine_V6_VQ25DD",
+  "atom_type": "reference",
+  "title": "Nissan SkyLine V6 VQ25DD — фазы/Px (вердикт неизвестен)",
+  "system": "прочее",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неизвестно",
+    "channels": 1,
+    "sample_count": 523190,
+    "features": {
+      "baseline_adc": 2019,
+      "turnoff_peak_adc": 3518,
+      "peak_amplitude_rel": 1499,
+      "dwell_trough_adc": 2019,
+      "event_index": 71514923,
+      "burn_len_samples": 18,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": "Плавная горбообразная кривая с двумя вертикальными маркерными импульсами, разделёнными ~2200 отсчётами. Широкий симметричный горб ~2620-3500 АЦП. Форма Px или фазового сигнала; без нормативного графика вердикт не установлен."
+  },
+  "image": "output\\oscilloscope\\02_Nissan_SkyLine_V6_VQ25DD.png",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\3. Осциллограмма давления в цилиндре\\04_Другие дефекты\\02_Nissan_SkyLine_V6_VQ25DD.md3",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "low",
+  "needs_human_review": true,
+  "review_notes": "Форма сигнала записана, но вердикт не определён без сравнения с нормой VQ25DD.",
+  "vehicle": {
+    "make": "Nissan",
+    "model": "Skyline",
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "symptom": null,
+  "dtc_codes": [],
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "content": null
+}

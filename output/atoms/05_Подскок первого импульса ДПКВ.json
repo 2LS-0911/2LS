@@ -1,0 +1,46 @@
+{
+  "id": "05_Подскок первого импульса ДПКВ",
+  "atom_type": "reference",
+  "title": "ДПКВ — подскок первого импульса (дефект диска)",
+  "system": "запуск",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неисправность",
+    "channels": 2,
+    "sample_count": 1000000,
+    "features": {
+      "baseline_adc": 2079,
+      "turnoff_peak_adc": 3578,
+      "peak_amplitude_rel": 1499,
+      "dwell_trough_adc": 1946,
+      "event_index": 31651,
+      "burn_len_samples": 4,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": "Серия равномерных мелких зубцов ДПКВ (~±60 АЦП) с тремя аномально высокими одиночными иглами (~3580 АЦП) — расположены неравномерно. Дефект задающего диска ДПКВ: физическое повреждение или зазубрина на зубе диска."
+  },
+  "image": "output\\oscilloscope\\05_Подскок первого импульса ДПКВ.png",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\8. Интересные осциллограммы. Часть 2\\05_Подскок первого импульса ДПКВ.md3",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "high",
+  "needs_human_review": false,
+  "review_notes": "PNG создан; требует просмотра формы и заполнения shape_description",
+  "vehicle": {
+    "make": null,
+    "model": null,
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "symptom": null,
+  "dtc_codes": [],
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "content": null
+}

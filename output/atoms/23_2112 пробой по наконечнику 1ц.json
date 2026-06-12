@@ -1,0 +1,46 @@
+{
+  "id": "23_2112 пробой по наконечнику 1ц",
+  "atom_type": "reference",
+  "title": "ВАЗ-2112 цилиндр 1 — пробой по наконечнику ВВ-провода",
+  "system": "зажигание",
+  "reference_data": {
+    "kind": "waveform",
+    "verdict": "неисправность",
+    "channels": 2,
+    "sample_count": 296824,
+    "features": {
+      "baseline_adc": 2048,
+      "turnoff_peak_adc": 3419,
+      "peak_amplitude_rel": 1371,
+      "dwell_trough_adc": 1801,
+      "event_index": 8681,
+      "burn_len_samples": 4,
+      "units_note": "сырые единицы АЦП / отсчёты; калибровка в В/мс не выполнена"
+    },
+    "shape_description": "Небольшая рябь и предпиковый подъём. Широкое хаотичное событие (~8000-9500 отсчётов): несколько близко стоящих пиков 2800-3420 АЦП и провалы ниже базы. Многократные пробои характерны для пробоя по поверхности наконечника ВВ-провода."
+  },
+  "image": "output\\oscilloscope\\23_2112 пробой по наконечнику 1ц.png",
+  "source": {
+    "file": "[freekurses.site] Анализ осциллограмм. Профессиональный поиск сложных дефектов (2025)\\5. Осциллограммы систем зажигания\\23_2112 пробой по наконечнику 1ц.md3",
+    "type": "oscilloscope_md3"
+  },
+  "confidence": "high",
+  "needs_human_review": false,
+  "review_notes": "PNG создан; требует просмотра формы и заполнения shape_description",
+  "vehicle": {
+    "make": "Lada",
+    "model": "2112",
+    "year": null,
+    "generation": null,
+    "engine": null,
+    "body": null
+  },
+  "symptom": null,
+  "dtc_codes": [],
+  "diagnostic_steps": [],
+  "root_cause": null,
+  "solution": null,
+  "parts": [],
+  "visual_facts": [],
+  "content": null
+}
