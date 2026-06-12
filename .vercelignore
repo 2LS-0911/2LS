@@ -1,6 +1,6 @@
-scripts/
-data/
-bot/
-skills/
+/scripts
+/data
+/bot
+/skills
 *.md
 .env*
