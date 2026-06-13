@@ -15,6 +15,13 @@ type Screen = "code" | "form" | "problem" | "chat" | "confirm" | "solved";
 
 interface Message { role: "user" | "assistant"; content: string; }
 
+interface RecommendedWork {
+  work: string;
+  part: string;
+  qty: number;
+  price: number;
+}
+
 const SYMPTOM_CHIPS = [
   { id: "check_engine",     label: "🔴 Check Engine" },
   { id: "no_power",         label: "⚡ Нет тяги" },
@@ -26,6 +33,12 @@ const SYMPTOM_CHIPS = [
   { id: "vibration",        label: "🚗 Вибрация" },
   { id: "leak",             label: "💧 Утечка" },
   { id: "smoke",            label: "💨 Дымит" },
+  // P1.2 — симптомы-маркеры
+  { id: "tacho_drops",      label: "📉 Тахометр падает в 0" },
+  { id: "stalls_hot",       label: "🌡️ Глохнет на горячую" },
+  { id: "stalls_wet",       label: "🌧️ Глохнет в дождь/после мойки" },
+  { id: "can_multiblock",   label: "📡 Несколько блоков по CAN" },
+  { id: "battery_lamp",     label: "🔋 Лампа АКБ горит" },
 ];
 
 const TOOL_CHIPS = [
@@ -69,6 +82,7 @@ function DiagApp() {
   const [model, setModel] = useState("");
   const [year, setYear] = useState("2020");
   const [engine, setEngine] = useState("");
+  const [vin, setVin] = useState(""); // Add VIN state
 
   // Screen 2 — Problem
   const [dtcCode, setDtcCode] = useState("");
@@ -82,6 +96,7 @@ function DiagApp() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [noAnswer, setNoAnswer] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -91,6 +106,13 @@ function DiagApp() {
   const [toolsUsed, setToolsUsed] = useState<string[]>([]);
   const [refValue, setRefValue] = useState("");
   const [saving, setSaving] = useState(false);
+  const [aiConclusion, setAiConclusion] = useState("");
+  const [recommendedWorks, setRecommendedWorks] = useState<RecommendedWork[]>([]);
+
+  // P3 — пакет документов
+  const [clientExplanation, setClientExplanation] = useState("");
+  const [repairMemo, setRepairMemo] = useState("");
+
 
   // Client report fields
   const [clientName, setClientName] = useState("");
@@ -98,6 +120,7 @@ function DiagApp() {
   const [clientCar, setClientCar] = useState("");
   const [laborHours, setLaborHours] = useState("");
   const [reportNote, setReportNote] = useState("");
+  const [odometer, setOdometer] = useState(""); // Add odometer state
 
   useEffect(() => {
     const tg = (window as any).Telegram?.WebApp;
@@ -175,6 +198,7 @@ function DiagApp() {
     const symptomLabels = symptoms.map(s => SYMPTOM_CHIPS.find(c => c.id === s)?.label || s);
 
     let contextMsg = `Автомобиль: ${brand} ${model} ${year}г., двигатель ${engine || "не указан"}.`;
+    if (odometer) contextMsg += ` Пробег: ${odometer} км.`; // Add odometer to context message
     if (dtcPart) contextMsg += ` Код ошибки: ${dtcPart}.`;
     else contextMsg += ` Кодов ошибок нет.`;
     if (symptomLabels.length > 0) contextMsg += ` Симптомы: ${symptomLabels.join(", ")}.`;
@@ -184,6 +208,7 @@ function DiagApp() {
     setMessages(initMessages);
     setNoAnswer(false);
     setLoading(true);
+    setCurrentPage(0);
     setScreen("chat");
 
     // Immediately get AI first response
@@ -191,7 +216,7 @@ function DiagApp() {
       const res = await fetch(`${API_URL}/chat`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          vehicle: { brand, model, year, engine },
+          vehicle: { brand, model, year, engine, odometer, vin }, // Add odometer and vin to vehicle object
           messages: [],
           message: contextMsg,
           service_code: serviceCode || null,
@@ -234,7 +259,7 @@ function DiagApp() {
       const res = await fetch(`${API_URL}/chat`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          vehicle: { brand, model, year, engine },
+          vehicle: { brand, model, year, engine, odometer, vin }, // Add odometer and vin to vehicle object
           messages: history,
           message: userMsg,
           service_code: serviceCode || null,
@@ -264,18 +289,33 @@ function DiagApp() {
   // ── Screen 3 → 4 ─────────────────────────────────────────────────
   function goToConfirm() {
     setAiRating(0); setRootCause(""); setToolsUsed([]); setRefValue("");
-    setClientName(""); setClientPhone(""); setClientCar(`${brand} ${model} ${year}`); setLaborHours(""); setReportNote("");
+    setClientName(""); setClientPhone(""); setClientCar(`${brand} ${model} ${year}`); setLaborHours("");
+    setReportNote(rootCause); // Pre-fill reportNote with rootCause if available
     setScreen("confirm");
   }
+
+  const addWork = () => {
+    setRecommendedWorks(prev => [...prev, { work: "", part: "", qty: 0, price: 0 }]);
+  };
+
+  const removeWork = (index: number) => {
+    setRecommendedWorks(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleWorkChange = (index: number, field: keyof RecommendedWork, value: string | number) => {
+    setRecommendedWorks(prev => prev.map((rw, i) => i === index ? { ...rw, [field]: value } : rw));
+  };
+
+  const totalWorksPrice = recommendedWorks.reduce((sum, rw) => sum + (rw.qty || 0) * (rw.price || 0), 0);
 
   // ── Screen 4 → 5 ─────────────────────────────────────────────────
   async function saveCase() {
     setSaving(true);
     try {
-      await fetch(`${API_URL}/solve`, {
+      const res = await fetch(`${API_URL}/solve`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          vehicle: { brand, model, year, engine },
+          vehicle: { brand, model, year, engine, odometer, vin }, // Added odometer and vin to vehicle object
           messages,
           service_code: serviceCode || null,
           session_id: sessionId,
@@ -288,17 +328,96 @@ function DiagApp() {
           ref_value: refValue,
           no_answer: noAnswer,
           client: clientName ? { name: clientName, phone: clientPhone, car: clientCar, labor_hours: laborHours, note: reportNote } : null,
+          recommended_works: recommendedWorks.filter(rw => rw.work || rw.part), // Only send non-empty work items
         }),
       });
-    } catch { /* best-effort */ }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json(); // Get JSON response
+
+      // Populate reportNote from case_doc
+      const fetchedCaseDoc = data.case_doc;
+      if (fetchedCaseDoc) {
+        const solution = fetchedCaseDoc.case_summary?.solution || fetchedCaseDoc.root_cause;
+        if (solution) {
+          setReportNote(solution);
+        }
+
+        // Generate AI Conclusion (P0.2)
+        try {
+          const conclusionRes = await fetch(`${API_URL}/generate_ai_conclusion`, {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              case_summary: fetchedCaseDoc.case_summary,
+              root_cause: fetchedCaseDoc.root_cause,
+              symptoms: fetchedCaseDoc.symptoms,
+              dtc_codes: fetchedCaseDoc.dtc_codes,
+              symptom_text: fetchedCaseDoc.symptom_text,
+              vehicle: fetchedCaseDoc.vehicle,
+              messages: fetchedCaseDoc.messages,
+            }),
+          });
+          if (!conclusionRes.ok) throw new Error(`HTTP ${conclusionRes.status}`);
+          const conclusionData = await conclusionRes.json();
+          setAiConclusion(conclusionData.conclusion);
+        } catch (conclusionError) {
+          console.error("Error generating AI conclusion:", conclusionError);
+          setAiConclusion("Не удалось сгенерировать заключение AI.");
+        }
+
+        // P3 — пакет документов: объяснение клиенту + памятка
+        try {
+          const cs = fetchedCaseDoc.case_summary || {};
+          const packRes = await fetch(`${API_URL}/generate_case_pack`, {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              vehicle: fetchedCaseDoc.vehicle,
+              root_cause: fetchedCaseDoc.root_cause || cs.root_cause || "",
+              solution: cs.solution || "",
+              parts_replaced: cs.parts_replaced || [],
+              symptoms: fetchedCaseDoc.symptoms || [],
+              dtc_codes: fetchedCaseDoc.dtc_codes || [],
+              checks_done: cs.checks_done || [],
+              symptom_text: fetchedCaseDoc.symptom_text || "",
+            }),
+          });
+          if (packRes.ok) {
+            const packData = await packRes.json();
+            setClientExplanation(packData.client_explanation || "");
+            setRepairMemo(packData.repair_memo || "");
+          }
+        } catch (packErr) {
+          console.error("Case pack generation error:", packErr);
+        }
+      }
+
+    } catch (e) {
+      console.error("Error saving case:", e);
+      // Optional: show user an error message
+    }
     setScreen("solved");
     setSaving(false);
   }
 
   function generatePDF() {
     const date = new Date().toLocaleDateString("ru-RU", { day: "2-digit", month: "long", year: "numeric" });
+    const time = new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+
+    // Generate Act Number: 2LS-YYYYMMDD-HHMMSS-RANDOM
+    const now = new Date();
+    const yearStr = now.getFullYear().toString();
+    const monthStr = (now.getMonth() + 1).toString().padStart(2, '0');
+    const dayStr = now.getDate().toString().padStart(2, '0');
+    const hourStr = now.getHours().toString().padStart(2, '0');
+    const minuteStr = now.getMinutes().toString().padStart(2, '0');
+    const secondStr = now.getSeconds().toString().padStart(2, '0');
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    const actNumber = `2LS-${yearStr}${monthStr}${dayStr}-${hourStr}${minuteStr}${secondStr}-${random}`;
+
+    // Helper to strip emojis for print version
+    const stripEmojis = (str: string) => str.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}]/gu, '');
+
     const symptomList = symptoms.map(s => SYMPTOM_CHIPS.find(c => c.id === s)?.label || s).join(", ");
-    const lastAiMsg = [...messages].reverse().find(m => m.role === "assistant")?.content || "";
+    const finalAiConclusion = aiConclusion || ([...messages].reverse().find(m => m.role === "assistant")?.content || "");
 
     const html = `<!DOCTYPE html>
 <html lang="ru">
@@ -351,8 +470,8 @@ function DiagApp() {
     <div style="font-size:11px;color:#888;margin-top:2px;">Интеллектуальная диагностика</div>
   </div>
   <div class="doc-meta">
-    <div class="doc-title">АКТ ДИАГНОСТИКИ</div>
-    <div class="doc-num">Дата: ${date}</div>
+    <div class="doc-title">АКТ ДИАГНОСТИКИ №${actNumber}</div>
+    <div class="doc-num">Дата: ${date} ${time}</div>
     ${serviceName ? `<div class="doc-num">Сервис: ${serviceName}</div>` : ""}
   </div>
 </div>
@@ -375,33 +494,69 @@ function DiagApp() {
   <div class="section-title">Автомобиль</div>
   <div class="row"><span class="label">Марка / Модель</span><span class="value">${clientCar || `${brand} ${model}`}</span></div>
   <div class="row"><span class="label">Год выпуска</span><span class="value">${year}</span></div>
+  ${vin ? `<div class="row"><span class="label">VIN</span><span class="value">${vin}</span></div>` : ""}
   <div class="row"><span class="label">Двигатель</span><span class="value">${engine || "—"}</span></div>
+  ${odometer ? `<div class="row"><span class="label">Пробег</span><span class="value">${odometer} км</span></div>` : ""}
 </div>
 
 <div class="section">
   <div class="section-title">Жалоба</div>
   ${dtcCode ? `<div class="row"><span class="label">Код ошибки</span><span class="value"><span class="dtc-badge">${dtcCode}</span></span></div>` : ""}
-  ${symptomList ? `<div class="row"><span class="label">Симптомы</span><div class="chips">${symptoms.map(s => `<span class="chip">${SYMPTOM_CHIPS.find(c => c.id === s)?.label || s}</span>`).join("")}</div></div>` : ""}
+  ${symptomList ? `<div class="row"><span class="label">Симптомы</span><div class="chips">${symptoms.map(s => `<span class="chip">${stripEmojis(SYMPTOM_CHIPS.find(c => c.id === s)?.label || s)}</span>`).join("")}</div></div>` : ""}
   ${symptomText ? `<div class="row"><span class="label">Описание</span><span class="value">${symptomText}</span></div>` : ""}
 </div>
 
 <div class="section">
   <div class="section-title">Результат диагностики</div>
   <div class="result-box">
-    <div class="cause">🔍 ${rootCause}</div>
+    <div class="cause">${rootCause}</div>
     ${reportNote ? `<div class="action">Рекомендация: ${reportNote}</div>` : ""}
   </div>
 </div>
 
-${lastAiMsg ? `<div class="section">
+${finalAiConclusion ? `<div class="section">
   <div class="section-title">Заключение AI-диагноста</div>
-  <div class="diagnosis-box">${lastAiMsg.replace(/\*([^*]+)\*/g, "<strong>$1</strong>").replace(/\n/g, "<br/>")}</div>
+  <div class="diagnosis-box">${finalAiConclusion.replace(/\*([^*]+)\*/g, "<strong>$1</strong>").replace(/\n/g, "<br/>")}</div>
 </div>` : ""}
 
 <div class="grid2" style="margin-bottom:22px;">
-  ${laborHours ? `<div class="info-box"><div class="ib-label">Трудоёмкость</div><div class="ib-value">${laborHours}</div></div>` : ""}
+  ${laborHours ? `<div class="info-box"><div class="ib-label">Трудоёмкость</div><div class="ib-value">${laborHours} н/ч</div></div>` : ""}
   ${toolsUsed.length > 0 ? `<div class="info-box"><div class="ib-label">Использованы</div><div class="ib-value" style="font-size:12px;">${toolsUsed.join(", ")}</div></div>` : ""}
 </div>
+
+${recommendedWorks.length > 0 ? `<div class="section">
+  <div class="section-title">Рекомендуемые работы и запчасти</div>
+  <table style="width:100%; border-collapse: collapse; margin-top: 10px;">
+    <thead>
+      <tr style="background-color:#f8fafc;">
+        <th style="text-align:left; padding: 8px; border: 1px solid #e2e8f0; font-size:10px; text-transform:uppercase; color:#888;">Работа</th>
+        <th style="text-align:left; padding: 8px; border: 1px solid #e2e8f0; font-size:10px; text-transform:uppercase; color:#888;">Запчасть (арт.)</th>
+        <th style="text-align:center; padding: 8px; border: 1px solid #e2e8f0; font-size:10px; text-transform:uppercase; color:#888;">Кол-во</th>
+        <th style="text-align:right; padding: 8px; border: 1px solid #e2e8f0; font-size:10px; text-transform:uppercase; color:#888;">Цена</th>
+        <th style="text-align:right; padding: 8px; border: 1px solid #e2e8f0; font-size:10px; text-transform:uppercase; color:#888;">Сумма</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${recommendedWorks.map(rw => `
+        <tr>
+          <td style="text-align:left; padding: 8px; border: 1px solid #e2e8f0; font-size:12px;">${rw.work || "—"}</td>
+          <td style="text-align:left; padding: 8px; border: 1px solid #e2e8f0; font-size:12px;">${rw.part || "—"}</td>
+          <td style="text-align:center; padding: 8px; border: 1px solid #e2e8f0; font-size:12px;">${rw.qty || "—"}</td>
+          <td style="text-align:right; padding: 8px; border: 1px solid #e2e8f0; font-size:12px;">${rw.price ? rw.price.toLocaleString() : "—"}</td>
+          <td style="text-align:right; padding: 8px; border: 1px solid #e2e8f0; font-size:12px;">${rw.qty && rw.price ? (rw.qty * rw.price).toLocaleString() : "—"}</td>
+        </tr>
+      `).join("")}
+    </tbody>
+    <tfoot>
+      ${totalWorksPrice > 0 ? `
+      <tr>
+        <td colspan="4" style="text-align:right; padding: 8px; border: 1px solid #e2e8f0; font-size:12px; font-weight:bold;">Итого, предварительно:</td>
+        <td style="text-align:right; padding: 8px; border: 1px solid #e2e8f0; font-size:14px; font-weight:bold; color:#0088cc;">${totalWorksPrice.toLocaleString()} ₽</td>
+      </tr>
+      ` : ''}
+    </tfoot>
+  </table>
+</div>` : ''}
 
 <div class="sign-section">
   <div class="sign-block">
@@ -438,8 +593,47 @@ ${lastAiMsg ? `<div class="section">
     setBrandCategory("regular"); setBrand(""); setModel(""); setYear("2020"); setEngine("");
     setDtcCode(""); setNoDtc(false); setSymptoms([]); setSymptomText("");
     setNoAnswer(false);
+    setOdometer(""); setVin(""); setRecommendedWorks([]); setAiConclusion("");
+    setClientExplanation(""); setRepairMemo("");
+    setCurrentPage(0);
     if (serviceCode) fetchCredits(serviceCode);
   }
+
+  // ── Chat pagination ───────────────────────────────────────────────
+  type ChatPage = { userMsg?: Message; aiMsg?: Message };
+
+  function buildPages(msgs: Message[]): ChatPage[] {
+    // msgs[0] is hidden context summary; skip it
+    const visible = msgs.slice(1);
+    const pages: ChatPage[] = [];
+    let i = 0;
+    while (i < visible.length) {
+      const msg = visible[i];
+      if (msg.role === "assistant") {
+        // First AI response (no preceding user message on this page)
+        pages.push({ aiMsg: msg });
+        i++;
+      } else if (msg.role === "user") {
+        const next = visible[i + 1];
+        pages.push({
+          userMsg: msg,
+          aiMsg: next?.role === "assistant" ? next : undefined,
+        });
+        i += next?.role === "assistant" ? 2 : 1;
+      } else {
+        i++;
+      }
+    }
+    // If loading, add a pending page for the last user message that has no AI reply yet
+    return pages;
+  }
+
+  const chatPages = buildPages(messages);
+
+  // Auto-advance to last page when messages update
+  useEffect(() => {
+    if (chatPages.length > 0) setCurrentPage(chatPages.length - 1);
+  }, [messages.length]);
 
   // ── Render helpers ────────────────────────────────────────────────
   const isDark = theme === "dark";
@@ -618,6 +812,14 @@ ${lastAiMsg ? `<div class="section">
                           : <input type="text" placeholder="1ZZ-FE 1.8" value={engine} onChange={e => setEngine(e.target.value)} className={fieldCls} />}
                       </div>
                     </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">Пробег</label>
+                      <input type="number" placeholder="200000" value={odometer} onChange={e => setOdometer(e.target.value)} className={fieldCls} />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">VIN</label>
+                      <input type="text" placeholder="WBA................" value={vin} onChange={e => setVin(e.target.value.toUpperCase())} className={fieldCls} />
+                    </div>
                   </div>
                 </div>
 
@@ -733,19 +935,61 @@ ${lastAiMsg ? `<div class="section">
                   </div>
                 </div>
 
-                {/* Messages */}
+                {/* Pagination nav */}
+                {chatPages.length > 1 && (
+                  <div className={`px-4 py-2 flex items-center justify-between border-b shrink-0 ${isDark ? "bg-slate-900/60 border-slate-800" : "bg-white/80 border-sky-100"}`}>
+                    <button
+                      onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
+                      disabled={currentPage === 0}
+                      className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-colors ${currentPage === 0 ? "opacity-30 cursor-default" : isDark ? "bg-slate-800 text-slate-300 hover:bg-slate-700" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
+                    >← Назад</button>
+                    <span className={`text-[10px] font-semibold ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                      {currentPage + 1} / {chatPages.length}
+                    </span>
+                    <button
+                      onClick={() => setCurrentPage(p => Math.min(chatPages.length - 1, p + 1))}
+                      disabled={currentPage === chatPages.length - 1}
+                      className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-colors ${currentPage === chatPages.length - 1 ? "opacity-30 cursor-default" : isDark ? "bg-slate-800 text-slate-300 hover:bg-slate-700" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
+                    >Вперёд →</button>
+                  </div>
+                )}
+
+                {/* Messages — current page */}
                 <div className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-2">
-                  {messages.filter((_, i) => !(i === 0 && messages[0]?.role === "user")).map((msg, i) => (
-                    <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                      <div className={`max-w-[88%] px-3 py-2.5 rounded-2xl text-[12px] ${
-                        msg.role === "user" ? "bg-blue-600 text-white rounded-tr-sm"
-                          : isDark ? "bg-slate-800 text-slate-200 rounded-tl-sm"
-                          : "bg-white border border-sky-100 text-slate-800 rounded-tl-sm shadow-sm"}`}>
-                        {renderContent(msg.content)}
-                      </div>
-                    </div>
-                  ))}
-                  {loading && (
+                  {chatPages.length === 0 && !loading && null}
+
+                  {chatPages.length > 0 && (() => {
+                    const page = chatPages[currentPage];
+                    return (
+                      <>
+                        {page?.userMsg && (
+                          <div className="flex justify-end">
+                            <div className="max-w-[88%] px-3 py-2.5 rounded-2xl rounded-tr-sm text-[12px] bg-blue-600 text-white">
+                              {renderContent(page.userMsg.content)}
+                            </div>
+                          </div>
+                        )}
+                        {page?.aiMsg && (
+                          <div className="flex justify-start">
+                            <div className={`max-w-[88%] px-3 py-2.5 rounded-2xl rounded-tl-sm text-[12px] ${isDark ? "bg-slate-800 text-slate-200" : "bg-white border border-sky-100 text-slate-800 shadow-sm"}`}>
+                              {renderContent(page.aiMsg.content)}
+                            </div>
+                          </div>
+                        )}
+                        {/* Loading on last page when AI hasn't responded yet */}
+                        {loading && currentPage === chatPages.length - 1 && !page?.aiMsg && (
+                          <div className="flex justify-start">
+                            <div className={`px-4 py-3 rounded-2xl rounded-tl-sm text-xs flex items-center gap-2 ${isDark ? "bg-slate-800 text-slate-400" : "bg-white border border-sky-100 text-slate-500 shadow-sm"}`}>
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" /> Анализирую...
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
+
+                  {/* Loading on empty state (very first response) */}
+                  {loading && chatPages.length === 0 && (
                     <div className="flex justify-start">
                       <div className={`px-4 py-3 rounded-2xl rounded-tl-sm text-xs flex items-center gap-2 ${isDark ? "bg-slate-800 text-slate-400" : "bg-white border border-sky-100 text-slate-500 shadow-sm"}`}>
                         <Loader2 className="w-3.5 h-3.5 animate-spin" /> Анализирую...
@@ -911,6 +1155,68 @@ ${lastAiMsg ? `<div class="section">
                   )}
                 </div>
 
+                {/* Recommended Works block (P0.4) */}
+                <div className={`p-4 rounded-3xl border ${isDark ? "bg-slate-900/40 border-slate-800/80" : "bg-white border-sky-100 shadow-sm"}`}>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-sm">🛠️</span>
+                    <p className={`text-xs font-bold ${isDark ? "text-slate-300" : "text-slate-700"}`}>
+                      Рекомендуемые работы и запчасти <span className={`font-normal text-[10px] ${isDark ? "text-slate-500" : "text-slate-400"}`}>(необязательно)</span>
+                    </p>
+                  </div>
+                  {recommendedWorks.map((rw, i) => (
+                    <div key={i} className="flex flex-col gap-2 border-b border-dashed mb-3 pb-3 last:border-b-0 last:pb-0">
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">Работа</label>
+                        <input type="text" placeholder="Замена свечей зажигания"
+                          value={rw.work} onChange={e => handleWorkChange(i, "work", e.target.value)}
+                          className={fieldCls} />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">Запчасть (артикул)</label>
+                        <input type="text" placeholder="NGK BKR6E-11"
+                          value={rw.part} onChange={e => handleWorkChange(i, "part", e.target.value)}
+                          className={fieldCls} />
+                      </div>
+                      <div className="grid grid-cols-3 gap-2">
+                        <div className="flex flex-col gap-1">
+                          <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">Кол-во</label>
+                          <input type="number" placeholder="4"
+                            value={rw.qty || ""} onChange={e => handleWorkChange(i, "qty", parseFloat(e.target.value))}
+                            className={fieldCls} />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">Цена за ед.</label>
+                          <input type="number" placeholder="500"
+                            value={rw.price || ""} onChange={e => handleWorkChange(i, "price", parseFloat(e.target.value))}
+                            className={fieldCls} />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">Сумма</label>
+                          <input type="text" readOnly
+                            value={rw.qty && rw.price ? (rw.qty * rw.price).toLocaleString() : ""}
+                            className={`${fieldCls} opacity-70`} />
+                        </div>
+                      </div>
+                      <button onClick={() => removeWork(i)}
+                        className={`text-red-400 text-[10px] uppercase font-semibold tracking-wider self-end mt-1 ${isDark ? "hover:text-red-300" : "hover:text-red-500"}`}>
+                        Удалить работу
+                      </button>
+                    </div>
+                  ))}
+                  <button onClick={addWork}
+                    className={`w-full py-2 mt-2 rounded-xl text-xs font-bold border transition-colors ${isDark ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700" : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"}`}>
+                    + Добавить работу
+                  </button>
+                  {totalWorksPrice > 0 && (
+                    <div className={`mt-4 pt-3 border-t ${isDark ? "border-slate-700" : "border-slate-200"}`}>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-bold uppercase tracking-wider">Итого, предварительно:</span>
+                        <span className="text-lg font-extrabold text-blue-500">{totalWorksPrice.toLocaleString()} ₽</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 <button onClick={saveCase} disabled={saving || !rootCause.trim()}
                   className={`w-full py-4 font-extrabold text-[15px] rounded-2xl flex items-center justify-center gap-2.5 h-14 uppercase tracking-wider transition-all ${
                     rootCause.trim() && !saving
@@ -950,6 +1256,27 @@ ${lastAiMsg ? `<div class="section">
                     <span>📄</span> Скачать акт PDF
                   </button>
                 )}
+
+                {/* P3 — Объяснение для клиента */}
+                {clientExplanation && (
+                  <div className={`w-full p-4 rounded-2xl border text-left ${isDark ? "bg-slate-900/60 border-slate-800" : "bg-blue-50 border-blue-100"}`}>
+                    <p className={`text-[10px] uppercase font-bold tracking-wider mb-2 ${isDark ? "text-blue-400" : "text-blue-600"}`}>💬 Объяснение для клиента</p>
+                    <p className={`text-xs leading-relaxed ${isDark ? "text-slate-300" : "text-slate-700"}`}>{clientExplanation}</p>
+                    <button
+                      onClick={() => { navigator.clipboard?.writeText(clientExplanation); }}
+                      className={`mt-2 text-[10px] font-bold uppercase tracking-wider ${isDark ? "text-blue-400 hover:text-blue-300" : "text-blue-600 hover:text-blue-500"}`}
+                    >📋 Скопировать (для WhatsApp/Telegram)</button>
+                  </div>
+                )}
+
+                {/* P3 — Памятка после ремонта */}
+                {repairMemo && (
+                  <div className={`w-full p-4 rounded-2xl border text-left ${isDark ? "bg-amber-500/5 border-amber-500/20" : "bg-amber-50 border-amber-100"}`}>
+                    <p className={`text-[10px] uppercase font-bold tracking-wider mb-2 ${isDark ? "text-amber-400" : "text-amber-700"}`}>📋 Памятка после ремонта</p>
+                    <p className={`text-xs leading-relaxed whitespace-pre-line ${isDark ? "text-slate-300" : "text-slate-700"}`}>{repairMemo}</p>
+                  </div>
+                )}
+
                 <button onClick={resetApp}
                   className={`w-full py-4 rounded-2xl font-extrabold text-sm uppercase tracking-wider transition-all ${isDark ? "bg-slate-900 border border-slate-800 text-slate-200 hover:bg-slate-800" : "bg-slate-100 text-slate-700 hover:bg-slate-200"}`}>
                   Новая диагностика

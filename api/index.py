@@ -11,7 +11,7 @@ import random
 import string
 import logging
 import requests
-from typing import Optional
+from typing import Optional, Dict, List, Any
 from datetime import datetime
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -207,6 +207,17 @@ def search_atoms(query_text: str, make: str = None, limit: int = 5) -> list[dict
 
 SYSTEM_PROMPT = """Ты — AI-диагност для профессионального автосервиса.
 На основе данных из базы знаний составь точный диагностический отчёт для механика.
+
+### Классификация начала проблемы (обязательный шаг анализа)
+Определи по словам механика тип начала и используй как жёсткий фильтр гипотез:
+- ОСТРОЕ начало («внезапно», «резко», «N недель/дней назад», «после мойки/ремонта/мороза») →
+  накопительные причины (загрязнение дросселя, закоксовка, постепенный износ) ПОНИЖАЮТСЯ;
+  повышаются: электрические отказы (датчики с тепловым обрывом — ДПКВ/ДПРВ, катушки),
+  механические поломки, последствия недавнего вмешательства.
+- ПОСТЕПЕННОЕ начало («давно», «всё хуже», «начиналось изредка») → накопительные причины в приоритете.
+Если тип начала не ясен из слов механика — это один из первых вопросов.
+В решении явно называй применённый фильтр: «начало острое — загрязнение дросселя маловероятно, начнём с …».
+
 Отвечай ТОЛЬКО валидным JSON без markdown-обёртки, без пояснений вне JSON.
 Язык отчёта: русский. Стиль: профессиональный, конкретный, без воды."""
 
@@ -227,12 +238,19 @@ def _atoms_to_context(atoms: list[dict]) -> str:
             p.get("name", str(p)) if isinstance(p, dict) else str(p)
             for p in parts_raw[:5]
         )
+        hyp_stats = a.get("hypothesis_stats") or []
+        hyp_str = ""
+        if hyp_stats:
+            hyp_str = "\nСтатистика причин: " + "; ".join(
+                f"{h.get('cause','')} ({int(h.get('weight',0)*100)}%)" for h in hyp_stats[:3]
+            )
         parts.append(
             f"[Кейс {i}] {title}\n"
             f"Причина: {root_cause}\n"
             f"Контент: {content}\n"
             f"Шаги: {steps_str}\n"
             f"Запчасти: {parts_str}"
+            f"{hyp_str}"
         )
     return "\n\n".join(parts)
 
@@ -706,6 +724,24 @@ _REF_AKTIVACIYA = """
 """
 
 
+_REF_SYMPTOM_MARKERS = """
+# Симптомы-маркеры (прямые указатели)
+
+Эти симптомы почти однозначно указывают на конкретную группу причин — активируй гипотезу немедленно, не дожидаясь вопросов. В первом же ответе называй маркер явно: «это классический признак …».
+
+- «Тахометр падает в ноль ДО остановки двигателя» → ДПКВ/его цепь (ЭБУ теряет сигнал оборотов раньше, чем мотор глохнет физически).
+- «Тахометр держится, мотор глохнет плавно» → топливоподача/смесь, НЕ ДПКВ.
+- «Глохнет на горячую, заводится после остывания (через 20–40 мин)» → тепловой обрыв: ДПКВ, катушка зажигания, реле питания ЭБУ, паяные соединения.
+- «Чёрная дорожка / прожжённая полоса на изоляторе свечи» → пробой ВВ (провод, наконечник, катушка), а не неисправность самой свечи.
+- «Несколько блоков (ABS, АКПП, SRS, приборка) отвалились одновременно по CAN» → питание/масса шины CAN или CAN-шлюз, а НЕ неисправность блоков по отдельности.
+- «Лампа АКБ тускло светит или мигает на повышенных оборотах» → диодный мост генератора (пробой диода).
+- «Провал при резком нажатии газа, через секунду тянет» → ДМРВ/ДАД или форсунки (кратковременное обеднение смеси при переходном режиме).
+- «Вибрация исчезает или меняется при отпускании газа на той же скорости» → карданные шарниры / ШРУС, а не дисбаланс колёс.
+- «Стук или скрип пропадает после прогрева» → тепловой зазор в механике (подшипник, постель, вкладыш).
+- «Check Engine появляется только в дождь / после мойки» → нарушение герметичности: разъём с влагой, ВВ-провод с трещиной.
+"""
+
+
 SKILL_SYSTEM_PROMPT = """Ты — опытный диагност-электрик, который ведёт механика к решению неисправности в режиме диалога. Не «справочник», который вываливает всё сразу, а наставник: сначала понять ситуацию, потом дать точный план.
 
 Главный принцип: **сначала собрать данные и сузить гипотезу, только потом давать решение.** Преждевременный ответ по неполным данным — главная ошибка, которой нужно избегать. Но и без фанатизма: не задавай вопросов больше, чем нужно для уверенной гипотезы (см. «Когда переходить к решению»).
@@ -782,9 +818,22 @@ SKILL_SYSTEM_PROMPT = """Ты — опытный диагност-электри
 
 Не затягивай опрос ради опроса. Если двух блоков вопросов хватило — переходи к решению.
 
+### Первый ответ: направление + вопросы
+
+Первый содержательный ответ после идентификации авто должен давать механику **НАПРАВЛЕНИЕ**:
+1–2 предварительные гипотезы с пометкой «предварительно, по типовой картине» + 2–3 самых делящих вопроса.
+**Не «допрос без версий»** (механик не видит ценности) и **не полная воронка без вопросов** (преждевременно).
+Формула: «Похоже на A или B. Чтобы выбрать: <вопросы>».
+
 ---
 
 ## Фаза 2. Решение
+
+### Анализ данных сканера — явное вычёркивание гипотез
+
+Получив данные сканера (STFT/LTFT, freeze frame, live data) — **ПЕРЕД рекомендацией действий** явно перечисли, какие гипотезы эти данные подтверждают, а какие исключают, с числами:
+«LTFT +3% — в норме → подсос воздуха и грубое загрязнение дросселя маловероятны; вычёркиваем».
+**Не назначай проверку/чистку узла, который уже исключён данными.**
 
 Когда данных достаточно — выдай решение. Четыре смысловых блока:
 
@@ -912,7 +961,12 @@ SKILL_SYSTEM_PROMPT = """Ты — опытный диагност-электри
 ---
 
 ## Справочник: Формат решения с примерами (Фаза 2)
-""" + _REF_FORMAT_OTVETA
+""" + _REF_FORMAT_OTVETA + """
+
+---
+
+## Справочник: Симптомы-маркеры (прямые указатели)
+""" + _REF_SYMPTOM_MARKERS
 
 CHINESE_BRANDS = {"haval", "chery", "geely", "changan", "omoda", "exeed", "jaecoo", "tank", "byd", "lixiang", "nio", "xpeng"}
 
@@ -922,6 +976,13 @@ CHINESE_BRANDS = {"haval", "chery", "geely", "changan", "omoda", "exeed", "jaeco
 class ChatMessage(BaseModel):
     role: str  # "user" or "assistant"
     content: str
+
+class ClientInfo(BaseModel): # Added ClientInfo model
+    name: Optional[str] = None
+    phone: Optional[str] = None
+    car: Optional[str] = None
+    labor_hours: Optional[str] = None
+    note: Optional[str] = None
 
 class ChatRequest(BaseModel):
     vehicle: dict
@@ -934,20 +995,31 @@ class ChatRequest(BaseModel):
     symptom_text: str = ""
 
 class SolveRequest(BaseModel):
-    vehicle: dict
-    messages: list[ChatMessage]
+    vehicle: Dict[str, Any]
+    messages: List[ChatMessage] # Changed to List[ChatMessage] for consistency
     service_code: Optional[str] = None
     session_id: Optional[str] = None
     # Structured data collected during session
-    dtc_codes: list[str] = []
-    symptoms: list[str] = []
+    dtc_codes: List[str] = []
+    symptoms: List[str] = []
     symptom_text: str = ""
     root_cause: str = ""
-    ai_rating: int = 0
-    tools_used: list[str] = []
-    ref_value: str = ""
+    ai_rating: Optional[int] = None # Optional now
+    tools_used: List[str] = []
+    ref_value: Optional[str] = None # Optional now
     no_answer: bool = False
-    client: Optional[dict] = None  # {name, phone, car, labor_hours, note}
+    client: Optional[ClientInfo] = None  # {name, phone, car, labor_hours, note}
+    recommended_works: List[Dict[str, Any]] = [] # New field for recommended works
+
+# New Pydantic model for AI conclusion generation
+class GenerateConclusionRequest(BaseModel):
+    case_summary: Optional[Dict[str, Any]] = None
+    root_cause: Optional[str] = None
+    symptoms: List[str] = []
+    dtc_codes: List[str] = []
+    symptom_text: Optional[str] = None
+    vehicle: Dict[str, Any] = {} # brand, model, year, engine, odometer
+    messages: List[Dict[str, str]] = [] # For context, if needed by LLM for checks_done
 
 
 def _get_cases_col():
@@ -1031,7 +1103,8 @@ DTC-коды: {', '.join(dtc_codes) or 'нет'}
   "diagnostic_steps": ["шаг 1", "шаг 2", "шаг 3"],
   "false_hypotheses": ["исключённая гипотеза 1"],
   "parts": [{{"name": "...", "part_number": "..."}}],
-  "ref_values": [{{"param": "...", "value": "...", "units": "...", "conditions": "...", "measured_on": "live"}}]
+  "ref_values": [{{"param": "...", "value": "...", "units": "...", "conditions": "...", "measured_on": "live"}}],
+  "hypothesis_stats": [{{"cause": "...", "weight": 0.7}}]
 }}"""
 
     try:
@@ -1095,6 +1168,7 @@ DTC-коды: {', '.join(dtc_codes) or 'нет'}
         "false_hypotheses": atom_data.get("false_hypotheses") or [],
         "parts": atom_data.get("parts") or [],
         "ref_values": atom_data.get("ref_values") or [],
+        "hypothesis_stats": atom_data.get("hypothesis_stats") or [],
         "source": {
             "type": "service_case",
             "case_ids": [case_id],
@@ -1224,6 +1298,151 @@ def chat_endpoint(req: ChatRequest):
     return {"reply": reply_clean}
 
 
+# ── AI Conclusion Generation ─────────────────────────────────────────
+@app.post("/api/generate_ai_conclusion")
+async def generate_ai_conclusion(req: GenerateConclusionRequest):
+    if not OPENROUTER_API_KEY:
+        raise HTTPException(status_code=503, detail="OPENROUTER_API_KEY не настроен")
+
+    try:
+        # Prioritize case_summary.solution then root_cause
+        solution = req.case_summary.get('solution') if req.case_summary else None
+        root_cause_final = req.root_cause
+
+        # Try to extract checks_done from case_summary, or from messages if available
+        checks_done = []
+        if req.case_summary and 'checks_done' in req.case_summary and isinstance(req.case_summary['checks_done'], list):
+            checks_done = req.case_summary['checks_done']
+        elif req.messages:
+            # Attempt to parse checks_done from bot's messages
+            # This is a fallback and might not be perfect
+            for msg in reversed(req.messages):
+                if msg['role'] == 'assistant':
+                    # Heuristic: look for phrases like "Проверьте:", "Рекомендую:"
+                    # This is a very basic attempt, a more robust solution would involve a dedicated LLM call
+                    if "проверьте" in msg['content'].lower() or "рекомендую" in msg['content'].lower():
+                        # Extract bullet points or numbered lists
+                        found_checks = re.findall(r'[-*]?\s*(.*?)(?=\n|$)', msg['content'])
+                        checks_done.extend([c.strip() for c in found_checks if c.strip()])
+                        if checks_done:
+                            break # Found some checks, stop searching
+
+        system_prompt = """Ты - профессиональный технический писатель, твоя задача - сформировать формализованное заключение AI-диагноста для акта диагностики. Заключение должно быть строго техническим, без эмоций, обращений и лишних фраз. Используй информацию о симптомах, причине, проведенных проверках и решении, чтобы составить 3-6 предложений.
+
+Пример шаблона:
+"По результатам диагностики автомобиля <марка модель год, двигатель, пробег> установлено: <краткое описание симптомов/кодов ошибок>. Проведенные проверки: <краткий список проверок>. Выявленная причина: <физика отказа в 1-2 предложениях>. Рекомендуется: <решение + запчасть с артикулом>."
+
+Если нет информации по проведенным проверкам, опусти этот пункт. Если есть, кратко упомяни 2-3 основные.
+"""
+        user_prompt_parts = []
+        vehicle_info = f"{req.vehicle.get('brand', '')} {req.vehicle.get('model', '')}"
+        if req.vehicle.get('year'): vehicle_info += f" {req.vehicle['year']}г."
+        if req.vehicle.get('engine'): vehicle_info += f", двигатель {req.vehicle['engine']}"
+        if req.vehicle.get('odometer'): vehicle_info += f", пробег {req.vehicle['odometer']} км"
+        user_prompt_parts.append(f"Автомобиль: {vehicle_info}")
+
+        if req.symptoms: user_prompt_parts.append(f"Симптомы: {', '.join(req.symptoms)}")
+        if req.symptom_text: user_prompt_parts.append(f"Дополнительное описание симптомов: {req.symptom_text}")
+        if req.dtc_codes: user_prompt_parts.append(f"Коды ошибок: {', '.join(req.dtc_codes)}")
+        if checks_done: user_prompt_parts.append(f"Проведенные проверки: {', '.join(checks_done[:3])}") # Limit to 3 checks
+        if root_cause_final: user_prompt_parts.append(f"Выявленная причина: {root_cause_final}")
+        if solution: user_prompt_parts.append(f"Решение: {solution}")
+
+        user_message_content = "Сформируй заключение по следующим данным:\n" + "\n".join(user_prompt_parts)
+
+        messages_for_llm = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_message_content}
+        ]
+
+        headers = {
+            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "model": "google/gemini-2.5-flash-lite",
+            "messages": messages_for_llm,
+            "temperature": 0.3,
+        }
+
+        response = requests.post(OPENROUTER_URL, headers=headers, json=payload)
+        response.raise_for_status() # Raise an HTTPError for bad responses (4xx or 5xx)
+        llm_response_json = response.json()
+        conclusion = llm_response_json["choices"][0]["message"]["content"].strip()
+        return {"conclusion": conclusion}
+
+    except requests.exceptions.RequestException as e:
+        logger.error(f"OpenRouter API error generating AI conclusion: {e}")
+        raise HTTPException(status_code=502, detail=f"Ошибка связи с LLM: {e}")
+    except Exception as e:
+        logger.error(f"Error generating AI conclusion: {e}")
+        raise HTTPException(status_code=500, detail="Ошибка генерации заключения AI")
+
+# ── Case pack: объяснение для клиента + памятка после ремонта ────
+
+class GenerateCasePackRequest(BaseModel):
+    vehicle: Dict[str, Any] = {}
+    root_cause: str = ""
+    solution: str = ""
+    parts_replaced: List[Dict[str, Any]] = []
+    symptoms: List[str] = []
+    dtc_codes: List[str] = []
+    checks_done: List[str] = []
+    symptom_text: str = ""
+
+@app.post("/api/generate_case_pack")
+async def generate_case_pack(req: GenerateCasePackRequest):
+    """Генерирует пакет закрытия: объяснение для клиента + памятка после ремонта."""
+    if not OPENROUTER_API_KEY:
+        raise HTTPException(status_code=503, detail="LLM не настроен")
+
+    v = req.vehicle
+    vehicle_str = f"{v.get('brand','')} {v.get('model','')} {v.get('year','')}г., двигатель {v.get('engine','')}".strip()
+    parts_str = ", ".join(p.get("name", "") for p in req.parts_replaced if p.get("name")) or "—"
+
+    user_prompt = f"""Автомобиль: {vehicle_str}
+Симптомы: {', '.join(req.symptoms) or req.symptom_text or '—'}
+Коды ошибок: {', '.join(req.dtc_codes) or '—'}
+Причина неисправности: {req.root_cause}
+Решение: {req.solution or '—'}
+Заменённые детали: {parts_str}
+
+Сформируй два документа в формате JSON (без markdown, только JSON):
+
+{{
+  "client_explanation": "5–7 предложений ПРОСТЫМ языком без терминов для клиента. Объясни: что сломалось, почему важно починить, что будет если откладывать, что входит в ремонт. Технические термины расшифровывай в скобках: ДПКВ → датчик положения коленвала. Тон дружелюбный, без снисхождения.",
+  "repair_memo": "Если после замены {parts_str} требуется адаптация/обкатка (дроссель, DCT, CVT, АКБ, форсунки) — короткий чек-лист до 5 пунктов: что обязательно сделать после ремонта. Если адаптация не нужна — верни пустую строку."
+}}"""
+
+    try:
+        resp = requests.post(
+            OPENROUTER_URL,
+            headers={"Authorization": f"Bearer {OPENROUTER_API_KEY}", "Content-Type": "application/json"},
+            json={
+                "model": "google/gemini-2.5-flash-lite",
+                "messages": [
+                    {"role": "system", "content": "Ты — технический редактор автосервиса. Отвечай ТОЛЬКО валидным JSON без markdown."},
+                    {"role": "user", "content": user_prompt},
+                ],
+                "temperature": 0.3,
+                "max_tokens": 1500,
+            },
+            timeout=45,
+        )
+        resp.raise_for_status()
+        raw = resp.json()["choices"][0]["message"]["content"].strip()
+        raw = re.sub(r"^```(?:json)?\s*", "", raw)
+        raw = re.sub(r"\s*```$", "", raw)
+        result = json.loads(raw)
+        return {
+            "client_explanation": result.get("client_explanation", ""),
+            "repair_memo": result.get("repair_memo", ""),
+        }
+    except Exception as e:
+        logger.error(f"generate_case_pack error: {e}")
+        raise HTTPException(status_code=500, detail="Ошибка генерации пакета документов")
+
+
 # ── Solve endpoint (save pending case for manager review) ─────────
 
 @app.post("/api/solve")
@@ -1276,43 +1495,38 @@ def solve_endpoint(req: SolveRequest):
         col.insert_one(case_doc)
         case_doc.pop("_id", None)
 
-        # Обновляем статистику сервиса
-        if service_id:
-            _get_services_col().update_one(
-                {"service_id": service_id},
-                {
-                    "$inc": {"solved_cases": 1},
-                    "$push": {
-                        "recent_brands": {"$each": [brand] if brand else [], "$slice": -50},
-                        "recent_dtcs": {"$each": dtc_codes[:5], "$slice": -100},
-                    },
-                    "$set": {"last_activity": datetime.utcnow().isoformat()},
-                }
-            )
-
         # Закрываем сессию
         if req.session_id:
             try:
                 _get_sessions_col().update_one(
                     {"session_id": req.session_id},
                     {"$set": {
-                        "status": "solved",
+                        "status": "no_answer" if req.no_answer else "solved",
                         "case_id": case_id,
-                        "ai_rating": req.ai_rating,
-                        "updated_at": datetime.utcnow().isoformat(),
+                        "closed_at": datetime.utcnow().isoformat(),
                     }}
                 )
             except Exception as e:
                 logger.warning(f"Session close error (non-critical): {e}")
 
-        # Авто-атомизация: запускаем только для полезных кейсов
-        if not req.no_answer and (req.root_cause or case_summary):
+        # Обновляем статистику сервиса
+        if service_id and not req.no_answer:
+            try:
+                _get_services_col().update_one(
+                    {"service_id": service_id},
+                    {"$inc": {"solved_cases": 1}, "$set": {"last_activity": datetime.utcnow().isoformat()}}
+                )
+            except Exception as e:
+                logger.warning(f"Service stats update error (non-critical): {e}")
+
+        # Авто-атомизация в фоне (только успешные кейсы)
+        if not req.no_answer:
             try:
                 _auto_atomize(case_doc)
             except Exception as e:
-                logger.error(f"Auto-atomize launch error: {e}")
+                logger.error(f"Auto-atomize error (non-critical): {e}")
 
-        return {"ok": True, "case_id": case_id}
+        return {"ok": True, "case_id": case_id, "case_doc": case_doc}
     except Exception as e:
         logger.error(f"Save case error: {e}")
         return {"ok": False, "error": str(e)}
