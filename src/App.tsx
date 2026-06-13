@@ -750,45 +750,31 @@ ${recommendedWorks.length > 0 ? `<div class="section">
 
             {/* ══ SCREEN: FORM (vehicle) ══ */}
             {screen === "form" && (
-              <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-4 pb-8">
-                <div className="text-center py-2">
-                  <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold ${isDark ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-blue-50 text-blue-600 border border-blue-100"}`}>
-                    <Wrench className="w-3.5 h-3.5" /> Шаг 1 из 3 — Автомобиль
-                  </div>
-                </div>
+              <div className="flex-1 overflow-y-auto px-4 pt-2 pb-4 flex flex-col gap-2">
 
                 {credits !== null && (
-                  <div className={`flex items-center justify-between px-4 py-2.5 rounded-2xl border text-xs ${credits > 0 ? (isDark ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-400" : "bg-emerald-50 border-emerald-100 text-emerald-700") : "bg-red-500/5 border-red-500/20 text-red-400"}`}>
-                    <div className="flex items-center gap-2"><CreditCard className="w-3.5 h-3.5" /><span className="font-semibold">{serviceName || serviceCode}</span></div>
-                    <span className="font-bold">{credits > 0 ? `${credits} кредитов` : "Кредиты закончились"}</span>
+                  <div className={`flex items-center justify-between px-3 py-1.5 rounded-xl text-[10px] ${credits > 0 ? (isDark ? "bg-emerald-500/5 border border-emerald-500/20 text-emerald-400" : "bg-emerald-50 border border-emerald-100 text-emerald-700") : "bg-red-500/5 border border-red-500/20 text-red-400"}`}>
+                    <div className="flex items-center gap-1.5"><CreditCard className="w-3 h-3" /><span className="font-semibold truncate max-w-[140px]">{serviceName || serviceCode}</span></div>
+                    <span className="font-bold shrink-0">{credits > 0 ? `${credits} кр.` : "Кредиты закончились"}</span>
                   </div>
                 )}
 
-                <div className={`p-4 rounded-3xl border ${isDark ? "bg-slate-900/40 border-slate-800/80" : "bg-white border-sky-100 shadow-sm"}`}>
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1.5">
-                    <Wrench className={`w-3.5 h-3.5 ${isDark ? "text-emerald-500" : "text-blue-500"}`} /> Спецификация
-                  </h2>
-                  <div className="flex flex-col gap-3">
-                    <div className="flex flex-col gap-1">
+                <div className={`p-3 rounded-3xl border ${isDark ? "bg-slate-900/40 border-slate-800/80" : "bg-white border-sky-100 shadow-sm"}`}>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-0.5">
                       <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">Марка *</label>
                       <div className={`flex rounded-xl border overflow-hidden text-xs font-semibold mb-0.5 ${isDark ? "border-slate-700" : "border-slate-200"}`}>
-                        <button
-                          type="button"
-                          onClick={() => { setBrandCategory("regular"); setBrand(""); setModel(""); setEngine(""); }}
-                          className={`flex-1 py-2 transition-colors ${brandCategory === "regular" ? (isDark ? "bg-emerald-600 text-white" : "bg-blue-600 text-white") : (isDark ? "bg-slate-800 text-slate-400" : "bg-slate-50 text-slate-500")}`}
-                        >Обычные</button>
-                        <button
-                          type="button"
-                          onClick={() => { setBrandCategory("chinese"); setBrand(""); setModel(""); setEngine(""); }}
-                          className={`flex-1 py-2 transition-colors ${brandCategory === "chinese" ? "bg-red-500 text-white" : (isDark ? "bg-slate-800 text-slate-400" : "bg-slate-50 text-slate-500")}`}
-                        >🇨🇳 Китайские</button>
+                        <button type="button" onClick={() => { setBrandCategory("regular"); setBrand(""); setModel(""); setEngine(""); }}
+                          className={`flex-1 py-1.5 transition-colors ${brandCategory === "regular" ? (isDark ? "bg-emerald-600 text-white" : "bg-blue-600 text-white") : (isDark ? "bg-slate-800 text-slate-400" : "bg-slate-50 text-slate-500")}`}>Обычные</button>
+                        <button type="button" onClick={() => { setBrandCategory("chinese"); setBrand(""); setModel(""); setEngine(""); }}
+                          className={`flex-1 py-1.5 transition-colors ${brandCategory === "chinese" ? "bg-red-500 text-white" : (isDark ? "bg-slate-800 text-slate-400" : "bg-slate-50 text-slate-500")}`}>🇨🇳 Китайские</button>
                       </div>
                       <select value={brand} onChange={e => { setBrand(e.target.value); setModel(""); setEngine(""); }} className={fieldCls}>
                         <option value="">Выберите марку...</option>
                         {(brandCategory === "chinese" ? CHINESE_BRANDS_LIST : CAR_BRANDS).map(b => <option key={b} value={b}>{b}</option>)}
                       </select>
                     </div>
-                    <div className="flex flex-col gap-1">
+                    <div className="flex flex-col gap-0.5">
                       <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">Модель</label>
                       {getModels(brand).length > 0
                         ? <select value={model} onChange={e => { setModel(e.target.value); setEngine(""); }} className={fieldCls}>
@@ -798,11 +784,11 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                         : <input type="text" placeholder="Введите модель" value={model} onChange={e => setModel(e.target.value)} className={fieldCls} />}
                     </div>
                     <div className="grid grid-cols-2 gap-2">
-                      <div className="flex flex-col gap-1">
+                      <div className="flex flex-col gap-0.5">
                         <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">Год</label>
                         <input type="number" min="1990" max="2030" placeholder="2020" value={year} onChange={e => setYear(e.target.value)} className={fieldCls} />
                       </div>
-                      <div className="flex flex-col gap-1">
+                      <div className="flex flex-col gap-0.5">
                         <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">Двигатель</label>
                         {getEngines(brand, model).length > 0
                           ? <select value={engine} onChange={e => setEngine(e.target.value)} className={fieldCls}>
@@ -812,19 +798,21 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                           : <input type="text" placeholder="1ZZ-FE 1.8" value={engine} onChange={e => setEngine(e.target.value)} className={fieldCls} />}
                       </div>
                     </div>
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">Пробег</label>
-                      <input type="number" placeholder="200000" value={odometer} onChange={e => setOdometer(e.target.value)} className={fieldCls} />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">VIN</label>
-                      <input type="text" placeholder="WBA................" value={vin} onChange={e => setVin(e.target.value.toUpperCase())} className={fieldCls} />
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="flex flex-col gap-0.5">
+                        <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">Пробег</label>
+                        <input type="number" placeholder="200000" value={odometer} onChange={e => setOdometer(e.target.value)} className={fieldCls} />
+                      </div>
+                      <div className="flex flex-col gap-0.5">
+                        <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">VIN</label>
+                        <input type="text" placeholder="WBA..." value={vin} onChange={e => setVin(e.target.value.toUpperCase())} className={fieldCls} />
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 <button onClick={goToProblem} disabled={!brand || credits === 0}
-                  className={`w-full py-4 font-extrabold text-[15px] rounded-2xl flex items-center justify-center gap-2.5 h-14 uppercase tracking-wider transition-all ${!brand || credits === 0 ? "bg-slate-400 text-slate-200 cursor-not-allowed opacity-60" : isDark ? "bg-emerald-500 hover:bg-emerald-600 text-slate-950" : "bg-blue-600 hover:bg-blue-700 text-white"}`}>
+                  className={`w-full py-3.5 font-extrabold text-[14px] rounded-2xl flex items-center justify-center gap-2 h-12 uppercase tracking-wider transition-all ${!brand || credits === 0 ? "bg-slate-400 text-slate-200 cursor-not-allowed opacity-60" : isDark ? "bg-emerald-500 hover:bg-emerald-600 text-slate-950" : "bg-blue-600 hover:bg-blue-700 text-white"}`}>
                   Далее → Описание проблемы
                 </button>
 
@@ -837,15 +825,10 @@ ${recommendedWorks.length > 0 ? `<div class="section">
 
             {/* ══ SCREEN: PROBLEM ══ */}
             {screen === "problem" && (
-              <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-4 pb-8">
-                <div className="text-center py-2">
-                  <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold ${isDark ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" : "bg-amber-50 text-amber-700 border border-amber-100"}`}>
-                    <Sparkles className="w-3.5 h-3.5" /> Шаг 2 из 3 — Проблема
-                  </div>
-                </div>
+              <div className="flex-1 overflow-y-auto px-4 pt-2 pb-4 flex flex-col gap-2">
 
                 {/* Vehicle summary */}
-                <div className={`px-4 py-2.5 rounded-2xl border text-xs flex items-center gap-2 ${isDark ? "bg-slate-900/40 border-slate-800" : "bg-white border-sky-100 shadow-sm"}`}>
+                <div className={`px-3 py-1.5 rounded-xl border text-[11px] flex items-center gap-2 ${isDark ? "bg-slate-900/40 border-slate-800" : "bg-white border-sky-100 shadow-sm"}`}>
                   <Wrench className="w-3 h-3 text-slate-400 shrink-0" />
                   <span className={isDark ? "text-slate-400" : "text-slate-500"}>
                     <strong className={isDark ? "text-slate-200" : "text-slate-700"}>{brand} {model}</strong>
@@ -853,35 +836,33 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                   </span>
                 </div>
 
-                {/* DTC input */}
-                <div className={`p-4 rounded-3xl border ${isDark ? "bg-slate-900/40 border-slate-800/80" : "bg-white border-sky-100 shadow-sm"}`}>
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 block">Код ошибки (DTC)</label>
+                {/* DTC — компактная строка */}
+                <div className={`px-3 py-2 rounded-2xl border ${isDark ? "bg-slate-900/40 border-slate-800/80" : "bg-white border-sky-100 shadow-sm"}`}>
                   <div className="flex gap-2 items-center">
+                    <span className="text-[10px] font-bold uppercase text-slate-400 shrink-0">DTC</span>
                     <input
                       type="text"
                       placeholder="P0420"
                       value={dtcCode}
                       onChange={e => { setDtcCode(e.target.value.toUpperCase()); if (e.target.value) setNoDtc(false); }}
                       disabled={noDtc}
-                      className={`${fieldCls} font-mono flex-1 ${noDtc ? "opacity-40" : ""}`}
+                      className={`${fieldCls} font-mono flex-1 h-9 ${noDtc ? "opacity-40" : ""}`}
                     />
                     <button
                       onClick={() => { setNoDtc(v => !v); if (!noDtc) setDtcCode(""); }}
-                      className={`shrink-0 px-3 py-2 rounded-xl text-xs font-bold border transition-colors ${noDtc ? (isDark ? "bg-slate-700 border-slate-600 text-white" : "bg-slate-200 border-slate-300 text-slate-700") : (isDark ? "bg-slate-800 border-slate-700 text-slate-400" : "bg-white border-slate-200 text-slate-500")}`}
-                    >
-                      Нет кода
-                    </button>
+                      className={`shrink-0 px-2.5 py-1.5 rounded-xl text-[11px] font-bold border transition-colors ${noDtc ? (isDark ? "bg-slate-700 border-slate-600 text-white" : "bg-slate-200 border-slate-300 text-slate-700") : (isDark ? "bg-slate-800 border-slate-700 text-slate-400" : "bg-white border-slate-200 text-slate-500")}`}
+                    >Нет кода</button>
                   </div>
-                  {noDtc && <p className="text-[10px] text-amber-500 mt-1.5">⚠️ Без кода диагностика сложнее — описание симптомов особенно важно</p>}
+                  {noDtc && <p className="text-[10px] text-amber-500 mt-1">⚠️ Без кода — описание симптомов особенно важно</p>}
                 </div>
 
-                {/* Symptoms chips */}
-                <div className={`p-4 rounded-3xl border ${isDark ? "bg-slate-900/40 border-slate-800/80" : "bg-white border-sky-100 shadow-sm"}`}>
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 block">Симптомы <span className="text-[10px] font-normal normal-case">(выберите все подходящие)</span></label>
-                  <div className="flex flex-wrap gap-2 mb-3">
+                {/* Symptoms chips — компактно */}
+                <div className={`p-3 rounded-3xl border ${isDark ? "bg-slate-900/40 border-slate-800/80" : "bg-white border-sky-100 shadow-sm"}`}>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 block">Симптомы</label>
+                  <div className="flex flex-wrap gap-1 mb-2">
                     {SYMPTOM_CHIPS.map(chip => (
                       <button key={chip.id} onClick={() => toggleSymptom(chip.id)}
-                        className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
+                        className={`px-2 py-1 rounded-full text-[11px] font-semibold border transition-all ${
                           symptoms.includes(chip.id)
                             ? isDark ? "bg-blue-600 border-blue-500 text-white" : "bg-blue-600 border-blue-600 text-white"
                             : isDark ? "bg-slate-800 border-slate-700 text-slate-300" : "bg-slate-50 border-slate-200 text-slate-600"
@@ -900,11 +881,11 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                 </div>
 
                 <button onClick={startChat} disabled={!problemReady}
-                  className={`w-full py-4 font-extrabold text-[15px] rounded-2xl flex items-center justify-center gap-2.5 h-14 uppercase tracking-wider transition-all ${
+                  className={`w-full py-3.5 font-extrabold text-[14px] rounded-2xl flex items-center justify-center gap-2 h-12 uppercase tracking-wider transition-all ${
                     problemReady
                       ? isDark ? "bg-emerald-500 hover:bg-emerald-600 text-slate-950" : "bg-blue-600 hover:bg-blue-700 text-white"
                       : "bg-slate-400 text-slate-200 cursor-not-allowed opacity-60"}`}>
-                  <Sparkles className="w-5 h-5" /> Начать диагностику
+                  <Sparkles className="w-4 h-4" /> Начать диагностику
                 </button>
                 <p className={`text-center text-[10px] ${isDark ? "text-slate-500" : "text-slate-400"}`}>
                   Укажите DTC-код или выберите хотя бы один симптом
@@ -927,7 +908,11 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                     {symptoms.length > 2 && <span className={`text-[10px] ${isDark ? "text-slate-500" : "text-slate-400"}`}>+{symptoms.length - 2}</span>}
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    {credits !== null && <span className={`text-[10px] font-bold ${credits > 0 ? "text-emerald-400" : "text-red-400"}`}>{credits} кр.</span>}
+                    {credits !== null && (
+                      <span className={`text-[10px] font-bold ${credits > 0 ? "text-emerald-400" : "text-red-400"}`}>
+                        баланс: {credits} кр.
+                      </span>
+                    )}
                     <button onClick={goToConfirm}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold bg-emerald-500 hover:bg-emerald-600 text-white transition-colors">
                       <CheckCircle2 className="w-3.5 h-3.5" /> Решено
