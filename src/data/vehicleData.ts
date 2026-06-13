@@ -188,6 +188,12 @@ export const VEHICLE_DATA: VehicleData = {
     "Creta GS/SU2 (2015–н.в.)": { engines: ["G4FA 1.4 MPI", "G4FG 1.6 GDI", "D4FC 1.6 CRDi", "G3LC 1.6 T-GDI"] },
     "Staria US4 (2021–н.в.)": { engines: ["G6DK 3.5 V6 GDI", "D4HB 2.2 CRDi"] },
     "Starex / H-1 TQ (2007–н.в.)": { engines: ["G6EA 2.4 MPI", "D4CB 2.5 CRDi", "D4CB 2.5 VGT"] },
+    "Trajet FO (2000–2007)": { engines: ["G4JP 2.0 MPI", "G6BA 2.4 MPI", "D4EA 2.0 CRDi"] },
+    "Veloster FS (2011–2017)": { engines: ["G4FD 1.6 GDI", "G4FJ 1.6 T-GDI", "G4FJ 2.0 T-GDI N"] },
+    "Equus VI / Centennial (2009–2016)": { engines: ["G6DA 4.6 V8 GDI", "G6DH 5.0 V8 GDI", "G6DC 3.8 V6 GDI"] },
+    "Ioniq AE (2016–2022)": { engines: ["G4LE 1.6 Hybrid", "BEV 88кВт IONIQ Electric", "G4LE 1.6 PHEV"] },
+    "IONIQ 5 NE (2021–н.в.)": { engines: ["BEV RWD 125кВт", "BEV AWD 225кВт", "BEV N AWD 448кВт"] },
+    "IONIQ 6 CE (2022–н.в.)": { engines: ["BEV RWD 111кВт", "BEV RWD 168кВт", "BEV AWD 239кВт"] },
     "Porter II (2004–н.в.)": { engines: ["D4BF 2.5 D", "G4CS 2.4 MPI"] },
   },
 

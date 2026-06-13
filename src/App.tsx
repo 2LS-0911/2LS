@@ -55,6 +55,8 @@ function getRouteFromURL() {
   return null;
 }
 
+const PERSIST_KEY = "2ls_diag_state";
+
 export default function App() {
   const route = getRouteFromURL();
   if (route?.type === "staff") return <StaffPortal />;
@@ -124,10 +126,71 @@ function DiagApp() {
   useEffect(() => {
     const tg = (window as any).Telegram?.WebApp;
     if (tg) { tg.ready(); tg.expand(); if (tg.colorScheme === "dark") setTheme("dark"); }
+
+    // Load persisted state
+    try {
+      const saved = localStorage.getItem(PERSIST_KEY);
+      if (saved) {
+        const state = JSON.parse(saved);
+        if (state.screen) setScreen(state.screen);
+        if (state.brandCategory) setBrandCategory(state.brandCategory);
+        if (state.brand) setBrand(state.brand);
+        if (state.model) setModel(state.model);
+        if (state.year) setYear(state.year);
+        if (state.engine) setEngine(state.engine);
+        if (state.vin) setVin(state.vin);
+        if (state.odometer) setOdometer(state.odometer);
+        if (state.dtcCode) setDtcCode(state.dtcCode);
+        if (state.noDtc !== undefined) setNoDtc(state.noDtc);
+        if (state.symptoms) setSymptoms(state.symptoms);
+        if (state.symptomText) setSymptomText(state.symptomText);
+        if (state.messages) setMessages(state.messages);
+        if (state.sessionId) setSessionId(state.sessionId);
+        if (state.noAnswer !== undefined) setNoAnswer(state.noAnswer);
+        if (state.rootCause) setRootCause(state.rootCause);
+        if (state.aiRating) setAiRating(state.aiRating);
+        if (state.toolsUsed) setToolsUsed(state.toolsUsed);
+        if (state.refValue) setRefValue(state.refValue);
+        if (state.clientName) setClientName(state.clientName);
+        if (state.clientPhone) setClientPhone(state.clientPhone);
+        if (state.clientCar) setClientCar(state.clientCar);
+        if (state.laborHours) setLaborHours(state.laborHours);
+        if (state.reportNote) setReportNote(state.reportNote);
+        if (state.recommendedWorks) setRecommendedWorks(state.recommendedWorks);
+      }
+    } catch (e) { console.error("Failed to load state", e); }
   }, []);
 
+  // Persist state on changes
   useEffect(() => {
-    if (serviceCode) { fetchCredits(serviceCode); setScreen("form"); }
+    if (screen === "code") return; // Don't persist on login screen
+    const state = {
+      screen, brandCategory, brand, model, year, engine, vin, odometer,
+      dtcCode, noDtc, symptoms, symptomText,
+      messages, sessionId, noAnswer,
+      rootCause, aiRating, toolsUsed, refValue,
+      clientName, clientPhone, clientCar, laborHours, reportNote,
+      recommendedWorks
+    };
+    localStorage.setItem(PERSIST_KEY, JSON.stringify(state));
+  }, [
+    screen, brandCategory, brand, model, year, engine, vin, odometer,
+    dtcCode, noDtc, symptoms, symptomText,
+    messages, sessionId, noAnswer,
+    rootCause, aiRating, toolsUsed, refValue,
+    clientName, clientPhone, clientCar, laborHours, reportNote,
+    recommendedWorks
+  ]);
+
+  useEffect(() => {
+    if (serviceCode) { 
+      fetchCredits(serviceCode); 
+      setScreen(prev => {
+        // If we already loaded a screen from PERSIST_KEY (e.g. 'chat'), keep it
+        if (prev !== "code") return prev;
+        return "form";
+      });
+    }
   }, []);
 
   useEffect(() => {
@@ -587,6 +650,7 @@ ${recommendedWorks.length > 0 ? `<div class="section">
   }
 
   function resetApp() {
+    localStorage.removeItem(PERSIST_KEY);
     setScreen("form");
     setMessages([]); setInput(""); setSessionId(null);
     setBrandCategory("regular"); setBrand(""); setModel(""); setYear("2020"); setEngine("");
