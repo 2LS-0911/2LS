@@ -234,6 +234,117 @@ export const VEHICLE_DATA: VehicleData = {
     "Legacy B4 (2003–2009)": { engines: ["EJ202 2.0 SOHC", "EJ204 2.0 AVCS", "EJ20X 2.0T", "EJ253 2.5 AVCS", "EJ30D 3.0 6цил"] },
     "Outback (2003–2009)": { engines: ["EJ251 2.5 AVCS", "EJ253 2.5 AVCS", "EJ30D 3.0 6цил", "EE20Z 2.0d Boxer Diesel"] },
   },
+
+  "Land Rover": {
+    "Range Rover III L322 (2002–2012)": { engines: ["M62B44 4.4 V8", "4.2 SC V8 (AJ34)", "AJD-V6 3.0 TD6", "276DT 3.6 TDV8"] },
+    "Range Rover IV L405 (2012–2022)": { engines: ["306DT 3.0 SDV6", "448DT 4.4 SDV8", "306PS 3.0 V6 SC", "508PS 5.0 V8 SC"] },
+    "Range Rover Sport I L320 (2005–2013)": { engines: ["M62B44 4.4 V8", "AJ34 4.2 SC", "276DT 2.7 TDV6", "368DT 3.6 TDV8"] },
+    "Range Rover Sport II L494 (2013–н.в.)": { engines: ["306DT 3.0 SDV6", "448DT 4.4 SDV8", "306PS 3.0 V6 SC", "508PS 5.0 V8 SC"] },
+    "Discovery III L319 (2004–2009)": { engines: ["276DT 2.7 TDV6", "M62B44 4.4 V8"] },
+    "Discovery IV L319 (2009–2016)": { engines: ["276DT 2.7 TDV6", "368DT 3.0 TDV6", "508PN 5.0 V8"] },
+    "Freelander 2 L359 (2006–2014)": { engines: ["204PT 2.0 Si4 T", "B6324S 3.2 V6", "224DT 2.2 TD4", "224DT 2.2 SD4"] },
+    "Defender 90/110 (2020–н.в.)": { engines: ["P300 2.0 Si4 T", "P400 3.0 I6 MHEV", "D200 2.0d", "D250 3.0 TDV6", "D300 3.0 TDV6"] },
+    "Range Rover Evoque L538 (2011–2018)": { engines: ["204PT 2.0 Si4 T", "180PS 2.0 TD4", "150PS 2.0 eD4"] },
+    "Range Rover Evoque L551 (2019–н.в.)": { engines: ["P200 1.5T 3цил", "P249 2.0T", "D150 2.0d", "D180 2.0d", "D240 2.0d"] },
+    "Discovery Sport L550 (2014–н.в.)": { engines: ["204PT 2.0 Si4 180л.с.", "204PT 2.0 Si4 240л.с.", "204DTA 2.0 TD4 150л.с.", "204DTD 2.0 TD4 180л.с."] },
+  },
+
+  "Volvo": {
+    "S40/V50 II (2004–2012)": { engines: ["B4164S 1.6", "B5244S5 2.4", "B5254T2 2.5T", "B5254T7 2.5T R", "D4162T 1.6d", "D5244T18 2.0d"] },
+    "S60/V60 I (2010–2018)": { engines: ["B4164T3 1.6T", "B5204T4 2.0T", "B5204T9 2.0T", "B5254T12 2.5T", "T6 AWD 3.0 300л.с.", "D3 D5204T2 2.0d", "D5 D5244T16 2.4d"] },
+    "S60/V60 II (2018–н.в.)": { engines: ["B3 2.0 mild-hybrid", "B4 2.0T", "B5 2.0T AWD", "D3 2.0d", "D4 2.0d"] },
+    "XC60 I (2008–2017)": { engines: ["B5244S4 2.4", "T5 B5254T5 2.5T", "T6 AWD 3.0 285л.с.", "D3 D5204T7 2.0d", "D5 D5244T18 2.4d"] },
+    "XC60 II (2017–н.в.)": { engines: ["T5 2.0T", "T6 AWD 2.0T", "T8 Twin Engine AWD", "D4 2.0d", "D5 2.0d"] },
+    "XC90 I (2002–2014)": { engines: ["B6254S 2.5T AWD", "B6324S 3.2 AWD", "D5244T4 2.4d AWD", "D5244T5 2.4d AWD"] },
+    "XC90 II (2014–н.в.)": { engines: ["T5 2.0T AWD", "T6 AWD 2.0T 320л.с.", "T8 Twin Engine AWD", "D4 2.0d", "D5 2.0d"] },
+    "S80 II (2006–2016)": { engines: ["B5244S5 2.4", "B6284T 2.8T", "B6304T4 3.0T", "D5244T4 2.4d", "D5244T14 2.4d"] },
+    "XC70 (2007–2016)": { engines: ["B5244S5 2.4T AWD", "T5 B5254T12 2.5T", "D5 D5244T16 2.4d AWD"] },
+  },
+
+  "MINI": {
+    "Cooper / One R50/R53 (2001–2006)": { engines: ["W10B16 1.6 One", "W10B16A 1.6 Cooper", "W11B16 1.6T Cooper S", "W17D14 1.4d"] },
+    "Cooper / One R56 (2006–2013)": { engines: ["N12B16 1.6", "N14B16 1.6T Cooper S", "N16B16 1.6T", "N47C16 1.6d", "N18B16 1.6T JCW"] },
+    "Countryman R60 (2010–2016)": { engines: ["N16B16 1.6", "N18B16 1.6T S ALL4", "N47C20 2.0d", "B36A15 1.5T Cooper"] },
+    "Paceman R61 (2012–2016)": { engines: ["N16B16 1.6", "N18B16 1.6T S ALL4", "N47C20 2.0d"] },
+    "Cooper / One F56 (2014–н.в.)": { engines: ["B38A15M 1.5T 3цил", "B48A20M 2.0T Cooper S", "B48A20T1 2.0T JCW", "B47D20 2.0d"] },
+    "Countryman F60 (2017–н.в.)": { engines: ["B38A15M 1.5T", "B48A20M 2.0T S ALL4", "B47D20 2.0d", "B48A20E1 2.0T PHEV"] },
+    "Clubman F54 (2015–н.в.)": { engines: ["B38A15M 1.5T", "B48A20M 2.0T S", "B47D20 2.0d"] },
+  },
+
+  "Lexus": {
+    "RX 300/330 (1997–2003)": { engines: ["1MZ-FE 3.0 V6"] },
+    "RX 300/330/350 (2003–2009)": { engines: ["1MZ-FE 3.0 V6", "3MZ-FE 3.3 V6", "2GR-FE 3.5 V6", "3MZ-FE 3.3 Hybrid"] },
+    "RX 350/450h (2009–2015)": { engines: ["2GR-FE 3.5 V6", "2GR-FXS 3.5 Hybrid"] },
+    "RX 200t/350 (2015–2022)": { engines: ["8AR-FTS 2.0T", "2GR-FKS 3.5 V6", "2AR-FSE 2.5 Hybrid"] },
+    "GX 470 (2002–2009)": { engines: ["2UZ-FE 4.7 V8"] },
+    "GX 460 (2009–н.в.)": { engines: ["1GR-FE 4.0 V6"] },
+    "LX 470 (1998–2007)": { engines: ["2UZ-FE 4.7 V8"] },
+    "LX 570 (2007–2021)": { engines: ["3UR-FE 5.7 V8"] },
+    "LX 600 (2021–н.в.)": { engines: ["V35A-FTS 3.5T V6"] },
+    "ES 300/330 (2001–2006)": { engines: ["1MZ-FE 3.0 V6", "3MZ-FE 3.3 V6"] },
+    "ES 350 (2006–2012)": { engines: ["2GR-FE 3.5 V6"] },
+    "ES 250/350 (2012–н.в.)": { engines: ["2AR-FSE 2.5", "2GR-FKS 3.5 V6", "2AR-FSE 2.5 Hybrid"] },
+    "IS 250/350 (2005–2013)": { engines: ["4GR-FSE 2.5 V6", "2GR-FSE 3.5 V6"] },
+    "IS 200/300 (2013–н.в.)": { engines: ["8AR-FTS 2.0T", "2GR-FSE 3.5 V6"] },
+    "NX 200t/300 (2014–2021)": { engines: ["8AR-FTS 2.0T", "2AR-FXE 2.5 Hybrid"] },
+    "NX 250/350 (2021–н.в.)": { engines: ["A25A-FXS 2.5", "T24A-FTS 2.4T", "A25A-FXS 2.5 Hybrid"] },
+  },
+
+  "Infiniti": {
+    "QX56 (2004–2010)": { engines: ["VK56DE 5.6 V8"] },
+    "QX56 / QX80 (2010–н.в.)": { engines: ["VK56VD 5.6 V8"] },
+    "FX35/45 (2002–2008)": { engines: ["VQ35DE 3.5 V6", "VK45DE 4.5 V8"] },
+    "FX35/50 (2008–2013)": { engines: ["VQ35HR 3.5 V6", "VK50VE 5.0 V8"] },
+    "QX50/60/70 (2013–2017)": { engines: ["VQ35HR 3.5 V6", "VQ37VHR 3.7 V6"] },
+    "G35/G37 (2003–2013)": { engines: ["VQ35DE 3.5 V6", "VQ37VHR 3.7 V6"] },
+    "Q50 (2013–н.в.)": { engines: ["VQ35HR 3.5 V6", "VR30DDTT 2.0T", "VR30DDTT 3.0T"] },
+    "Q60 Coupe (2016–н.в.)": { engines: ["VR30DDTT 2.0T", "VR30DDTT 3.0T AWD"] },
+    "M35/M37/M56 (2006–2013)": { engines: ["VQ35HR 3.5 V6", "VQ37VHR 3.7 V6", "VK56VD 5.6 V8"] },
+  },
+
+  "Cadillac": {
+    "Escalade III (2006–2014)": { engines: ["L92 6.2 V8 AWD", "LY2 6.0 V8", "LMG 5.3 V8"] },
+    "Escalade IV (2015–2020)": { engines: ["L86 6.2 EcoTec3 V8", "L83 5.3 EcoTec3 V8"] },
+    "Escalade V (2021–н.в.)": { engines: ["L87 6.2 V8", "3.0 Duramax TDi"] },
+    "CTS I (2002–2007)": { engines: ["LD8 3.6 V6", "LY7 3.6 V6"] },
+    "CTS II (2007–2014)": { engines: ["LLT 3.6 V6", "LAF 2.0T 4цил", "A28NET 2.8T"] },
+    "CTS III / CT5 (2014–н.в.)": { engines: ["LGX 3.6 V6", "LSY 2.0T"] },
+    "STS (2004–2011)": { engines: ["LC3 3.6 V6 Northstar", "LD8 4.6 V8 Northstar"] },
+    "SRX I (2003–2009)": { engines: ["LA3 3.6 V6", "LH2 4.6 V8 Northstar", "RF8 3.0 V6 TDi"] },
+    "SRX II / XT5 (2010–н.в.)": { engines: ["LFX 3.6 V6", "LGX 3.6 V6", "LSY 2.0T"] },
+  },
+
+  "Dodge": {
+    "RAM 1500 DS (2009–2018)": { engines: ["HEMI 5.7 V8 MDS", "ERB 3.6 V6 Pentastar", "VM44 EcoDiesel 3.0 V6"] },
+    "RAM 1500 DT (2018–н.в.)": { engines: ["HEMI 5.7 V8 eTorque", "ERB 3.6 V6 eTorque", "VM44 EcoDiesel 3.0 V6"] },
+    "Durango WD (2011–н.в.)": { engines: ["ERB 3.6 V6 Pentastar", "HEMI 5.7 V8", "HEMI 6.4 SRT V8"] },
+    "Challenger LC (2008–н.в.)": { engines: ["ERB 3.6 V6 Pentastar", "HEMI 5.7 V8", "HEMI 6.4 V8 SRT", "Hellcat 6.2 SC V8"] },
+    "Charger LD (2011–н.в.)": { engines: ["ERB 3.6 V6 Pentastar", "HEMI 5.7 V8", "HEMI 6.4 V8 SRT", "Hellcat 6.2 SC V8"] },
+    "Journey JC (2011–2020)": { engines: ["ERB 3.6 V6 Pentastar", "ED3 2.4", "VM44 2.0 CRD"] },
+  },
+
+  "Jeep": {
+    "Grand Cherokee WJ (1999–2004)": { engines: ["EKG 4.0 I6", "EVA 3.7 V6", "ERH 4.7 V8", "OM647 2.7 CRD"] },
+    "Grand Cherokee WK (2005–2010)": { engines: ["EKG 4.0 I6", "EVA 3.7 V6", "EZB 5.7 HEMI", "OM642 3.0 CRD"] },
+    "Grand Cherokee WK2 (2010–н.в.)": { engines: ["ERB 3.6 V6 Pentastar", "ESF 5.7 HEMI", "EZH 6.4 SRT", "VM44 3.0 CRD V6"] },
+    "Wrangler TJ (1997–2006)": { engines: ["EKG 4.0 I6", "ERK 2.4 DOHC"] },
+    "Wrangler JK (2007–2018)": { engines: ["ERK 3.8 V6", "ERB 3.6 V6 Pentastar"] },
+    "Wrangler JL (2018–н.в.)": { engines: ["ERB 3.6 V6 Pentastar", "ETJ 2.0T", "VM44 2.2 CRD"] },
+    "Cherokee KL (2013–н.в.)": { engines: ["ED3 2.4 Tigershark", "ETJ 2.0T", "VM44 2.2 CRD"] },
+    "Compass / Patriot MK (2006–2017)": { engines: ["GEMA 2.0 DOHC", "GEMA 2.4 DOHC", "ECN 2.2 CRD"] },
+  },
+
+  "Suzuki": {
+    "Swift II (2004–2010)": { engines: ["M13A 1.3 VVT", "M15A 1.5 VVT", "D13A 1.3 DDiS"] },
+    "Swift III (2010–2017)": { engines: ["K10B 1.0 VVT", "K12B 1.2 VVT", "D13A 1.3 DDiS"] },
+    "Grand Vitara II (2005–2014)": { engines: ["J20A 2.0 VVT", "N32A 2.7 V6", "H27A 2.7 V6", "D19AA 1.9 DDiS"] },
+    "Jimny III (1998–2018)": { engines: ["G13BB 1.3 DOHC", "M13A 1.3 VVT"] },
+    "Jimny IV (2018–н.в.)": { engines: ["K15B 1.5 VVT"] },
+    "Vitara IV (2015–н.в.)": { engines: ["K14B 1.4T", "M16A 1.6", "D16AA 1.6 DDiS"] },
+    "SX4 / S-Cross (2006–н.в.)": { engines: ["M15A 1.5 VVT", "M16A 1.6 VVT", "K14B 1.4T SHVS", "D19AA 1.9 DDiS"] },
+    "Liana (2001–2008)": { engines: ["M13A 1.3 VVT", "M15A 1.5 VVT", "M16A 1.6 VVT"] },
+    "Baleno (2016–н.в.)": { engines: ["K10C 1.0T BoosterJet", "K12C 1.2 DualJet", "K12M 1.2 VVT"] },
+  },
 };
 
 // ── Китайские бренды ─────────────────────────────────────────────
@@ -379,6 +490,14 @@ export const CHINESE_VEHICLE_DATA: VehicleData = {
     "Hover H3 (2010–2014)": { engines: ["4G63S4M 2.0 MT", "GW4G64 2.0 MT"] },
     "Hover H5 (2010–2015)": { engines: ["4G93T 2.0T MT", "GW4D20 2.0d MT 4WD"] },
     "Hover H6 Classic (2011–2017)": { engines: ["4G63S4M 2.0 MT", "GW4C20 2.0T AT"] },
+  },
+
+  "Zeekr": {
+    "001 (2021–н.в.)": { engines: ["BEV RWD 272кВт", "BEV AWD 400кВт"] },
+    "009 (2022–н.в.)": { engines: ["BEV AWD 400кВт"] },
+    "X (2023–н.в.)": { engines: ["BEV FWD 200кВт", "BEV AWD 315кВт"] },
+    "007 (2023–н.в.)": { engines: ["BEV RWD 310кВт", "REEV 1.0T Range Extender"] },
+    "Mix (2024–н.в.)": { engines: ["BEV AWD 400кВт"] },
   },
 
 };
