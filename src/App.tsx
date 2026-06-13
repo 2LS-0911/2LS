@@ -3,8 +3,7 @@ import {
   Wrench, Send, CheckCircle2, ArrowLeft, Moon, Sun,
   MoreVertical, Sparkles, Loader2, KeyRound, CreditCard, Star,
 } from "lucide-react";
-import { getModels, getEngines, CHINESE_BRANDS_LIST } from "./data/vehicleData";
-import { CAR_BRANDS } from "./data/presets";
+import { getModels, getEngines, CHINESE_BRANDS_LIST, VEHICLE_DATA } from "./data/vehicleData";
 import AdminPanel from "./AdminPanel";
 import RepDashboard from "./RepDashboard";
 import StaffPortal from "./StaffPortal";
@@ -771,7 +770,7 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                       </div>
                       <select value={brand} onChange={e => { setBrand(e.target.value); setModel(""); setEngine(""); }} className={fieldCls}>
                         <option value="">Выберите марку...</option>
-                        {(brandCategory === "chinese" ? CHINESE_BRANDS_LIST : CAR_BRANDS).map(b => <option key={b} value={b}>{b}</option>)}
+                        {(brandCategory === "chinese" ? CHINESE_BRANDS_LIST : Object.keys(VEHICLE_DATA)).map(b => <option key={b} value={b}>{b}</option>)}
                       </select>
                     </div>
                     <div className="flex flex-col gap-0.5">
