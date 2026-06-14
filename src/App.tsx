@@ -134,8 +134,11 @@ function DiagApp() {
   const [currentPage, setCurrentPage] = useState(0);
   const [chatError, setChatError] = useState<{ message: string; payload: Record<string, unknown>; retryCount: number } | null>(null);
   const [fallbackUsed, setFallbackUsed] = useState(false);
+  const [chatImage, setChatImage] = useState<{ base64: string; mime: string; name: string } | null>(null);
+  const [imageProcessing, setImageProcessing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Screen 4 — Confirm
   const [aiRating, setAiRating] = useState(0);
@@ -295,7 +298,46 @@ function DiagApp() {
     sessionStorage.removeItem("2ls_session");
     setMessages([]); setInput(""); setLoading(false);
     setChatError(null); setFallbackUsed(false); setNoAnswer(false);
+    setChatImage(null);
     setScreen("code");
+  }
+
+  async function handleImageSelect(file: File) {
+    if (file.size > 10 * 1024 * 1024) {
+      alert("Файл слишком большой. Максимум 10 МБ.");
+      return;
+    }
+    setImageProcessing(true);
+    try {
+      const base64 = await _resizeImage(file);
+      setChatImage({ base64, mime: "image/jpeg", name: file.name });
+      setNoDtc(false);
+    } finally {
+      setImageProcessing(false);
+    }
+  }
+
+  function _resizeImage(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const MAX = 1200;
+        let { width, height } = img;
+        if (width > MAX || height > MAX) {
+          const r = Math.min(MAX / width, MAX / height);
+          width = Math.round(width * r);
+          height = Math.round(height * r);
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width; canvas.height = height;
+        canvas.getContext("2d")!.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/jpeg", 0.85).split(",")[1]);
+      };
+      img.onerror = reject;
+      img.src = url;
+    });
   }
 
   // ── Service code ──────────────────────────────────────────────────
@@ -428,7 +470,11 @@ function DiagApp() {
       dtc_codes: dtcCodes,
       symptoms: symptoms.map(s => SYMPTOM_CHIPS.find(c => c.id === s)?.label || s),
       symptom_text: symptomText,
+      image_base64: chatImage?.base64 || null,
+      image_mime: chatImage?.mime || null,
     };
+    setChatImage(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
 
     try {
       const data = await _sendWithRetry(payload);
@@ -1273,15 +1319,37 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                   </div>
                 )}
 
+                {/* Image preview */}
+                {chatImage && (
+                  <div className={`mx-3 mb-1 flex items-center gap-2 px-2 py-1.5 rounded-xl border ${isDark ? "bg-slate-800 border-slate-700" : "bg-blue-50 border-blue-100"}`}>
+                    <span className="text-base">🖼</span>
+                    <span className={`text-[11px] flex-1 truncate ${isDark ? "text-slate-300" : "text-slate-600"}`}>{chatImage.name}</span>
+                    <button onClick={() => { setChatImage(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}
+                      className="text-slate-400 hover:text-red-400 text-xs px-1">✕</button>
+                  </div>
+                )}
+
+                {/* Hidden file input */}
+                <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/heic"
+                  className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleImageSelect(f); }} />
+
                 {/* Input */}
                 <div className={`px-3 py-3 border-t flex gap-2 items-end shrink-0 ${isDark ? "bg-slate-900 border-slate-800" : "bg-white border-sky-100"}`}>
+                  <button onClick={() => fileInputRef.current?.click()} disabled={loading}
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors shrink-0 border ${
+                      chatImage
+                        ? "bg-blue-500 border-blue-500 text-white"
+                        : isDark ? "bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200" : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
+                    }`} title="Прикрепить изображение">
+                    {imageProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : <span className="text-base">📎</span>}
+                  </button>
                   <textarea ref={inputRef} rows={1} value={input}
                     onChange={e => { setInput(e.target.value); e.target.style.height = "auto"; e.target.style.height = Math.min(e.target.scrollHeight, 100) + "px"; }}
-                    placeholder="Напишите ответ и нажмите →"
+                    placeholder={chatImage ? "Опишите что на изображении..." : "Напишите ответ и нажмите →"}
                     className={`flex-1 px-3 py-2.5 rounded-xl text-xs border outline-none resize-none transition-colors min-h-[40px] max-h-[100px] leading-relaxed ${isDark ? "bg-slate-800 border-slate-700 text-slate-200 focus:border-blue-500 placeholder-slate-500" : "bg-[#f5f9fc] border-sky-100/90 text-slate-800 focus:border-blue-500 placeholder-slate-400"}`}
                   />
-                  <button onClick={sendMessage} disabled={!input.trim() || loading}
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors shrink-0 ${input.trim() && !loading ? "bg-blue-600 hover:bg-blue-700 text-white" : isDark ? "bg-slate-800 text-slate-600" : "bg-slate-200 text-slate-400"}`}>
+                  <button onClick={sendMessage} disabled={(!input.trim() && !chatImage) || loading}
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors shrink-0 ${(input.trim() || chatImage) && !loading ? "bg-blue-600 hover:bg-blue-700 text-white" : isDark ? "bg-slate-800 text-slate-600" : "bg-slate-200 text-slate-400"}`}>
                     <Send className="w-4 h-4" />
                   </button>
                 </div>

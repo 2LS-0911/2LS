@@ -1118,6 +1118,8 @@ class ChatRequest(BaseModel):
     dtc_codes: list[str] = []
     symptoms: list[str] = []
     symptom_text: str = ""
+    image_base64: Optional[str] = None
+    image_mime: Optional[str] = None
 
 class SolveRequest(BaseModel):
     vehicle: Dict[str, Any]
@@ -1364,7 +1366,26 @@ def chat_endpoint(req: ChatRequest):
     llm_msgs = [{"role": "system", "content": system}]
     for m in req.messages:
         llm_msgs.append({"role": m.role, "content": m.content})
-    llm_msgs.append({"role": "user", "content": req.message})
+
+    # Multimodal: if image attached, send as vision message
+    ALLOWED_IMAGE_MIMES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
+    if req.image_base64 and req.image_mime and req.image_mime in ALLOWED_IMAGE_MIMES:
+        system += (
+            "\n\nМеханик прислал изображение. "
+            "Опиши что видишь с точки зрения диагностики. "
+            "Сравни с эталоном если знаешь тип узла (осциллограмма, скриншот сканера, фото детали). "
+            "Вынеси вердикт: норма / отклонение / явная неисправность."
+        )
+        llm_msgs[0]["content"] = system  # update system with image context
+        llm_msgs.append({
+            "role": "user",
+            "content": [
+                {"type": "text", "text": req.message or "Что видишь на изображении? Оцени с точки зрения диагностики."},
+                {"type": "image_url", "image_url": {"url": f"data:{req.image_mime};base64,{req.image_base64}"}},
+            ],
+        })
+    else:
+        llm_msgs.append({"role": "user", "content": req.message})
 
     def _call_llm(model: str) -> str:
         r = requests.post(
