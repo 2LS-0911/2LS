@@ -100,6 +100,8 @@ function DiagApp() {
   const [loading, setLoading] = useState(false);
   const [noAnswer, setNoAnswer] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
+  const [chatError, setChatError] = useState<{ message: string; payload: Record<string, unknown>; retryCount: number } | null>(null);
+  const [fallbackUsed, setFallbackUsed] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -201,6 +203,68 @@ function DiagApp() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
+  // ── Chat helpers ──────────────────────────────────────────────────
+  const RETRY_DELAYS = [3000, 6000, 12000];
+
+  async function _fetchChat(payload: Record<string, unknown>): Promise<{ reply: string; fallback_model?: boolean }> {
+    const controller = new AbortController();
+    const tid = setTimeout(() => controller.abort(), 30_000);
+    try {
+      const res = await fetch(`${API_URL}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      });
+      if (res.status >= 400 && res.status < 500) {
+        const d = await res.json().catch(() => ({}));
+        const err = new Error(d.detail || d.message || `HTTP ${res.status}`) as Error & { noRetry: boolean };
+        err.noRetry = true;
+        throw err;
+      }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } finally {
+      clearTimeout(tid);
+    }
+  }
+
+  async function _sendWithRetry(
+    payload: Record<string, unknown>,
+    attempt = 0
+  ): Promise<{ reply: string; fallback_model?: boolean }> {
+    try {
+      return await _fetchChat(payload);
+    } catch (err: unknown) {
+      const isNoRetry = (err as { noRetry?: boolean }).noRetry;
+      const isAbort = (err as { name?: string }).name === "AbortError";
+      if (isNoRetry || attempt >= RETRY_DELAYS.length) throw err;
+      // AbortError = таймаут 30с — тоже ретрай
+      if (!isAbort && !(err instanceof Error)) throw err;
+      await new Promise(r => setTimeout(r, RETRY_DELAYS[attempt]));
+      return _sendWithRetry(payload, attempt + 1);
+    }
+  }
+
+  function _saveChatSession(msgs: Message[]) {
+    try {
+      sessionStorage.setItem("2ls_session", JSON.stringify({
+        session_id: sessionId,
+        messages: msgs,
+        vehicle: { brand, model, year, engine },
+        dtc_codes: dtcCode ? [dtcCode.toUpperCase()] : [],
+        symptoms,
+      }));
+    } catch { /* quota exceeded — ignore */ }
+  }
+
+  function resetToStart() {
+    sessionStorage.removeItem("2ls_session");
+    setMessages([]); setInput(""); setLoading(false);
+    setChatError(null); setFallbackUsed(false); setNoAnswer(false);
+    setScreen("code");
+  }
+
   // ── Service code ──────────────────────────────────────────────────
   async function fetchCredits(code: string) {
     try {
@@ -278,27 +342,28 @@ function DiagApp() {
     setScreen("chat");
 
     // Immediately get AI first response
+    const initPayload: Record<string, unknown> = {
+      vehicle: { brand, model, year, engine, odometer, vin },
+      messages: [],
+      message: contextMsg,
+      service_code: serviceCode || null,
+      session_id: newSessionId,
+      dtc_codes: dtcPart ? [dtcPart] : [],
+      symptoms: symptomLabels,
+      symptom_text: symptomText,
+    };
+    setChatError(null);
+    setFallbackUsed(false);
     try {
-      const res = await fetch(`${API_URL}/chat`, {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          vehicle: { brand, model, year, engine, odometer, vin }, // Add odometer and vin to vehicle object
-          messages: [],
-          message: contextMsg,
-          service_code: serviceCode || null,
-          session_id: newSessionId,
-          dtc_codes: dtcPart ? [dtcPart] : [],
-          symptoms: symptomLabels,
-          symptom_text: symptomText,
-        }),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
+      const data = await _sendWithRetry(initPayload);
       const reply = stripCaseSummary(data.reply || "Ошибка ответа сервера.");
       if (reply.includes("недостаточно данных") || reply.includes("Свяжитесь с администрацией")) setNoAnswer(true);
-      setMessages([{ role: "user", content: contextMsg }, { role: "assistant", content: reply }]);
+      if (data.fallback_model) setFallbackUsed(true);
+      const finalMsgs: Message[] = [{ role: "user", content: contextMsg }, { role: "assistant", content: reply }];
+      setMessages(finalMsgs);
+      _saveChatSession(finalMsgs);
     } catch {
-      setMessages([{ role: "user", content: contextMsg }, { role: "assistant", content: "Ошибка соединения. Проверьте интернет и попробуйте снова." }]);
+      setChatError({ message: "Не удалось получить ответ. Проверьте интернет.", payload: initPayload, retryCount: 3 });
     } finally {
       setLoading(false);
       setTimeout(() => inputRef.current?.focus(), 100);
@@ -319,33 +384,32 @@ function DiagApp() {
     const updated: Message[] = [...messages, { role: "user", content: userMsg }];
     setMessages(updated);
     setLoading(true);
+    setChatError(null);
+
+    const payload: Record<string, unknown> = {
+      vehicle: { brand, model, year, engine, odometer, vin },
+      messages: updated.slice(1, -1),
+      message: userMsg,
+      service_code: serviceCode || null,
+      session_id: sessionId,
+      dtc_codes: dtcCode ? [dtcCode.toUpperCase()] : [],
+      symptoms: symptoms.map(s => SYMPTOM_CHIPS.find(c => c.id === s)?.label || s),
+      symptom_text: symptomText,
+    };
 
     try {
-      const history = updated.slice(1, -1);
-      const res = await fetch(`${API_URL}/chat`, {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          vehicle: { brand, model, year, engine, odometer, vin }, // Add odometer and vin to vehicle object
-          messages: history,
-          message: userMsg,
-          service_code: serviceCode || null,
-          session_id: sessionId,
-          dtc_codes: dtcCode ? [dtcCode.toUpperCase()] : [],
-          symptoms: symptoms.map(s => SYMPTOM_CHIPS.find(c => c.id === s)?.label || s),
-          symptom_text: symptomText,
-        }),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
+      const data = await _sendWithRetry(payload);
       const reply = stripCaseSummary(data.reply || "Ошибка ответа сервера.");
-
-      // Detect "no answer" response
-      const isNoAnswer = reply.includes("недостаточно данных") || reply.includes("Свяжитесь с администрацией");
-      if (isNoAnswer) setNoAnswer(true);
-
-      setMessages(prev => [...prev, { role: "assistant", content: reply }]);
+      if (reply.includes("недостаточно данных") || reply.includes("Свяжитесь с администрацией")) setNoAnswer(true);
+      if (data.fallback_model) setFallbackUsed(true);
+      const finalMsgs: Message[] = [...updated, { role: "assistant", content: reply }];
+      setMessages(finalMsgs);
+      _saveChatSession(finalMsgs);
     } catch {
-      setMessages(prev => [...prev, { role: "assistant", content: "Ошибка соединения. Проверьте интернет и попробуйте снова." }]);
+      setChatError({ message: "Не удалось отправить. Проверьте интернет.", payload, retryCount: 3 });
+      // Rollback optimistic user message so user can retry
+      setMessages(messages);
+      setInput(userMsg);
     } finally {
       setLoading(false);
       setTimeout(() => inputRef.current?.focus(), 100);
@@ -1076,6 +1140,42 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                   )}
                   <div ref={messagesEndRef} />
                 </div>
+
+                {/* Inline chat error */}
+                {chatError && (
+                  <div className={`mx-3 mb-2 px-3 py-2.5 rounded-2xl border flex items-center gap-3 shrink-0 ${isDark ? "bg-red-900/20 border-red-800/50 text-red-300" : "bg-red-50 border-red-200 text-red-700"}`}>
+                    <span className="text-sm shrink-0">⚠</span>
+                    <span className="text-[11px] flex-1">{chatError.message}</span>
+                    <div className="flex gap-2 shrink-0">
+                      <button onClick={async () => {
+                        setChatError(null);
+                        setLoading(true);
+                        try {
+                          const data = await _sendWithRetry(chatError.payload);
+                          const reply = stripCaseSummary(data.reply || "Ошибка ответа сервера.");
+                          if (data.fallback_model) setFallbackUsed(true);
+                          const finalMsgs: Message[] = [...messages, { role: "assistant", content: reply }];
+                          setMessages(finalMsgs);
+                          _saveChatSession(finalMsgs);
+                        } catch {
+                          setChatError(prev => prev ? { ...prev, retryCount: (prev.retryCount || 0) + 1 } : null);
+                        } finally { setLoading(false); }
+                      }} className={`text-[11px] font-bold px-2 py-1 rounded-lg ${isDark ? "bg-red-800/40 hover:bg-red-800/60" : "bg-red-100 hover:bg-red-200"}`}>
+                        Повторить
+                      </button>
+                      <button onClick={resetToStart} className={`text-[11px] font-bold px-2 py-1 rounded-lg ${isDark ? "bg-slate-800 hover:bg-slate-700 text-slate-300" : "bg-slate-100 hover:bg-slate-200 text-slate-600"}`}>
+                        Новая
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Fallback model notice */}
+                {fallbackUsed && !chatError && (
+                  <div className={`mx-3 mb-1 text-center text-[10px] ${isDark ? "text-slate-500" : "text-slate-400"}`}>
+                    резервная модель
+                  </div>
+                )}
 
                 {/* Input */}
                 <div className={`px-3 py-3 border-t flex gap-2 items-end shrink-0 ${isDark ? "bg-slate-900 border-slate-800" : "bg-white border-sky-100"}`}>

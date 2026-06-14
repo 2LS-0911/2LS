@@ -35,6 +35,7 @@ VECTOR_INDEX = "Diagnostik"
 
 # Модель для синтеза — gemini-2.0-flash-001 дешёвая и хорошо работает с русским
 LLM_MODEL = "google/gemini-2.5-pro"
+LLM_FALLBACK_MODEL = "deepseek/deepseek-chat"
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 logging.basicConfig(level=logging.INFO)
@@ -1241,27 +1242,36 @@ def chat_endpoint(req: ChatRequest):
         llm_msgs.append({"role": m.role, "content": m.content})
     llm_msgs.append({"role": "user", "content": req.message})
 
-    try:
-        resp = requests.post(
+    def _call_llm(model: str) -> str:
+        r = requests.post(
             OPENROUTER_URL,
             headers={
                 "Authorization": f"Bearer {OPENROUTER_API_KEY}",
                 "Content-Type": "application/json",
                 "HTTP-Referer": "https://2ls.app",
             },
-            json={
-                "model": LLM_MODEL,
-                "messages": llm_msgs,
-                "temperature": 0.3,
-                "max_tokens": 4000,
-            },
-            timeout=120,
+            json={"model": model, "messages": llm_msgs, "temperature": 0.3, "max_tokens": 4000},
+            timeout=90,
         )
-        resp.raise_for_status()
-        reply = resp.json()["choices"][0]["message"]["content"].strip()
+        r.raise_for_status()
+        return r.json()["choices"][0]["message"]["content"].strip()
+
+    fallback_model = False
+    try:
+        reply = _call_llm(LLM_MODEL)
     except Exception as e:
-        logger.error(f"Chat LLM error: {type(e).__name__}: {e}")
-        raise HTTPException(status_code=502, detail="Ошибка LLM. Попробуйте снова.")
+        logger.warning(f"Primary LLM error ({LLM_MODEL}): {type(e).__name__}: {e}. Trying fallback.")
+        try:
+            reply = _call_llm(LLM_FALLBACK_MODEL)
+            fallback_model = True
+        except Exception as e2:
+            logger.error(f"Fallback LLM error ({LLM_FALLBACK_MODEL}): {type(e2).__name__}: {e2}")
+            from fastapi.responses import JSONResponse
+            return JSONResponse(
+                status_code=503,
+                content={"error": True, "error_type": "llm_unavailable",
+                         "message": "Сервис временно недоступен, попробуйте через несколько секунд"},
+            )
 
     # Strip internal tier marker from displayed reply
     reply_clean = re.sub(r"\[TIER:[^\]]+\]\s*\n?", "", reply).strip()
@@ -1295,7 +1305,7 @@ def chat_endpoint(req: ChatRequest):
         except Exception as e:
             logger.warning(f"Session update error (non-critical): {e}")
 
-    return {"reply": reply_clean}
+    return {"reply": reply_clean, "fallback_model": fallback_model}
 
 
 # ── AI Conclusion Generation ─────────────────────────────────────────
