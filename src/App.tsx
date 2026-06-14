@@ -1327,7 +1327,7 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                   {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
                   Сохранить кейс
                 </button>
-                <p className={`text-center text-[10px] ${isDark ? "text-slate-500" : "text-slate-400"}`}>* Укажите причину чтобы сохранить</p>
+                {!rootCause.trim() && <p className={`text-center text-[10px] ${isDark ? "text-slate-500" : "text-slate-400"}`}>* Укажите причину чтобы сохранить</p>}
               </div>
             )}
 
