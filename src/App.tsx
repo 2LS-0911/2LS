@@ -48,6 +48,35 @@ const TOOL_CHIPS = [
   "Манометр топлива", "Дымогенератор",
 ];
 
+const DTC_SUGGESTIONS: { code: string; desc: string }[] = [
+  { code: "P0300", desc: "Случайные пропуски воспламенения" },
+  { code: "P0301", desc: "Пропуск воспламенения, цилиндр 1" },
+  { code: "P0302", desc: "Пропуск воспламенения, цилиндр 2" },
+  { code: "P0303", desc: "Пропуск воспламенения, цилиндр 3" },
+  { code: "P0304", desc: "Пропуск воспламенения, цилиндр 4" },
+  { code: "P0171", desc: "Бедная смесь, банк 1" },
+  { code: "P0172", desc: "Богатая смесь, банк 1" },
+  { code: "P0420", desc: "Эффективность катализатора ниже нормы, банк 1" },
+  { code: "P0335", desc: "Цепь датчика положения коленвала (ДПКВ)" },
+  { code: "P0340", desc: "Цепь датчика положения распредвала (ДПРВ)" },
+  { code: "P0130", desc: "Датчик O2, банк 1, датчик 1 — сигнал" },
+  { code: "P0136", desc: "Датчик O2, банк 1, датчик 2 — сигнал" },
+  { code: "P0102", desc: "ДМРВ — низкий сигнал" },
+  { code: "P0103", desc: "ДМРВ — высокий сигнал" },
+  { code: "P0113", desc: "Датчик температуры воздуха (ДТВ) — высокий сигнал" },
+  { code: "P0116", desc: "Датчик температуры охлаждающей жидкости (ДТОЖ) — диапазон" },
+  { code: "P0400", desc: "Система рециркуляции отработавших газов (EGR)" },
+  { code: "P0440", desc: "Система контроля испарений топлива (EVAP)" },
+  { code: "P0500", desc: "Датчик скорости автомобиля" },
+  { code: "P0601", desc: "Внутренняя ошибка ЭБУ — контрольная сумма" },
+  { code: "U0100", desc: "Нет связи с ЭБУ двигателя" },
+  { code: "U0155", desc: "Нет связи с панелью приборов" },
+  { code: "B1000", desc: "Ошибка блока управления SRS (подушки безопасности)" },
+  { code: "C0035", desc: "Датчик скорости переднего левого колеса (ABS)" },
+];
+
+const DTC_REGEX = /^[PpBbCcUu]\d{4}$/;
+
 function getRouteFromURL() {
   const p = new URLSearchParams(window.location.search);
   if (p.get("panel") === "staff") return { type: "staff" as const };
@@ -88,7 +117,10 @@ function DiagApp() {
   const [vin, setVin] = useState(""); // Add VIN state
 
   // Screen 2 — Problem
-  const [dtcCode, setDtcCode] = useState("");
+  const [dtcCodes, setDtcCodes] = useState<string[]>([]);
+  const [dtcInput, setDtcInput] = useState("");
+  const [dtcError, setDtcError] = useState("");
+  const [dtcDropdown, setDtcDropdown] = useState(false);
   const [noDtc, setNoDtc] = useState(false);
   const [symptoms, setSymptoms] = useState<string[]>([]);
   const [symptomText, setSymptomText] = useState("");
@@ -145,7 +177,8 @@ function DiagApp() {
         if (state.engine) setEngine(state.engine);
         if (state.vin) setVin(state.vin);
         if (state.odometer) setOdometer(state.odometer);
-        if (state.dtcCode) setDtcCode(state.dtcCode);
+        if (state.dtcCodes) setDtcCodes(state.dtcCodes);
+        else if (state.dtcCode) setDtcCodes([state.dtcCode]); // backward compat
         if (state.noDtc !== undefined) setNoDtc(state.noDtc);
         if (state.symptoms) setSymptoms(state.symptoms);
         if (state.symptomText) setSymptomText(state.symptomText);
@@ -172,7 +205,7 @@ function DiagApp() {
     if (screen === "code") return; // Don't persist on login screen
     const state = {
       screen, brandCategory, brand, model, year, engine, vin, odometer,
-      dtcCode, noDtc, symptoms, symptomText,
+      dtcCodes, noDtc, symptoms, symptomText,
       messages, sessionId, noAnswer,
       rootCause, aiRating, toolsUsed, refValue,
       clientName, clientPhone, clientCar, laborHours, laborRate, reportNote,
@@ -181,7 +214,7 @@ function DiagApp() {
     localStorage.setItem(PERSIST_KEY, JSON.stringify(state));
   }, [
     screen, brandCategory, brand, model, year, engine, vin, odometer,
-    dtcCode, noDtc, symptoms, symptomText,
+    dtcCodes, noDtc, symptoms, symptomText,
     messages, sessionId, noAnswer,
     rootCause, aiRating, toolsUsed, refValue,
     clientName, clientPhone, clientCar, laborHours, laborRate, reportNote,
@@ -252,7 +285,7 @@ function DiagApp() {
         session_id: sessionId,
         messages: msgs,
         vehicle: { brand, model, year, engine },
-        dtc_codes: dtcCode ? [dtcCode.toUpperCase()] : [],
+        dtc_codes: dtcCodes,
         symptoms,
       }));
     } catch { /* quota exceeded — ignore */ }
@@ -324,12 +357,12 @@ function DiagApp() {
     }
 
     // Build context summary (shown as first user "message" to AI)
-    const dtcPart = dtcCode ? dtcCode.toUpperCase() : "";
+    const dtcPart = dtcCodes.length > 0 ? dtcCodes.join(", ") : "";
     const symptomLabels = symptoms.map(s => SYMPTOM_CHIPS.find(c => c.id === s)?.label || s);
 
     let contextMsg = `Автомобиль: ${brand} ${model} ${year}г., двигатель ${engine || "не указан"}.`;
-    if (odometer) contextMsg += ` Пробег: ${odometer} км.`; // Add odometer to context message
-    if (dtcPart) contextMsg += ` Код ошибки: ${dtcPart}.`;
+    if (odometer) contextMsg += ` Пробег: ${odometer} км.`;
+    if (dtcPart) contextMsg += ` ${dtcCodes.length > 1 ? "Коды ошибок" : "Код ошибки"}: ${dtcPart}.`;
     else contextMsg += ` Кодов ошибок нет.`;
     if (symptomLabels.length > 0) contextMsg += ` Симптомы: ${symptomLabels.join(", ")}.`;
     if (symptomText.trim()) contextMsg += ` ${symptomText.trim()}`;
@@ -348,7 +381,7 @@ function DiagApp() {
       message: contextMsg,
       service_code: serviceCode || null,
       session_id: newSessionId,
-      dtc_codes: dtcPart ? [dtcPart] : [],
+      dtc_codes: dtcCodes,
       symptoms: symptomLabels,
       symptom_text: symptomText,
     };
@@ -392,7 +425,7 @@ function DiagApp() {
       message: userMsg,
       service_code: serviceCode || null,
       session_id: sessionId,
-      dtc_codes: dtcCode ? [dtcCode.toUpperCase()] : [],
+      dtc_codes: dtcCodes,
       symptoms: symptoms.map(s => SYMPTOM_CHIPS.find(c => c.id === s)?.label || s),
       symptom_text: symptomText,
     };
@@ -450,7 +483,7 @@ function DiagApp() {
           messages,
           service_code: serviceCode || null,
           session_id: sessionId,
-          dtc_codes: dtcCode ? [dtcCode.toUpperCase()] : [],
+          dtc_codes: dtcCodes,
           symptoms: symptoms.map(s => SYMPTOM_CHIPS.find(c => c.id === s)?.label || s),
           symptom_text: symptomText,
           root_cause: rootCause,
@@ -640,7 +673,7 @@ function DiagApp() {
 
 <div class="section">
   <div class="section-title">Жалоба</div>
-  ${dtcCode ? `<div class="row"><span class="label">Код ошибки</span><span class="value"><span class="dtc-badge">${dtcCode}</span></span></div>` : ""}
+  ${dtcCodes.length > 0 ? `<div class="row"><span class="label">${dtcCodes.length > 1 ? "Коды ошибок" : "Код ошибки"}</span><span class="value">${dtcCodes.map(c => `<span class="dtc-badge">${c}</span>`).join(" ")}</span></div>` : ""}
   ${symptomList ? `<div class="row"><span class="label">Симптомы</span><div class="chips">${symptoms.map(s => `<span class="chip">${stripEmojis(SYMPTOM_CHIPS.find(c => c.id === s)?.label || s)}</span>`).join("")}</div></div>` : ""}
   ${symptomText ? `<div class="row"><span class="label">Описание</span><span class="value">${symptomText}</span></div>` : ""}
 </div>
@@ -742,7 +775,7 @@ ${recommendedWorks.length > 0 ? `<div class="section">
     setScreen("form");
     setMessages([]); setInput(""); setSessionId(null);
     setBrandCategory("regular"); setBrand(""); setModel(""); setYear("2020"); setEngine("");
-    setDtcCode(""); setNoDtc(false); setSymptoms([]); setSymptomText("");
+    setDtcCodes([]); setDtcInput(""); setDtcError(""); setNoDtc(false); setSymptoms([]); setSymptomText("");
     setNoAnswer(false);
     setOdometer(""); setVin(""); setRecommendedWorks([]); setAiConclusion("");
     setLaborRate("");
@@ -817,7 +850,7 @@ ${recommendedWorks.length > 0 ? `<div class="section">
 
   const canGoBack = screen === "problem" || screen === "form";
 
-  const problemReady = (dtcCode.trim() || noDtc) && (symptoms.length > 0 || symptomText.trim());
+  const problemReady = (dtcCodes.length > 0 || noDtc) && (symptoms.length > 0 || symptomText.trim());
 
   // ── UI ────────────────────────────────────────────────────────────
   return (
@@ -988,23 +1021,83 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                   </span>
                 </div>
 
-                {/* DTC — компактная строка */}
-                <div className={`px-3 py-2 rounded-2xl border ${isDark ? "bg-slate-900/40 border-slate-800/80" : "bg-white border-sky-100 shadow-sm"}`}>
-                  <div className="flex gap-2 items-center">
-                    <span className="text-[10px] font-bold uppercase text-slate-400 shrink-0">DTC</span>
-                    <input
-                      type="text"
-                      placeholder="P0420"
-                      value={dtcCode}
-                      onChange={e => { setDtcCode(e.target.value.toUpperCase()); if (e.target.value) setNoDtc(false); }}
-                      disabled={noDtc}
-                      className={`${fieldCls} font-mono flex-1 h-9 ${noDtc ? "opacity-40" : ""}`}
-                    />
+                {/* DTC — chips input */}
+                <div className={`px-3 py-2.5 rounded-2xl border ${isDark ? "bg-slate-900/40 border-slate-800/80" : "bg-white border-sky-100 shadow-sm"}`}>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[10px] font-bold uppercase text-slate-400">Коды ошибок DTC</span>
                     <button
-                      onClick={() => { setNoDtc(v => !v); if (!noDtc) setDtcCode(""); }}
-                      className={`shrink-0 px-2.5 py-1.5 rounded-xl text-[11px] font-bold border transition-colors ${noDtc ? (isDark ? "bg-slate-700 border-slate-600 text-white" : "bg-slate-200 border-slate-300 text-slate-700") : (isDark ? "bg-slate-800 border-slate-700 text-slate-400" : "bg-white border-slate-200 text-slate-500")}`}
+                      onClick={() => { setNoDtc(v => !v); if (!noDtc) { setDtcCodes([]); setDtcInput(""); setDtcError(""); } }}
+                      className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-colors ${noDtc ? (isDark ? "bg-slate-700 border-slate-600 text-white" : "bg-slate-200 border-slate-300 text-slate-700") : (isDark ? "bg-slate-800 border-slate-700 text-slate-400" : "bg-white border-slate-200 text-slate-500")}`}
                     >Нет кода</button>
                   </div>
+
+                  {/* Chips */}
+                  {dtcCodes.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {dtcCodes.map(code => (
+                        <span key={code} className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-mono font-bold ${isDark ? "bg-amber-500/20 text-amber-400" : "bg-amber-50 text-amber-700 border border-amber-200"}`}>
+                          {code}
+                          <button onClick={() => setDtcCodes(prev => prev.filter(c => c !== code))} className="opacity-60 hover:opacity-100 ml-0.5">✕</button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Input + dropdown */}
+                  {!noDtc && (
+                    <div className="relative">
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          placeholder="P0420 и Enter"
+                          value={dtcInput}
+                          disabled={noDtc}
+                          onChange={e => {
+                            const v = e.target.value.toUpperCase();
+                            setDtcInput(v);
+                            setDtcError("");
+                            setDtcDropdown(v.length >= 2);
+                          }}
+                          onKeyDown={e => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              const v = dtcInput.trim().toUpperCase();
+                              if (!v) return;
+                              if (!DTC_REGEX.test(v)) { setDtcError("Формат: P0302, B1234, C0100, U0001"); return; }
+                              if (!dtcCodes.includes(v)) setDtcCodes(prev => [...prev, v]);
+                              setDtcInput(""); setDtcError(""); setDtcDropdown(false);
+                            }
+                          }}
+                          onBlur={() => setTimeout(() => setDtcDropdown(false), 150)}
+                          className={`${fieldCls} font-mono flex-1 h-9`}
+                        />
+                        <button onClick={() => {
+                          const v = dtcInput.trim().toUpperCase();
+                          if (!v) return;
+                          if (!DTC_REGEX.test(v)) { setDtcError("Формат: P0302, B1234, C0100, U0001"); return; }
+                          if (!dtcCodes.includes(v)) setDtcCodes(prev => [...prev, v]);
+                          setDtcInput(""); setDtcError(""); setDtcDropdown(false);
+                        }} className={`px-3 h-9 rounded-xl text-sm font-bold border transition-colors shrink-0 ${isDark ? "bg-slate-700 border-slate-600 text-white hover:bg-slate-600" : "bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200"}`}>+</button>
+                      </div>
+
+                      {/* Dropdown suggestions */}
+                      {dtcDropdown && (
+                        <div className={`absolute z-20 left-0 right-0 top-full mt-1 rounded-xl border shadow-lg overflow-hidden max-h-40 overflow-y-auto ${isDark ? "bg-slate-800 border-slate-700" : "bg-white border-slate-200"}`}>
+                          {DTC_SUGGESTIONS.filter(s => s.code.startsWith(dtcInput.toUpperCase())).slice(0, 6).map(s => (
+                            <button key={s.code} onMouseDown={() => {
+                              if (!dtcCodes.includes(s.code)) setDtcCodes(prev => [...prev, s.code]);
+                              setDtcInput(""); setDtcError(""); setDtcDropdown(false);
+                            }} className={`w-full px-3 py-2 text-left flex gap-2 items-baseline hover:bg-blue-50 dark:hover:bg-slate-700 ${isDark ? "text-slate-200" : "text-slate-800"}`}>
+                              <span className="font-mono font-bold text-[11px] shrink-0 text-amber-600">{s.code}</span>
+                              <span className="text-[11px] text-slate-500 truncate">{s.desc}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {dtcError && <p className="text-[10px] text-red-400 mt-1">{dtcError}</p>}
                   {noDtc && <p className="text-[10px] text-amber-500 mt-1">⚠️ Без кода — описание симптомов особенно важно</p>}
                 </div>
 
@@ -1055,8 +1148,11 @@ ${recommendedWorks.length > 0 ? `<div class="section">
               <div className="flex flex-col flex-1 overflow-hidden">
                 {/* Sub-header */}
                 <div className={`px-4 py-2 border-b flex items-center justify-between shrink-0 ${isDark ? "bg-slate-900/60 border-slate-800" : "bg-white/80 border-sky-100 shadow-sm"}`}>
-                  <div className="flex items-center gap-2 min-w-0">
-                    {dtcCode && <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded ${isDark ? "bg-amber-500/20 text-amber-400" : "bg-amber-50 text-amber-700"}`}>{dtcCode}</span>}
+                  <div className="flex items-center gap-2 min-w-0 overflow-hidden">
+                    {dtcCodes.slice(0, 2).map(c => (
+                      <span key={c} className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded shrink-0 ${isDark ? "bg-amber-500/20 text-amber-400" : "bg-amber-50 text-amber-700"}`}>{c}</span>
+                    ))}
+                    {dtcCodes.length > 2 && <span className={`text-[10px] shrink-0 ${isDark ? "text-amber-500" : "text-amber-600"}`}>+{dtcCodes.length - 2}</span>}
                     {symptoms.slice(0, 2).map(s => (
                       <span key={s} className={`text-[10px] px-2 py-0.5 rounded ${isDark ? "bg-slate-800 text-slate-400" : "bg-slate-100 text-slate-500"}`}>
                         {SYMPTOM_CHIPS.find(c => c.id === s)?.label}
@@ -1209,10 +1305,14 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                       <span className="text-[10px] text-slate-400 w-20 shrink-0 pt-0.5">Автомобиль</span>
                       <span className={`text-xs font-bold ${isDark ? "text-slate-200" : "text-slate-700"}`}>{brand} {model} {year}г. · {engine || "—"}</span>
                     </div>
-                    {dtcCode && (
+                    {dtcCodes.length > 0 && (
                       <div className="flex items-start gap-2">
-                        <span className="text-[10px] text-slate-400 w-20 shrink-0 pt-0.5">DTC-код</span>
-                        <span className={`text-xs font-mono font-bold px-2 py-0.5 rounded ${isDark ? "bg-amber-500/20 text-amber-400" : "bg-amber-50 text-amber-700"}`}>{dtcCode}</span>
+                        <span className="text-[10px] text-slate-400 w-20 shrink-0 pt-0.5">{dtcCodes.length > 1 ? "DTC-коды" : "DTC-код"}</span>
+                        <div className="flex flex-wrap gap-1">
+                          {dtcCodes.map(c => (
+                            <span key={c} className={`text-xs font-mono font-bold px-2 py-0.5 rounded ${isDark ? "bg-amber-500/20 text-amber-400" : "bg-amber-50 text-amber-700"}`}>{c}</span>
+                          ))}
+                        </div>
                       </div>
                     )}
                     {symptoms.length > 0 && (
