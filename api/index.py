@@ -1495,6 +1495,45 @@ def solve_endpoint(req: SolveRequest):
         col.insert_one(case_doc)
         case_doc.pop("_id", None)
 
+        # P2: Списываем кредит при закрытии решённого кейса (не при старте сессии)
+        credit_charged = False
+        if service_id and not req.no_answer:
+            try:
+                result = _get_services_col().update_one(
+                    {"service_id": service_id, "credits": {"$gte": 1}},
+                    {"$inc": {"credits": -1, "solved_cases": 1},
+                     "$set": {"last_activity": datetime.utcnow().isoformat()}}
+                )
+                credit_charged = result.modified_count > 0
+                if credit_charged:
+                    # Логируем транзакцию списания
+                    _get_txn_col().insert_one({
+                        "txn_id": _make_id("txn_"),
+                        "service_id": service_id,
+                        "type": "charge",
+                        "credits_delta": -1,
+                        "case_id": case_id,
+                        "session_id": req.session_id,
+                        "created_at": datetime.utcnow().isoformat(),
+                    })
+            except Exception as e:
+                logger.warning(f"Credit charge error (non-critical): {e}")
+        elif service_id and req.no_answer:
+            # no_answer — кредит не списывается, фиксируем release в транзакциях
+            try:
+                _get_txn_col().insert_one({
+                    "txn_id": _make_id("txn_"),
+                    "service_id": service_id,
+                    "type": "release",
+                    "credits_delta": 0,
+                    "case_id": case_id,
+                    "session_id": req.session_id,
+                    "note": "no_answer — credit not charged",
+                    "created_at": datetime.utcnow().isoformat(),
+                })
+            except Exception as e:
+                logger.warning(f"Credit release log error (non-critical): {e}")
+
         # Закрываем сессию
         if req.session_id:
             try:
@@ -1503,21 +1542,12 @@ def solve_endpoint(req: SolveRequest):
                     {"$set": {
                         "status": "no_answer" if req.no_answer else "solved",
                         "case_id": case_id,
+                        "credit_hold": "released" if req.no_answer else ("charged" if credit_charged else "pending"),
                         "closed_at": datetime.utcnow().isoformat(),
                     }}
                 )
             except Exception as e:
                 logger.warning(f"Session close error (non-critical): {e}")
-
-        # Обновляем статистику сервиса
-        if service_id and not req.no_answer:
-            try:
-                _get_services_col().update_one(
-                    {"service_id": service_id},
-                    {"$inc": {"solved_cases": 1}, "$set": {"last_activity": datetime.utcnow().isoformat()}}
-                )
-            except Exception as e:
-                logger.warning(f"Service stats update error (non-critical): {e}")
 
         # Авто-атомизация в фоне (только успешные кейсы)
         if not req.no_answer:
@@ -1920,10 +1950,49 @@ def rep_dashboard(token: str):
     services = list(_get_services_col().find({"rep_id": rep["telegram_id"]}, {"_id": 0}).sort("created_at", -1))
     txns = list(_get_txn_col().find({"rep_id": rep["telegram_id"]}, {"_id": 0}).sort("created_at", -1).limit(20))
 
+    # Маркируем брошенные при каждой загрузке дашборда (lazy gc)
+    try:
+        from datetime import timedelta
+        cutoff = (datetime.utcnow() - timedelta(hours=24)).isoformat()
+        _get_sessions_col().update_many(
+            {"status": "active", "created_at": {"$lt": cutoff}},
+            {"$set": {"status": "abandoned", "updated_at": datetime.utcnow().isoformat()}}
+        )
+    except Exception:
+        pass
+
+    # Брошенные/подозрительные сессии по сервисам этого представителя
+    service_ids = [s["service_id"] for s in services]
+    suspicious = []
+    if service_ids:
+        try:
+            # abandoned + active > 2 часов (потенциально незакрытые)
+            from datetime import timedelta
+            cutoff_2h = (datetime.utcnow() - timedelta(hours=2)).isoformat()
+            raw = list(_get_sessions_col().find(
+                {
+                    "service_id": {"$in": service_ids},
+                    "$or": [
+                        {"status": "abandoned"},
+                        {"status": "active", "created_at": {"$lt": cutoff_2h}},
+                    ]
+                },
+                {"_id": 0, "session_id": 1, "service_id": 1, "status": 1,
+                 "credit_hold": 1, "created_at": 1, "updated_at": 1, "vehicle": 1}
+            ).sort("created_at", -1).limit(100))
+            # Обогащаем именем сервиса
+            svc_map = {s["service_id"]: s["name"] for s in services}
+            for sess in raw:
+                sess["service_name"] = svc_map.get(sess["service_id"], sess["service_id"])
+            suspicious = raw
+        except Exception as e:
+            logger.warning(f"Rep suspicious sessions error: {e}")
+
     return {
         "rep": rep,
         "services": services,
         "recent_transactions": txns,
+        "suspicious_sessions": suspicious,
     }
 
 
@@ -1945,7 +2014,8 @@ def get_service_credits(code: str):
 
 @app.post("/api/session/start")
 def session_start(req: StartSessionRequest):
-    """Списывает 1 кредит при старте диагностики. Возвращает session_id."""
+    """Резервирует кредит (hold) при старте диагностики. Списание — только при закрытии кейса.
+    Не решили — не платите."""
     col = _get_services_col()
     svc = col.find_one({"service_id": req.service_code}, {"_id": 0})
     if not svc:
@@ -1955,15 +2025,14 @@ def session_start(req: StartSessionRequest):
     if svc.get("credits", 0) < 1:
         raise HTTPException(status_code=402, detail="Недостаточно кредитов. Свяжитесь с администрацией.")
 
-    # Атомарно списываем кредит и увеличиваем счётчик сессий
+    # Только увеличиваем счётчик сессий; кредит НЕ списываем — только при solve
     col.update_one(
-        {"service_id": req.service_code, "credits": {"$gte": 1}},
-        {"$inc": {"credits": -1, "total_sessions": 1}}
+        {"service_id": req.service_code},
+        {"$inc": {"total_sessions": 1}}
     )
 
     session_id = _make_id("sess_", 10)
 
-    # Логируем сессию с первого момента — брошенные сессии = сигнал слабости скилла
     try:
         _get_sessions_col().insert_one({
             "session_id": session_id,
@@ -1973,13 +2042,15 @@ def session_start(req: StartSessionRequest):
             "messages": [],
             "rag_trace": [],
             "status": "active",
+            "credit_hold": "pending",  # pending → charged | released
             "created_at": datetime.utcnow().isoformat(),
             "updated_at": datetime.utcnow().isoformat(),
         })
     except Exception as e:
         logger.warning(f"Session create error (non-critical): {e}")
 
-    return {"session_id": session_id, "credits_remaining": svc["credits"] - 1}
+    # Возвращаем актуальный баланс без изменений — кредит не списан
+    return {"session_id": session_id, "credits_remaining": svc["credits"]}
 
 
 # ── Manager: черновики атомов (atoms_draft) ────────────────────────
@@ -2116,7 +2187,23 @@ def manager_reject_draft(draft_id: str, reason: str = ""):
     return {"ok": True, "draft_id": draft_id}
 
 
-# ── Sessions: аналитика ────────────────────────────────────────────
+# ── Sessions: аналитика и контроль брошенных ─────────────────────
+
+@app.post("/api/sessions/mark_abandoned")
+def mark_abandoned_sessions(threshold_hours: int = 24):
+    """Помечает как abandoned сессии, активные > threshold_hours без закрытия.
+    Вызывается автоматически из rep/dashboard и manager/sessions при загрузке."""
+    from datetime import timedelta
+    cutoff = (datetime.utcnow() - timedelta(hours=threshold_hours)).isoformat()
+    try:
+        result = _get_sessions_col().update_many(
+            {"status": "active", "created_at": {"$lt": cutoff}},
+            {"$set": {"status": "abandoned", "updated_at": datetime.utcnow().isoformat()}}
+        )
+        return {"marked": result.modified_count}
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=str(e))
+
 
 @app.get("/api/manager/sessions")
 def manager_sessions(status: str = "active", limit: int = 50):

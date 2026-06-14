@@ -38,6 +38,8 @@ const SYMPTOM_CHIPS = [
   { id: "stalls_wet",       label: "🌧️ Глохнет в дождь/после мойки" },
   { id: "can_multiblock",   label: "📡 Несколько блоков по CAN" },
   { id: "battery_lamp",     label: "🔋 Лампа АКБ горит" },
+  { id: "spark_black_track", label: "⚡ Чёрная дорожка на свече" },
+  { id: "stall_coasting",   label: "⬇️ Глохнет при сбросе газа" },
 ];
 
 const TOOL_CHIPS = [
@@ -120,8 +122,9 @@ function DiagApp() {
   const [clientPhone, setClientPhone] = useState("");
   const [clientCar, setClientCar] = useState("");
   const [laborHours, setLaborHours] = useState("");
+  const [laborRate, setLaborRate] = useState("");
   const [reportNote, setReportNote] = useState("");
-  const [odometer, setOdometer] = useState(""); // Add odometer state
+  const [odometer, setOdometer] = useState("");
 
   useEffect(() => {
     const tg = (window as any).Telegram?.WebApp;
@@ -155,6 +158,7 @@ function DiagApp() {
         if (state.clientPhone) setClientPhone(state.clientPhone);
         if (state.clientCar) setClientCar(state.clientCar);
         if (state.laborHours) setLaborHours(state.laborHours);
+        if (state.laborRate) setLaborRate(state.laborRate);
         if (state.reportNote) setReportNote(state.reportNote);
         if (state.recommendedWorks) setRecommendedWorks(state.recommendedWorks);
       }
@@ -169,7 +173,7 @@ function DiagApp() {
       dtcCode, noDtc, symptoms, symptomText,
       messages, sessionId, noAnswer,
       rootCause, aiRating, toolsUsed, refValue,
-      clientName, clientPhone, clientCar, laborHours, reportNote,
+      clientName, clientPhone, clientCar, laborHours, laborRate, reportNote,
       recommendedWorks
     };
     localStorage.setItem(PERSIST_KEY, JSON.stringify(state));
@@ -178,7 +182,7 @@ function DiagApp() {
     dtcCode, noDtc, symptoms, symptomText,
     messages, sessionId, noAnswer,
     rootCause, aiRating, toolsUsed, refValue,
-    clientName, clientPhone, clientCar, laborHours, reportNote,
+    clientName, clientPhone, clientCar, laborHours, laborRate, reportNote,
     recommendedWorks
   ]);
 
@@ -351,8 +355,9 @@ function DiagApp() {
   // ── Screen 3 → 4 ─────────────────────────────────────────────────
   function goToConfirm() {
     setAiRating(0); setRootCause(""); setToolsUsed([]); setRefValue("");
-    setClientName(""); setClientPhone(""); setClientCar(`${brand} ${model} ${year}`); setLaborHours("");
-    setReportNote(rootCause); // Pre-fill reportNote with rootCause if available
+    setClientName(""); setClientPhone(""); setClientCar(`${brand} ${model}`);
+    setLaborHours(""); // keep laborRate — mechanic likely reuses same rate
+    setReportNote("");
     setScreen("confirm");
   }
 
@@ -399,8 +404,10 @@ function DiagApp() {
       // Populate reportNote from case_doc
       const fetchedCaseDoc = data.case_doc;
       if (fetchedCaseDoc) {
-        const solution = fetchedCaseDoc.case_summary?.solution || fetchedCaseDoc.root_cause;
-        if (solution) {
+        // Only fill recommendation from case_summary.solution if mechanic left it empty.
+        // Never use root_cause as recommendation fallback — they are different fields.
+        const solution = fetchedCaseDoc.case_summary?.solution;
+        if (solution && !reportNote.trim()) {
           setReportNote(solution);
         }
 
@@ -454,8 +461,9 @@ function DiagApp() {
 
     } catch (e) {
       console.error("Error saving case:", e);
-      // Optional: show user an error message
     }
+    // Refresh credit balance — charge happens at solve, not at session start
+    if (serviceCode) fetchCredits(serviceCode);
     setScreen("solved");
     setSaving(false);
   }
@@ -463,6 +471,10 @@ function DiagApp() {
   function generatePDF() {
     const date = new Date().toLocaleDateString("ru-RU", { day: "2-digit", month: "long", year: "numeric" });
     const time = new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+
+    const parsedLaborHours = parseFloat(laborHours) || 0;
+    const parsedLaborRate = parseFloat(laborRate) || 0;
+    const laborCost = parsedLaborHours > 0 && parsedLaborRate > 0 ? parsedLaborHours * parsedLaborRate : 0;
 
     // Generate Act Number: 2LS-YYYYMMDD-HHMMSS-RANDOM
     const now = new Date();
@@ -479,7 +491,8 @@ function DiagApp() {
     const stripEmojis = (str: string) => str.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}]/gu, '');
 
     const symptomList = symptoms.map(s => SYMPTOM_CHIPS.find(c => c.id === s)?.label || s).join(", ");
-    const finalAiConclusion = aiConclusion || ([...messages].reverse().find(m => m.role === "assistant")?.content || "");
+    // Use only LLM-generated formal conclusion; never fall back to raw chat messages in official documents.
+    const finalAiConclusion = aiConclusion || "";
 
     const html = `<!DOCTYPE html>
 <html lang="ru">
@@ -582,8 +595,13 @@ ${finalAiConclusion ? `<div class="section">
 </div>` : ""}
 
 <div class="grid2" style="margin-bottom:22px;">
-  ${laborHours ? `<div class="info-box"><div class="ib-label">Трудоёмкость</div><div class="ib-value">${laborHours} н/ч</div></div>` : ""}
-  ${toolsUsed.length > 0 ? `<div class="info-box"><div class="ib-label">Использованы</div><div class="ib-value" style="font-size:12px;">${toolsUsed.join(", ")}</div></div>` : ""}
+  <div class="info-box">
+    <div class="ib-label">Трудоёмкость</div>
+    <div class="ib-value">${laborHours ? `${laborHours} н/ч` : "—"}</div>
+    ${parsedLaborRate > 0 ? `<div style="font-size:11px;color:#64748b;margin-top:3px;">Ставка: ${parsedLaborRate.toLocaleString("ru-RU")} ₽/н/ч</div>` : ""}
+    ${laborCost > 0 ? `<div style="font-size:13px;font-weight:700;color:#0088cc;margin-top:4px;">Стоимость работ: ${laborCost.toLocaleString("ru-RU")} ₽</div>` : ""}
+  </div>
+  <div class="info-box"><div class="ib-label">Использованы</div><div class="ib-value" style="font-size:12px;">${toolsUsed.length > 0 ? toolsUsed.join(", ") : "—"}</div></div>
 </div>
 
 ${recommendedWorks.length > 0 ? `<div class="section">
@@ -610,10 +628,16 @@ ${recommendedWorks.length > 0 ? `<div class="section">
       `).join("")}
     </tbody>
     <tfoot>
-      ${totalWorksPrice > 0 ? `
+      ${laborCost > 0 ? `
+      <tr style="background:#f0f9ff;">
+        <td colspan="3" style="text-align:left; padding: 8px; border: 1px solid #e2e8f0; font-size:12px; font-weight:600; color:#0369a1;">Диагностика / работа: ${parsedLaborHours} н/ч × ${parsedLaborRate.toLocaleString("ru-RU")} ₽</td>
+        <td colspan="2" style="text-align:right; padding: 8px; border: 1px solid #e2e8f0; font-size:13px; font-weight:700; color:#0088cc;">${laborCost.toLocaleString("ru-RU")} ₽</td>
+      </tr>
+      ` : ''}
+      ${(totalWorksPrice + laborCost) > 0 ? `
       <tr>
         <td colspan="4" style="text-align:right; padding: 8px; border: 1px solid #e2e8f0; font-size:12px; font-weight:bold;">Итого, предварительно:</td>
-        <td style="text-align:right; padding: 8px; border: 1px solid #e2e8f0; font-size:14px; font-weight:bold; color:#0088cc;">${totalWorksPrice.toLocaleString()} ₽</td>
+        <td style="text-align:right; padding: 8px; border: 1px solid #e2e8f0; font-size:14px; font-weight:bold; color:#0088cc;">${(totalWorksPrice + laborCost).toLocaleString("ru-RU")} ₽</td>
       </tr>
       ` : ''}
     </tfoot>
@@ -657,6 +681,7 @@ ${recommendedWorks.length > 0 ? `<div class="section">
     setDtcCode(""); setNoDtc(false); setSymptoms([]); setSymptomText("");
     setNoAnswer(false);
     setOdometer(""); setVin(""); setRecommendedWorks([]); setAiConclusion("");
+    setLaborRate("");
     setClientExplanation(""); setRepairMemo("");
     setCurrentPage(0);
     if (serviceCode) fetchCredits(serviceCode);
@@ -950,9 +975,14 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                       : "bg-slate-400 text-slate-200 cursor-not-allowed opacity-60"}`}>
                   <Sparkles className="w-4 h-4" /> Начать диагностику
                 </button>
-                <p className={`text-center text-[10px] ${isDark ? "text-slate-500" : "text-slate-400"}`}>
-                  Укажите DTC-код или выберите хотя бы один симптом
-                </p>
+                <div className="flex flex-col items-center gap-0.5">
+                  <p className={`text-center text-[10px] ${isDark ? "text-slate-500" : "text-slate-400"}`}>
+                    Укажите DTC-код или выберите хотя бы один симптом
+                  </p>
+                  <p className={`text-center text-[10px] font-semibold ${isDark ? "text-emerald-500" : "text-emerald-600"}`}>
+                    Не решили — не платите
+                  </p>
+                </div>
               </div>
             )}
 
@@ -1181,13 +1211,27 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                         value={clientCar} onChange={e => setClientCar(e.target.value)}
                         className={fieldCls} />
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-3 gap-2">
                       <div className="flex flex-col gap-1">
                         <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">Нормачасы</label>
-                        <input type="text" placeholder="2 н/ч"
+                        <input type="number" min="0" step="0.5" placeholder="2"
                           value={laborHours} onChange={e => setLaborHours(e.target.value)}
                           className={fieldCls} />
                       </div>
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">Ставка ₽/н/ч</label>
+                        <input type="number" min="0" placeholder="1500"
+                          value={laborRate} onChange={e => setLaborRate(e.target.value)}
+                          className={fieldCls} />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">Стоимость работ</label>
+                        <input type="text" readOnly
+                          value={laborHours && laborRate ? `${(parseFloat(laborHours) * parseFloat(laborRate)).toLocaleString("ru-RU")} ₽` : ""}
+                          className={`${fieldCls} opacity-70`} />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 gap-2">
                       <div className="flex flex-col gap-1">
                         <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">Рекомендация</label>
                         <input type="text" placeholder="Замена катализатора"
@@ -1255,11 +1299,21 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                     className={`w-full py-2 mt-2 rounded-xl text-xs font-bold border transition-colors ${isDark ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700" : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"}`}>
                     + Добавить работу
                   </button>
-                  {totalWorksPrice > 0 && (
+                  {(totalWorksPrice + (parseFloat(laborHours) || 0) * (parseFloat(laborRate) || 0)) > 0 && (
                     <div className={`mt-4 pt-3 border-t ${isDark ? "border-slate-700" : "border-slate-200"}`}>
+                      {laborHours && laborRate && (
+                        <div className="flex justify-between items-center mb-1">
+                          <span className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                            Работы: {laborHours} н/ч × {parseFloat(laborRate).toLocaleString("ru-RU")} ₽
+                          </span>
+                          <span className="text-sm font-bold text-blue-400">{((parseFloat(laborHours) || 0) * (parseFloat(laborRate) || 0)).toLocaleString("ru-RU")} ₽</span>
+                        </div>
+                      )}
                       <div className="flex justify-between items-center">
                         <span className="text-sm font-bold uppercase tracking-wider">Итого, предварительно:</span>
-                        <span className="text-lg font-extrabold text-blue-500">{totalWorksPrice.toLocaleString()} ₽</span>
+                        <span className="text-lg font-extrabold text-blue-500">
+                          {(totalWorksPrice + (parseFloat(laborHours) || 0) * (parseFloat(laborRate) || 0)).toLocaleString("ru-RU")} ₽
+                        </span>
                       </div>
                     </div>
                   )}

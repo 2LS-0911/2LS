@@ -15,6 +15,11 @@ interface Transaction {
   txn_id: string; service_name: string; amount_rub: number;
   credits_added: number; rep_commission_rub: number; notes: string; created_at: string;
 }
+interface SuspiciousSession {
+  session_id: string; service_id: string; service_name: string;
+  status: string; credit_hold: string; created_at: string;
+  vehicle?: { brand?: string; model?: string; year?: string };
+}
 
 const C = {
   bg: "#f8fafc", surface: "#ffffff", border: "#e2e8f0",
@@ -30,6 +35,7 @@ export default function RepDashboard({ repToken }: { repToken: string }) {
   const [rep, setRep] = useState<Rep | null>(null);
   const [services, setServices] = useState<Service[]>([]);
   const [txns, setTxns] = useState<Transaction[]>([]);
+  const [suspicious, setSuspicious] = useState<SuspiciousSession[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -37,7 +43,12 @@ export default function RepDashboard({ repToken }: { repToken: string }) {
     setLoading(true);
     fetch(`${API}/api/rep/dashboard?token=${repToken}`)
       .then(r => { if (!r.ok) throw new Error("Неверная ссылка или токен истёк"); return r.json(); })
-      .then(data => { setRep(data.rep); setServices(data.services); setTxns(data.recent_transactions); })
+      .then(data => {
+        setRep(data.rep);
+        setServices(data.services);
+        setTxns(data.recent_transactions);
+        setSuspicious(data.suspicious_sessions || []);
+      })
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
   }, [repToken]);
@@ -146,6 +157,51 @@ export default function RepDashboard({ repToken }: { repToken: string }) {
             </div>
           )}
         </div>
+
+        {/* Suspicious / abandoned sessions */}
+        {suspicious.length > 0 && (
+          <div style={{ ...card, border: `1px solid #fde68a`, background: "#fffbeb" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+              <span style={{ fontSize: 20 }}>⚠️</span>
+              <div>
+                <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: C.amber }}>Сессии без закрытия — проверьте</h3>
+                <div style={{ fontSize: 12, color: C.textSub, marginTop: 2 }}>
+                  Сессии, открытые механиком, но не завершённые. Кредит не списан. Убедитесь, что это не злоупотребление.
+                </div>
+              </div>
+            </div>
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead><tr>
+                  <th style={{ ...th, borderBottom: `2px solid #fde68a` }}>Дата открытия</th>
+                  <th style={{ ...th, borderBottom: `2px solid #fde68a` }}>Сервис</th>
+                  <th style={{ ...th, borderBottom: `2px solid #fde68a` }}>Авто</th>
+                  <th style={{ ...th, borderBottom: `2px solid #fde68a` }}>Статус</th>
+                  <th style={{ ...th, borderBottom: `2px solid #fde68a` }}>Кредит</th>
+                </tr></thead>
+                <tbody>{suspicious.map(s => {
+                  const vehicleStr = s.vehicle
+                    ? [s.vehicle.brand, s.vehicle.model, s.vehicle.year].filter(Boolean).join(" ") || "—"
+                    : "—";
+                  const isAbandoned = s.status === "abandoned";
+                  return (
+                    <tr key={s.session_id} onMouseEnter={e => (e.currentTarget.style.background = "#fef9c3")} onMouseLeave={e => (e.currentTarget.style.background = "")}>
+                      <td style={{ ...td, fontSize: 12, color: C.textSub }}>{new Date(s.created_at).toLocaleString("ru-RU")}</td>
+                      <td style={{ ...td, fontWeight: 600 }}>{s.service_name}</td>
+                      <td style={{ ...td, color: C.textSub }}>{vehicleStr}</td>
+                      <td style={td}>
+                        <span style={{ background: isAbandoned ? "#fee2e2" : "#fef9c3", color: isAbandoned ? C.red : C.amber, padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 600 }}>
+                          {isAbandoned ? "брошена" : "активна >2ч"}
+                        </span>
+                      </td>
+                      <td style={{ ...td, color: C.textSub, fontSize: 12 }}>{s.credit_hold || "—"}</td>
+                    </tr>
+                  );
+                })}</tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
         {/* Transactions */}
         {txns.length > 0 && (
