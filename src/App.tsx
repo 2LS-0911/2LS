@@ -99,6 +99,7 @@ export default function App() {
 function DiagApp() {
   const [theme, setTheme] = useState<"dark" | "light">("light");
   const [isDesktop, setIsDesktop] = useState(() => window.innerWidth >= 768);
+  const [desktopForced, setDesktopForced] = useState(false);
   const [screen, setScreen] = useState<Screen>("code");
 
   // Service
@@ -165,14 +166,27 @@ function DiagApp() {
   const [odometer, setOdometer] = useState("");
 
   useEffect(() => {
-    const handleResize = () => setIsDesktop(window.innerWidth >= 768);
+    const handleResize = () => { if (!desktopForced) setIsDesktop(window.innerWidth >= 768); };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  }, [desktopForced]);
+
+  useEffect(() => {
+    if (desktopForced) setIsDesktop(true);
+  }, [desktopForced]);
 
   useEffect(() => {
     const tg = (window as any).Telegram?.WebApp;
-    if (tg) { tg.ready(); tg.expand(); if (tg.colorScheme === "dark") setTheme("dark"); }
+    if (tg) {
+      tg.ready();
+      tg.expand();
+      if (tg.colorScheme === "dark") setTheme("dark");
+      // На десктопных платформах Telegram — включить десктопный вид
+      const desktopPlatforms = ["tdesktop", "macos", "web", "weba", "webk"];
+      if (desktopPlatforms.includes(tg.platform)) setDesktopForced(true);
+      // Запросить полноэкранный режим (Telegram 8.0+)
+      try { tg.requestFullscreen?.(); } catch {}
+    }
 
     // Load persisted state
     try {
@@ -962,7 +976,15 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                 className={`p-1 rounded-md border flex items-center justify-center transition-colors ${isDark ? "bg-slate-800 border-slate-700/50 text-amber-400" : "bg-white/10 border-white/20 text-yellow-300"}`}>
                 {isDark ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
               </button>
-              <MoreVertical className="w-4 h-4 cursor-pointer opacity-60" />
+              <button
+                onClick={() => {
+                  if (isDesktop) { setIsDesktop(false); setDesktopForced(false); }
+                  else { setIsDesktop(true); setDesktopForced(true); }
+                }}
+                title={isDesktop ? "Мобильный вид" : "Десктопный вид"}
+                className={`p-1 rounded-md border flex items-center justify-center transition-colors text-[13px] ${isDark ? "bg-slate-800 border-slate-700/50 text-slate-300 hover:text-white" : "bg-white/10 border-white/20 text-white/80 hover:text-white"}`}>
+                {isDesktop ? "📱" : "🖥"}
+              </button>
             </div>
           </div>
 
