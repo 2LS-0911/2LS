@@ -1743,6 +1743,26 @@ def manager_approve(case_id: str):
         raise HTTPException(status_code=503, detail=str(e))
 
 
+@app.delete("/api/manager/case/{case_id}")
+def manager_delete_case(case_id: str, key: str = ""):
+    _verify_admin(key)
+    try:
+        col = _get_cases_col()
+        result = col.delete_one({"case_id": case_id})
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Кейс не найден")
+        # Also remove related draft atom if exists
+        try:
+            _get_db()["atoms_draft"].delete_one({"source_case_id": case_id})
+        except Exception:
+            pass
+        return {"ok": True, "case_id": case_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=str(e))
+
+
 # ══════════════════════════════════════════════════════════════════
 #  BUSINESS LAYER: Services / Representatives / Credits
 # ══════════════════════════════════════════════════════════════════

@@ -221,6 +221,14 @@ export default function AdminPanel({ adminKey }: { adminKey: string }) {
     finally { setLoading(false); }
   }
 
+  async function deleteCase(caseId: string) {
+    if (!confirm("Удалить кейс безвозвратно?")) return;
+    setLoading(true); setError("");
+    try { await call(`${API}/api/manager/case/${caseId}?key=${adminKey}`, "DELETE"); loadTab("cases", true); }
+    catch (e: unknown) { setError(e instanceof Error ? e.message : String(e)); }
+    finally { setLoading(false); }
+  }
+
   // ── Tabs config ───────────────────────────────────────────────────────────
   const tabs = [
     { id: "stats", label: "Статистика", icon: "📊" },
@@ -537,7 +545,12 @@ export default function AdminPanel({ adminKey }: { adminKey: string }) {
                         <td style={{ ...S.td, maxWidth: 240 }}><div style={{ fontSize: 12, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.root_cause || "—"}</div></td>
                         <td style={S.td}><span style={{ color: C.amber, fontWeight: 700 }}>{"★".repeat(Math.max(0, c.ai_rating || 0))}</span></td>
                         <td style={{ ...S.td, color: C.textMuted, fontSize: 12 }}>{new Date(c.created_at).toLocaleDateString("ru-RU")}</td>
-                        <td style={S.td}><button style={S.btnSm("success")} onClick={() => approveCase(c.case_id)} disabled={loading}>✓ Одобрить</button></td>
+                        <td style={S.td}>
+                          <div style={{ display: "flex", gap: 6 }}>
+                            <button style={S.btnSm("success")} onClick={() => approveCase(c.case_id)} disabled={loading}>✓ Одобрить</button>
+                            <button style={S.btnSm("danger")} onClick={() => deleteCase(c.case_id)} disabled={loading}>🗑 Удалить</button>
+                          </div>
+                        </td>
                       </tr>
                     ))}</tbody>
                   </table>
