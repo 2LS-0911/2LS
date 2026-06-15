@@ -181,11 +181,24 @@ function DiagApp() {
       tg.ready();
       tg.expand();
       if (tg.colorScheme === "dark") setTheme("dark");
-      // На десктопных платформах Telegram — включить десктопный вид
       const desktopPlatforms = ["tdesktop", "macos", "web", "weba", "webk"];
       if (desktopPlatforms.includes(tg.platform)) setDesktopForced(true);
-      // Запросить полноэкранный режим (Telegram 8.0+)
       try { tg.requestFullscreen?.(); } catch {}
+
+      // Пишем viewport и safe-area через JS API (работает на всех версиях Telegram)
+      const applyViewport = () => {
+        const root = document.documentElement;
+        if (tg.viewportHeight) root.style.setProperty("--tg-viewport-height", `${tg.viewportHeight}px`);
+        const sa  = tg.safeAreaInset        || {};
+        const csa = tg.contentSafeAreaInset || {};
+        // contentSafeAreaInset.top = статусбар + хедер Telegram (кнопки ✕ ↗ ⋮)
+        root.style.setProperty("--app-top-inset",    `${csa.top    ?? sa.top    ?? 0}px`);
+        root.style.setProperty("--app-bottom-inset", `${sa.bottom  ?? 0}px`);
+      };
+      tg.onEvent?.("viewportChanged",        applyViewport);
+      tg.onEvent?.("safeAreaChanged",        applyViewport);
+      tg.onEvent?.("contentSafeAreaChanged", applyViewport);
+      applyViewport();
     }
 
     // Load persisted state
@@ -929,8 +942,8 @@ ${recommendedWorks.length > 0 ? `<div class="section">
       className={`font-sans transition-colors duration-300 flex flex-col overflow-hidden ${isDark ? "bg-slate-950 text-slate-100" : "bg-[#f0f6fc] text-slate-900"}`}
       style={{
         height: "var(--tg-viewport-height, 100dvh)",
-        paddingTop: "var(--tg-safe-area-inset-top, env(safe-area-inset-top, 0px))",
-        paddingBottom: "var(--tg-safe-area-inset-bottom, env(safe-area-inset-bottom, 0px))",
+        paddingTop: "var(--app-top-inset, env(safe-area-inset-top, 0px))",
+        paddingBottom: "var(--app-bottom-inset, env(safe-area-inset-bottom, 0px))",
       }}
     >
       <div className={`flex-1 flex flex-col overflow-hidden ${isDesktop ? "max-w-4xl mx-auto w-full" : "w-full"}`}>
@@ -979,34 +992,43 @@ ${recommendedWorks.length > 0 ? `<div class="section">
 
             {/* ══ SCREEN: CODE ══ */}
             {screen === "code" && (
-              <div className={`flex-1 flex flex-col px-4 ${isDesktop ? "max-w-xl mx-auto w-full" : ""}`}>
-                {/* Центрированный контент */}
-                <div className="flex-1 flex flex-col items-center justify-center gap-5">
-                  <div className="text-center">
-                    <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${isDark ? "bg-blue-500/10 border border-blue-500/20" : "bg-blue-50 border border-blue-100"}`}>
-                      <KeyRound className={`w-8 h-8 ${isDark ? "text-blue-400" : "text-blue-600"}`} />
-                    </div>
-                    <h2 className={`text-base font-extrabold mb-1 ${isDark ? "text-white" : "text-slate-800"}`}>Код вашего сервиса</h2>
-                    <p className={`text-xs leading-relaxed ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                      Введите код, выданный вашему автосервису администратором 2LS
-                    </p>
+              <div className={`flex-1 flex flex-col justify-between px-5 py-5 ${isDesktop ? "max-w-xl mx-auto w-full" : ""}`}>
+
+                {/* Зона 1 — брендинг (верх) */}
+                <div className="flex flex-col items-center gap-3 pt-2">
+                  <div className={`w-20 h-20 rounded-3xl flex items-center justify-center shadow-xl ${isDark ? "bg-blue-600 shadow-blue-900/50" : "bg-blue-600 shadow-blue-300/60"}`}>
+                    <Wrench className="w-10 h-10 text-white" />
                   </div>
-                  <div className={`w-full p-4 rounded-3xl border ${isDark ? "bg-slate-900/40 border-slate-800/80" : "bg-white border-sky-100 shadow-sm"}`}>
+                  <div className="text-center">
+                    <div className={`text-3xl font-black tracking-tight ${isDark ? "text-white" : "text-slate-900"}`}>2LS</div>
+                    <div className={`text-sm font-medium mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>AI-диагностика автомобилей</div>
+                  </div>
+                </div>
+
+                {/* Зона 2 — поле ввода (центр) */}
+                <div className="flex flex-col gap-3">
+                  <div className={`p-4 rounded-2xl border ${isDark ? "bg-slate-900/60 border-slate-700" : "bg-white border-sky-100 shadow-md shadow-sky-100/80"}`}>
+                    <label className={`text-[10px] uppercase font-bold tracking-widest mb-2 block ${isDark ? "text-slate-500" : "text-slate-400"}`}>Код сервиса</label>
                     <input type="text" placeholder="svc_xxxxxxxx" value={serviceCodeInput}
                       onChange={e => setServiceCodeInput(e.target.value)}
                       onKeyDown={e => e.key === "Enter" && submitServiceCode()}
-                      className={`${fieldCls} font-mono text-sm`} />
-                    {codeError && <p className="mt-2 text-xs text-red-400">{codeError}</p>}
+                      className={`${fieldCls} font-mono text-base tracking-wider`} />
+                    {codeError && <p className="mt-2 text-xs text-red-400 font-medium">{codeError}</p>}
                   </div>
+                  <p className={`text-center text-[11px] leading-relaxed ${isDark ? "text-slate-500" : "text-slate-400"}`}>
+                    Код выдаётся вашему автосервису администратором 2LS
+                  </p>
                 </div>
-                {/* Кнопка прижата к низу */}
-                <div className="pb-6 pt-3">
+
+                {/* Зона 3 — кнопка (низ) */}
+                <div className="pb-2">
                   <button onClick={submitServiceCode} disabled={codeLoading || !serviceCodeInput.trim()}
-                    className="w-full py-4 font-extrabold text-[15px] rounded-2xl flex items-center justify-center gap-2.5 h-14 uppercase tracking-wider bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-40">
+                    className="w-full h-14 font-extrabold text-[15px] rounded-2xl flex items-center justify-center gap-2.5 uppercase tracking-wider bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white disabled:opacity-40 shadow-lg shadow-blue-500/30 transition-all">
                     {codeLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <KeyRound className="w-5 h-5" />}
-                    Войти
+                    Войти в сервис
                   </button>
                 </div>
+
               </div>
             )}
 
