@@ -229,6 +229,22 @@ export default function AdminPanel({ adminKey }: { adminKey: string }) {
     finally { setLoading(false); }
   }
 
+  async function deleteTxn(txnId: string) {
+    if (!confirm("Удалить транзакцию?")) return;
+    setLoading(true); setError("");
+    try { await call(`${API}/api/admin/transaction/${txnId}?key=${adminKey}`, "DELETE"); loadTab("txns", true); }
+    catch (e: unknown) { setError(e instanceof Error ? e.message : String(e)); }
+    finally { setLoading(false); }
+  }
+
+  async function deleteZeroTxns() {
+    if (!confirm("Удалить все нулевые транзакции (0 ₽, 0 кредитов)?")) return;
+    setLoading(true); setError("");
+    try { await call(`${API}/api/admin/transactions/zero?key=${adminKey}`, "DELETE"); loadTab("txns", true); }
+    catch (e: unknown) { setError(e instanceof Error ? e.message : String(e)); }
+    finally { setLoading(false); }
+  }
+
   // ── Tabs config ───────────────────────────────────────────────────────────
   const tabs = [
     { id: "stats", label: "Статистика", icon: "📊" },
@@ -563,18 +579,29 @@ export default function AdminPanel({ adminKey }: { adminKey: string }) {
         {tab === "txns" && (
           loading && txns.length === 0 ? <Spinner /> :
           <div style={S.card}>
-            <h3 style={{ margin: "0 0 14px", fontSize: 14, fontWeight: 700, color: C.text }}>Транзакции ({txns.length})</h3>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+              <h3 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: C.text }}>Транзакции ({txns.length})</h3>
+              {txns.some(t => (t.amount_rub || 0) <= 0 && (t.credits_added || 0) <= 0) && (
+                <button style={S.btnSm("danger")} onClick={deleteZeroTxns} disabled={loading}>
+                  🗑 Удалить все нулевые
+                </button>
+              )}
+            </div>
             <div style={{ overflowX: "auto" }}>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead><tr>{["Дата", "Сервис", "Кредиты", "Сумма", "Комиссия", "Примечание"].map(h => <th key={h} style={S.th}>{h}</th>)}</tr></thead>
+                <thead><tr>{["Дата", "Сервис", "Кредиты", "Сумма", "Комиссия", "Примечание", ""].map(h => <th key={h} style={S.th}>{h}</th>)}</tr></thead>
                 <tbody>{txns.map(t => (
-                  <tr key={t.txn_id} onMouseEnter={e => (e.currentTarget.style.background = C.bg)} onMouseLeave={e => (e.currentTarget.style.background = "")}>
+                  <tr key={t.txn_id}
+                    style={{ background: (t.amount_rub || 0) <= 0 && (t.credits_added || 0) <= 0 ? (C.redBg || "#fff1f2") : "" }}
+                    onMouseEnter={e => (e.currentTarget.style.background = C.bg)}
+                    onMouseLeave={e => (e.currentTarget.style.background = (t.amount_rub || 0) <= 0 && (t.credits_added || 0) <= 0 ? (C.redBg || "#fff1f2") : "")}>
                     <td style={{ ...S.td, color: C.textSub, fontSize: 12 }}>{new Date(t.created_at).toLocaleString("ru-RU")}</td>
                     <td style={{ ...S.td, fontWeight: 600 }}>{t.service_name}</td>
                     <td style={{ ...S.td, color: C.green, fontWeight: 700 }}>+{t.credits_added}</td>
                     <td style={S.td}>{(t.amount_rub || 0).toLocaleString("ru-RU")} ₽</td>
                     <td style={{ ...S.td, color: C.amber, fontWeight: t.rep_commission_rub > 0 ? 700 : 400 }}>{(t.rep_commission_rub || 0).toLocaleString("ru-RU")} ₽</td>
                     <td style={{ ...S.td, color: C.textSub }}>{t.notes || "—"}</td>
+                    <td style={S.td}><button style={S.btnSm("danger")} onClick={() => deleteTxn(t.txn_id)} disabled={loading}>🗑</button></td>
                   </tr>
                 ))}</tbody>
               </table>

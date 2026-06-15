@@ -2114,6 +2114,23 @@ def admin_transactions(key: str, limit: int = 100):
     return {"transactions": txns, "total": len(txns)}
 
 
+@app.delete("/api/admin/transaction/{txn_id}")
+def admin_delete_transaction(txn_id: str, key: str = ""):
+    _verify_admin(key)
+    result = _get_txn_col().delete_one({"txn_id": txn_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Транзакция не найдена")
+    return {"ok": True, "txn_id": txn_id}
+
+
+@app.delete("/api/admin/transactions/zero")
+def admin_delete_zero_transactions(key: str = ""):
+    """Удалить все транзакции с нулевой суммой и нулевыми кредитами."""
+    _verify_admin(key)
+    result = _get_txn_col().delete_many({"amount_rub": {"$lte": 0}, "credits_added": {"$lte": 0}})
+    return {"ok": True, "deleted": result.deleted_count}
+
+
 # ── Дашборд представителя ─────────────────────────────────────────
 
 @app.get("/api/rep/dashboard")
