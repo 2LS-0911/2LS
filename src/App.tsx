@@ -925,7 +925,14 @@ ${recommendedWorks.length > 0 ? `<div class="section">
 
   // ── UI ────────────────────────────────────────────────────────────
   return (
-    <div className={`font-sans transition-colors duration-300 flex flex-col h-screen overflow-hidden ${isDark ? "bg-slate-950 text-slate-100" : "bg-[#f0f6fc] text-slate-900"}`}>
+    <div
+      className={`font-sans transition-colors duration-300 flex flex-col overflow-hidden ${isDark ? "bg-slate-950 text-slate-100" : "bg-[#f0f6fc] text-slate-900"}`}
+      style={{
+        height: "var(--tg-viewport-height, 100dvh)",
+        paddingTop: "var(--tg-safe-area-inset-top, env(safe-area-inset-top, 0px))",
+        paddingBottom: "var(--tg-safe-area-inset-bottom, env(safe-area-inset-bottom, 0px))",
+      }}
+    >
       <div className={`flex-1 flex flex-col overflow-hidden ${isDesktop ? "max-w-4xl mx-auto w-full" : "w-full"}`}>
         <div className={`flex-1 flex flex-col overflow-hidden ${isDark ? "bg-slate-950" : "bg-[#f0f6fc]"}`}
         >
@@ -972,109 +979,118 @@ ${recommendedWorks.length > 0 ? `<div class="section">
 
             {/* ══ SCREEN: CODE ══ */}
             {screen === "code" && (
-              <div className={`flex-1 overflow-y-auto px-4 py-6 flex flex-col gap-4 ${isDesktop ? "max-w-xl mx-auto w-full" : ""}`}>
-                <div className="text-center py-4">
-                  <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${isDark ? "bg-blue-500/10 border border-blue-500/20" : "bg-blue-50 border border-blue-100"}`}>
-                    <KeyRound className={`w-8 h-8 ${isDark ? "text-blue-400" : "text-blue-600"}`} />
+              <div className={`flex-1 flex flex-col px-4 ${isDesktop ? "max-w-xl mx-auto w-full" : ""}`}>
+                {/* Центрированный контент */}
+                <div className="flex-1 flex flex-col items-center justify-center gap-5">
+                  <div className="text-center">
+                    <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${isDark ? "bg-blue-500/10 border border-blue-500/20" : "bg-blue-50 border border-blue-100"}`}>
+                      <KeyRound className={`w-8 h-8 ${isDark ? "text-blue-400" : "text-blue-600"}`} />
+                    </div>
+                    <h2 className={`text-base font-extrabold mb-1 ${isDark ? "text-white" : "text-slate-800"}`}>Код вашего сервиса</h2>
+                    <p className={`text-xs leading-relaxed ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                      Введите код, выданный вашему автосервису администратором 2LS
+                    </p>
                   </div>
-                  <h2 className={`text-base font-extrabold mb-1 ${isDark ? "text-white" : "text-slate-800"}`}>Код вашего сервиса</h2>
-                  <p className={`text-xs leading-relaxed ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                    Введите код, выданный вашему автосервису администратором 2LS
-                  </p>
+                  <div className={`w-full p-4 rounded-3xl border ${isDark ? "bg-slate-900/40 border-slate-800/80" : "bg-white border-sky-100 shadow-sm"}`}>
+                    <input type="text" placeholder="svc_xxxxxxxx" value={serviceCodeInput}
+                      onChange={e => setServiceCodeInput(e.target.value)}
+                      onKeyDown={e => e.key === "Enter" && submitServiceCode()}
+                      className={`${fieldCls} font-mono text-sm`} />
+                    {codeError && <p className="mt-2 text-xs text-red-400">{codeError}</p>}
+                  </div>
                 </div>
-                <div className={`p-4 rounded-3xl border ${isDark ? "bg-slate-900/40 border-slate-800/80" : "bg-white border-sky-100 shadow-sm"}`}>
-                  <input type="text" placeholder="svc_xxxxxxxx" value={serviceCodeInput}
-                    onChange={e => setServiceCodeInput(e.target.value)}
-                    onKeyDown={e => e.key === "Enter" && submitServiceCode()}
-                    className={`${fieldCls} font-mono text-sm`} />
-                  {codeError && <p className="mt-2 text-xs text-red-400">{codeError}</p>}
+                {/* Кнопка прижата к низу */}
+                <div className="pb-6 pt-3">
+                  <button onClick={submitServiceCode} disabled={codeLoading || !serviceCodeInput.trim()}
+                    className="w-full py-4 font-extrabold text-[15px] rounded-2xl flex items-center justify-center gap-2.5 h-14 uppercase tracking-wider bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-40">
+                    {codeLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <KeyRound className="w-5 h-5" />}
+                    Войти
+                  </button>
                 </div>
-                <button onClick={submitServiceCode} disabled={codeLoading || !serviceCodeInput.trim()}
-                  className="w-full py-4 font-extrabold text-[15px] rounded-2xl flex items-center justify-center gap-2.5 h-14 uppercase tracking-wider bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-40">
-                  {codeLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <KeyRound className="w-5 h-5" />}
-                  Войти
-                </button>
               </div>
             )}
 
             {/* ══ SCREEN: FORM (vehicle) ══ */}
             {screen === "form" && (
-              <div className={`flex-1 overflow-y-auto px-4 pt-2 pb-4 flex flex-col gap-2 ${isDesktop ? "max-w-xl mx-auto w-full" : ""}`}>
-
-                {credits !== null && (
-                  <div className={`flex items-center justify-between px-3 py-1.5 rounded-xl text-[10px] ${credits > 0 ? (isDark ? "bg-emerald-500/5 border border-emerald-500/20 text-emerald-400" : "bg-emerald-50 border border-emerald-100 text-emerald-700") : "bg-red-500/5 border border-red-500/20 text-red-400"}`}>
-                    <div className="flex items-center gap-1.5"><CreditCard className="w-3 h-3" /><span className="font-semibold truncate max-w-[140px]">{serviceName || serviceCode}</span></div>
-                    <span className="font-bold shrink-0">{credits > 0 ? `${credits} кр.` : "Кредиты закончились"}</span>
-                  </div>
-                )}
-
-                <div className={`p-3 rounded-3xl border ${isDark ? "bg-slate-900/40 border-slate-800/80" : "bg-white border-sky-100 shadow-sm"}`}>
-                  <div className="flex flex-col gap-2">
-                    <div className="flex flex-col gap-0.5">
-                      <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">Марка *</label>
-                      <div className={`flex rounded-xl border overflow-hidden text-xs font-semibold mb-0.5 ${isDark ? "border-slate-700" : "border-slate-200"}`}>
-                        <button type="button" onClick={() => { setBrandCategory("regular"); setBrand(""); setModel(""); setEngine(""); }}
-                          className={`flex-1 py-1.5 transition-colors ${brandCategory === "regular" ? (isDark ? "bg-emerald-600 text-white" : "bg-blue-600 text-white") : (isDark ? "bg-slate-800 text-slate-400" : "bg-slate-50 text-slate-500")}`}>Обычные</button>
-                        <button type="button" onClick={() => { setBrandCategory("chinese"); setBrand(""); setModel(""); setEngine(""); }}
-                          className={`flex-1 py-1.5 transition-colors ${brandCategory === "chinese" ? "bg-red-500 text-white" : (isDark ? "bg-slate-800 text-slate-400" : "bg-slate-50 text-slate-500")}`}>🇨🇳 Китайские</button>
-                      </div>
-                      <select value={brand} onChange={e => { setBrand(e.target.value); setModel(""); setEngine(""); }} className={fieldCls}>
-                        <option value="">Выберите марку...</option>
-                        {(brandCategory === "chinese" ? CHINESE_BRANDS_LIST : Object.keys(VEHICLE_DATA)).map(b => <option key={b} value={b}>{b}</option>)}
-                      </select>
+              <div className={`flex-1 flex flex-col overflow-hidden px-4 ${isDesktop ? "max-w-xl mx-auto w-full" : ""}`}>
+                {/* Скроллируемая область формы */}
+                <div className="flex-1 overflow-y-auto pt-2 pb-2 flex flex-col gap-2">
+                  {credits !== null && (
+                    <div className={`flex items-center justify-between px-3 py-1.5 rounded-xl text-[10px] ${credits > 0 ? (isDark ? "bg-emerald-500/5 border border-emerald-500/20 text-emerald-400" : "bg-emerald-50 border border-emerald-100 text-emerald-700") : "bg-red-500/5 border border-red-500/20 text-red-400"}`}>
+                      <div className="flex items-center gap-1.5"><CreditCard className="w-3 h-3" /><span className="font-semibold truncate max-w-[140px]">{serviceName || serviceCode}</span></div>
+                      <span className="font-bold shrink-0">{credits > 0 ? `${credits} кр.` : "Кредиты закончились"}</span>
                     </div>
-                    <div className="flex flex-col gap-0.5">
-                      <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">Модель</label>
-                      {getModels(brand).length > 0
-                        ? <select value={model} onChange={e => { setModel(e.target.value); setEngine(""); }} className={fieldCls}>
-                            <option value="">Выберите модель...</option>
-                            {getModels(brand).map(m => <option key={m} value={m}>{m}</option>)}
-                          </select>
-                        : <input type="text" placeholder="Введите модель" value={model} onChange={e => setModel(e.target.value)} className={fieldCls} />}
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
+                  )}
+                  <div className={`p-3 rounded-3xl border ${isDark ? "bg-slate-900/40 border-slate-800/80" : "bg-white border-sky-100 shadow-sm"}`}>
+                    <div className="flex flex-col gap-2">
                       <div className="flex flex-col gap-0.5">
-                        <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">Год</label>
-                        <input type="number" min="1990" max="2030" placeholder="2020" value={year} onChange={e => setYear(e.target.value)} className={fieldCls} />
+                        <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">Марка *</label>
+                        <div className={`flex rounded-xl border overflow-hidden text-xs font-semibold mb-0.5 ${isDark ? "border-slate-700" : "border-slate-200"}`}>
+                          <button type="button" onClick={() => { setBrandCategory("regular"); setBrand(""); setModel(""); setEngine(""); }}
+                            className={`flex-1 py-1.5 transition-colors ${brandCategory === "regular" ? (isDark ? "bg-emerald-600 text-white" : "bg-blue-600 text-white") : (isDark ? "bg-slate-800 text-slate-400" : "bg-slate-50 text-slate-500")}`}>Обычные</button>
+                          <button type="button" onClick={() => { setBrandCategory("chinese"); setBrand(""); setModel(""); setEngine(""); }}
+                            className={`flex-1 py-1.5 transition-colors ${brandCategory === "chinese" ? "bg-red-500 text-white" : (isDark ? "bg-slate-800 text-slate-400" : "bg-slate-50 text-slate-500")}`}>🇨🇳 Китайские</button>
+                        </div>
+                        <select value={brand} onChange={e => { setBrand(e.target.value); setModel(""); setEngine(""); }} className={fieldCls}>
+                          <option value="">Выберите марку...</option>
+                          {(brandCategory === "chinese" ? CHINESE_BRANDS_LIST : Object.keys(VEHICLE_DATA)).map(b => <option key={b} value={b}>{b}</option>)}
+                        </select>
                       </div>
                       <div className="flex flex-col gap-0.5">
-                        <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">Двигатель</label>
-                        {getEngines(brand, model).length > 0
-                          ? <select value={engine} onChange={e => setEngine(e.target.value)} className={fieldCls}>
-                              <option value="">Выбрать...</option>
-                              {getEngines(brand, model).map(eng => <option key={eng} value={eng}>{eng}</option>)}
+                        <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">Модель</label>
+                        {getModels(brand).length > 0
+                          ? <select value={model} onChange={e => { setModel(e.target.value); setEngine(""); }} className={fieldCls}>
+                              <option value="">Выберите модель...</option>
+                              {getModels(brand).map(m => <option key={m} value={m}>{m}</option>)}
                             </select>
-                          : <input type="text" placeholder="1ZZ-FE 1.8" value={engine} onChange={e => setEngine(e.target.value)} className={fieldCls} />}
+                          : <input type="text" placeholder="Введите модель" value={model} onChange={e => setModel(e.target.value)} className={fieldCls} />}
                       </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="flex flex-col gap-0.5">
-                        <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">Пробег</label>
-                        <input type="number" placeholder="200000" value={odometer} onChange={e => setOdometer(e.target.value)} className={fieldCls} />
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="flex flex-col gap-0.5">
+                          <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">Год</label>
+                          <input type="number" min="1990" max="2030" placeholder="2020" value={year} onChange={e => setYear(e.target.value)} className={fieldCls} />
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                          <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">Двигатель</label>
+                          {getEngines(brand, model).length > 0
+                            ? <select value={engine} onChange={e => setEngine(e.target.value)} className={fieldCls}>
+                                <option value="">Выбрать...</option>
+                                {getEngines(brand, model).map(eng => <option key={eng} value={eng}>{eng}</option>)}
+                              </select>
+                            : <input type="text" placeholder="1ZZ-FE 1.8" value={engine} onChange={e => setEngine(e.target.value)} className={fieldCls} />}
+                        </div>
                       </div>
-                      <div className="flex flex-col gap-0.5">
-                        <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">VIN</label>
-                        <input type="text" placeholder="WBA..." value={vin} onChange={e => setVin(e.target.value.toUpperCase())} className={fieldCls} />
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="flex flex-col gap-0.5">
+                          <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">Пробег</label>
+                          <input type="number" placeholder="200000" value={odometer} onChange={e => setOdometer(e.target.value)} className={fieldCls} />
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                          <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">VIN</label>
+                          <input type="text" placeholder="WBA..." value={vin} onChange={e => setVin(e.target.value.toUpperCase())} className={fieldCls} />
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-
-                <button onClick={goToProblem} disabled={!brand || credits === 0}
-                  className={`w-full py-3.5 font-extrabold text-[14px] rounded-2xl flex items-center justify-center gap-2 h-12 uppercase tracking-wider transition-all ${!brand || credits === 0 ? "bg-slate-400 text-slate-200 cursor-not-allowed opacity-60" : isDark ? "bg-emerald-500 hover:bg-emerald-600 text-slate-950" : "bg-blue-600 hover:bg-blue-700 text-white"}`}>
-                  Далее → Описание проблемы
-                </button>
-
-                <button onClick={() => { setServiceCode(""); localStorage.removeItem("2ls_service_code"); localStorage.removeItem("2ls_service_name"); setScreen("code"); setCredits(null); }}
-                  className="text-center text-[10px] text-slate-400 hover:text-slate-300 transition-colors">
-                  Изменить код сервиса
-                </button>
+                {/* Кнопки прижаты к низу */}
+                <div className="pb-6 pt-2 flex flex-col gap-2">
+                  <button onClick={goToProblem} disabled={!brand || credits === 0}
+                    className={`w-full py-3.5 font-extrabold text-[14px] rounded-2xl flex items-center justify-center gap-2 h-12 uppercase tracking-wider transition-all ${!brand || credits === 0 ? "bg-slate-400 text-slate-200 cursor-not-allowed opacity-60" : isDark ? "bg-emerald-500 hover:bg-emerald-600 text-slate-950" : "bg-blue-600 hover:bg-blue-700 text-white"}`}>
+                    Далее → Описание проблемы
+                  </button>
+                  <button onClick={() => { setServiceCode(""); localStorage.removeItem("2ls_service_code"); localStorage.removeItem("2ls_service_name"); setScreen("code"); setCredits(null); }}
+                    className="text-center text-[10px] text-slate-400 hover:text-slate-300 transition-colors py-1">
+                    Изменить код сервиса
+                  </button>
+                </div>
               </div>
             )}
 
             {/* ══ SCREEN: PROBLEM ══ */}
             {screen === "problem" && (
-              <div className={`flex-1 overflow-y-auto px-4 pt-2 pb-4 flex flex-col gap-2 ${isDesktop ? "max-w-xl mx-auto w-full" : ""}`}>
+              <div className={`flex-1 flex flex-col overflow-hidden px-4 ${isDesktop ? "max-w-xl mx-auto w-full" : ""}`}>
+              <div className="flex-1 overflow-y-auto pt-2 pb-2 flex flex-col gap-2">
 
                 {/* Vehicle summary */}
                 <div className={`px-3 py-1.5 rounded-xl border text-[11px] flex items-center gap-2 ${isDark ? "bg-slate-900/40 border-slate-800" : "bg-white border-sky-100 shadow-sm"}`}>
@@ -1189,20 +1205,24 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                   />
                 </div>
 
-                <button onClick={startChat} disabled={!problemReady}
-                  className={`w-full py-3.5 font-extrabold text-[14px] rounded-2xl flex items-center justify-center gap-2 h-12 uppercase tracking-wider transition-all ${
-                    problemReady
-                      ? isDark ? "bg-emerald-500 hover:bg-emerald-600 text-slate-950" : "bg-blue-600 hover:bg-blue-700 text-white"
-                      : "bg-slate-400 text-slate-200 cursor-not-allowed opacity-60"}`}>
-                  <Sparkles className="w-4 h-4" /> Начать диагностику
-                </button>
-                <div className="flex flex-col items-center gap-0.5">
-                  <p className={`text-center text-[10px] ${isDark ? "text-slate-500" : "text-slate-400"}`}>
-                    Укажите DTC-код или выберите хотя бы один симптом
-                  </p>
-                  <p className={`text-center text-[10px] font-semibold ${isDark ? "text-emerald-500" : "text-emerald-600"}`}>
-                    Не решили — не платите
-                  </p>
+                </div>
+                {/* Кнопка прижата к низу */}
+                <div className="pb-6 pt-2 flex flex-col gap-1.5">
+                  <button onClick={startChat} disabled={!problemReady}
+                    className={`w-full py-3.5 font-extrabold text-[14px] rounded-2xl flex items-center justify-center gap-2 h-12 uppercase tracking-wider transition-all ${
+                      problemReady
+                        ? isDark ? "bg-emerald-500 hover:bg-emerald-600 text-slate-950" : "bg-blue-600 hover:bg-blue-700 text-white"
+                        : "bg-slate-400 text-slate-200 cursor-not-allowed opacity-60"}`}>
+                    <Sparkles className="w-4 h-4" /> Начать диагностику
+                  </button>
+                  <div className="flex justify-between px-1">
+                    <p className={`text-[10px] ${isDark ? "text-slate-500" : "text-slate-400"}`}>
+                      Укажите DTC-код или симптом
+                    </p>
+                    <p className={`text-[10px] font-semibold ${isDark ? "text-emerald-500" : "text-emerald-600"}`}>
+                      Не решили — не платите
+                    </p>
+                  </div>
                 </div>
               </div>
             )}
