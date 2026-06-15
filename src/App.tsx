@@ -98,6 +98,7 @@ export default function App() {
 
 function DiagApp() {
   const [theme, setTheme] = useState<"dark" | "light">("light");
+  const [isDesktop, setIsDesktop] = useState(() => window.innerWidth >= 768);
   const [screen, setScreen] = useState<Screen>("code");
 
   // Service
@@ -162,6 +163,12 @@ function DiagApp() {
   const [laborRate, setLaborRate] = useState("");
   const [reportNote, setReportNote] = useState("");
   const [odometer, setOdometer] = useState("");
+
+  useEffect(() => {
+    const handleResize = () => setIsDesktop(window.innerWidth >= 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     const tg = (window as any).Telegram?.WebApp;
@@ -359,7 +366,11 @@ function DiagApp() {
     setCodeLoading(true); setCodeError("");
     try {
       const r = await fetch(`${API_URL}/service/credits?code=${encodeURIComponent(code)}`);
-      if (!r.ok) throw new Error((await r.json()).detail || "Неверный код");
+      if (!r.ok) {
+        let msg = "Неверный код";
+        try { const err = await r.json(); msg = err.detail || msg; } catch {}
+        throw new Error(msg);
+      }
       const d = await r.json();
       setServiceCode(code); setServiceName(d.service_name || ""); setCredits(d.credits);
       localStorage.setItem("2ls_service_code", code);
@@ -900,28 +911,34 @@ ${recommendedWorks.length > 0 ? `<div class="section">
 
   // ── UI ────────────────────────────────────────────────────────────
   return (
-    <div className={`min-h-screen font-sans transition-colors duration-300 ${isDark ? "bg-slate-950 text-slate-100" : "bg-[#f0f4f8] text-slate-900"}`}>
-      <div className="flex justify-center p-4">
+    <div className={`font-sans transition-colors duration-300 ${isDesktop ? "min-h-screen flex flex-col" : "min-h-screen"} ${isDark ? "bg-slate-950 text-slate-100" : "bg-[#f0f4f8] text-slate-900"}`}>
+      <div className={isDesktop ? "contents" : "flex justify-center p-4"}>
         <div
-          className={`relative w-full max-w-[430px] rounded-[48px] border-[10px] shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ${
-            isDark ? "border-slate-800 bg-slate-950 ring-8 ring-slate-900/30 shadow-black/80"
-                   : "border-slate-300 bg-white ring-8 ring-slate-100/85 shadow-sky-900/10"}`}
-          style={{ height: "87vh", maxHeight: "840px" }}
+          className={isDesktop
+            ? `flex-1 flex flex-col overflow-hidden ${isDark ? "bg-slate-950" : "bg-[#f0f6fc]"}`
+            : `relative w-full max-w-[430px] rounded-[48px] border-[10px] shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ${
+                isDark ? "border-slate-800 bg-slate-950 ring-8 ring-slate-900/30 shadow-black/80"
+                       : "border-slate-300 bg-white ring-8 ring-slate-100/85 shadow-sky-900/10"}`}
+          style={isDesktop ? {} : { height: "87vh", maxHeight: "840px" }}
         >
-          {/* Notch */}
-          <div className="absolute top-2 left-1/2 -translate-x-1/2 w-32 h-6 rounded-full z-40 flex items-center justify-center pointer-events-none bg-slate-950">
-            <div className="w-12 h-1 bg-slate-800 rounded-full" />
-            <div className="w-2.5 h-2.5 bg-slate-900 rounded-full ml-auto mr-4" />
-          </div>
+          {/* Notch — mobile only */}
+          {!isDesktop && (
+            <div className="absolute top-2 left-1/2 -translate-x-1/2 w-32 h-6 rounded-full z-40 flex items-center justify-center pointer-events-none bg-slate-950">
+              <div className="w-12 h-1 bg-slate-800 rounded-full" />
+              <div className="w-2.5 h-2.5 bg-slate-900 rounded-full ml-auto mr-4" />
+            </div>
+          )}
 
-          {/* Status bar */}
-          <div className={`h-10 flex justify-between items-center px-6 pt-3 text-[11px] font-semibold font-mono z-30 ${isDark ? "bg-slate-900 text-slate-300" : "bg-[#0088cc] text-sky-100/90"}`}>
-            <span>17:42</span>
-            <div className="flex items-center gap-1.5"><span className="text-[10px]">5G</span><span>84%</span></div>
-          </div>
+          {/* Status bar — mobile only */}
+          {!isDesktop && (
+            <div className={`h-10 flex justify-between items-center px-6 pt-3 text-[11px] font-semibold font-mono z-30 ${isDark ? "bg-slate-900 text-slate-300" : "bg-[#0088cc] text-sky-100/90"}`}>
+              <span>17:42</span>
+              <div className="flex items-center gap-1.5"><span className="text-[10px]">5G</span><span>84%</span></div>
+            </div>
+          )}
 
           {/* Header */}
-          <div className={`h-12 border-b flex items-center justify-between px-4 z-30 ${isDark ? "bg-slate-900 border-slate-800/80 text-slate-200" : "bg-[#0088cc] border-blue-600/10 text-white"}`}>
+          <div className={`border-b flex items-center justify-between z-30 shrink-0 ${isDesktop ? "h-14 px-8" : "h-12 px-4"} ${isDark ? "bg-slate-900 border-slate-800/80 text-slate-200" : "bg-[#0088cc] border-blue-600/10 text-white"}`}>
             <div className="flex items-center gap-1.5">
               <button
                 onClick={() => { if (screen === "problem") setScreen("form"); else if (screen === "form") {} }}
@@ -954,7 +971,7 @@ ${recommendedWorks.length > 0 ? `<div class="section">
 
             {/* ══ SCREEN: CODE ══ */}
             {screen === "code" && (
-              <div className="flex-1 overflow-y-auto px-4 py-6 flex flex-col gap-4">
+              <div className={`flex-1 overflow-y-auto px-4 py-6 flex flex-col gap-4 ${isDesktop ? "max-w-xl mx-auto w-full" : ""}`}>
                 <div className="text-center py-4">
                   <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${isDark ? "bg-blue-500/10 border border-blue-500/20" : "bg-blue-50 border border-blue-100"}`}>
                     <KeyRound className={`w-8 h-8 ${isDark ? "text-blue-400" : "text-blue-600"}`} />
@@ -981,7 +998,7 @@ ${recommendedWorks.length > 0 ? `<div class="section">
 
             {/* ══ SCREEN: FORM (vehicle) ══ */}
             {screen === "form" && (
-              <div className="flex-1 overflow-y-auto px-4 pt-2 pb-4 flex flex-col gap-2">
+              <div className={`flex-1 overflow-y-auto px-4 pt-2 pb-4 flex flex-col gap-2 ${isDesktop ? "max-w-xl mx-auto w-full" : ""}`}>
 
                 {credits !== null && (
                   <div className={`flex items-center justify-between px-3 py-1.5 rounded-xl text-[10px] ${credits > 0 ? (isDark ? "bg-emerald-500/5 border border-emerald-500/20 text-emerald-400" : "bg-emerald-50 border border-emerald-100 text-emerald-700") : "bg-red-500/5 border border-red-500/20 text-red-400"}`}>
@@ -1056,7 +1073,7 @@ ${recommendedWorks.length > 0 ? `<div class="section">
 
             {/* ══ SCREEN: PROBLEM ══ */}
             {screen === "problem" && (
-              <div className="flex-1 overflow-y-auto px-4 pt-2 pb-4 flex flex-col gap-2">
+              <div className={`flex-1 overflow-y-auto px-4 pt-2 pb-4 flex flex-col gap-2 ${isDesktop ? "max-w-xl mx-auto w-full" : ""}`}>
 
                 {/* Vehicle summary */}
                 <div className={`px-3 py-1.5 rounded-xl border text-[11px] flex items-center gap-2 ${isDark ? "bg-slate-900/40 border-slate-800" : "bg-white border-sky-100 shadow-sm"}`}>
@@ -1191,9 +1208,71 @@ ${recommendedWorks.length > 0 ? `<div class="section">
 
             {/* ══ SCREEN: CHAT ══ */}
             {screen === "chat" && (
-              <div className="flex flex-col flex-1 overflow-hidden">
-                {/* Sub-header */}
-                <div className={`px-4 py-2 border-b flex items-center justify-between shrink-0 ${isDark ? "bg-slate-900/60 border-slate-800" : "bg-white/80 border-sky-100 shadow-sm"}`}>
+              <div className={`flex-1 overflow-hidden ${isDesktop ? "flex flex-row" : "flex flex-col"}`}>
+
+                {/* Desktop sidebar */}
+                {isDesktop && (
+                  <aside className={`w-72 shrink-0 flex flex-col border-r overflow-y-auto ${isDark ? "bg-slate-900 border-slate-800" : "bg-white border-sky-100"}`}>
+                    <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-5">
+                      {/* Vehicle */}
+                      <div>
+                        <p className="text-[10px] uppercase font-bold tracking-wider mb-2 text-slate-400">Автомобиль</p>
+                        <p className={`text-sm font-extrabold ${isDark ? "text-white" : "text-slate-800"}`}>{brand} {model}</p>
+                        <p className={`text-xs mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>{year} г.&nbsp;·&nbsp;{engine || "—"}</p>
+                      </div>
+                      {/* DTC */}
+                      {dtcCodes.length > 0 && (
+                        <div>
+                          <p className="text-[10px] uppercase font-bold tracking-wider mb-2 text-slate-400">DTC-{dtcCodes.length > 1 ? "коды" : "код"}</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {dtcCodes.map(c => (
+                              <span key={c} className={`text-xs font-mono font-bold px-2 py-0.5 rounded ${isDark ? "bg-amber-500/20 text-amber-400" : "bg-amber-50 text-amber-700 border border-amber-200"}`}>{c}</span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {/* Symptoms */}
+                      {symptoms.length > 0 && (
+                        <div>
+                          <p className="text-[10px] uppercase font-bold tracking-wider mb-2 text-slate-400">Симптомы</p>
+                          <div className="flex flex-wrap gap-1">
+                            {symptoms.map(s => (
+                              <span key={s} className={`text-[11px] px-2 py-0.5 rounded-full ${isDark ? "bg-slate-800 text-slate-300" : "bg-slate-100 text-slate-600"}`}>
+                                {SYMPTOM_CHIPS.find(c => c.id === s)?.label}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {/* Description */}
+                      {symptomText && (
+                        <div>
+                          <p className="text-[10px] uppercase font-bold tracking-wider mb-2 text-slate-400">Описание</p>
+                          <p className={`text-xs leading-relaxed ${isDark ? "text-slate-300" : "text-slate-600"}`}>{symptomText}</p>
+                        </div>
+                      )}
+                      {/* Credits */}
+                      {credits !== null && (
+                        <div className={`text-xs font-bold ${credits > 0 ? "text-emerald-500" : "text-red-400"}`}>
+                          Баланс: {credits} кредит{credits === 1 ? "" : credits > 4 ? "ов" : "а"}
+                        </div>
+                      )}
+                    </div>
+                    {/* Solve button */}
+                    <div className="p-4 border-t shrink-0 border-slate-200 dark:border-slate-800">
+                      <button onClick={goToConfirm}
+                        className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-bold bg-emerald-500 hover:bg-emerald-600 text-white transition-colors">
+                        <CheckCircle2 className="w-4 h-4" /> Решено
+                      </button>
+                    </div>
+                  </aside>
+                )}
+
+                {/* Main chat column */}
+                <div className="flex-1 flex flex-col overflow-hidden">
+
+                {/* Sub-header — mobile only */}
+                {!isDesktop && <div className={`px-4 py-2 border-b flex items-center justify-between shrink-0 ${isDark ? "bg-slate-900/60 border-slate-800" : "bg-white/80 border-sky-100 shadow-sm"}`}>
                   <div className="flex items-center gap-2 min-w-0 overflow-hidden">
                     {dtcCodes.slice(0, 2).map(c => (
                       <span key={c} className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded shrink-0 ${isDark ? "bg-amber-500/20 text-amber-400" : "bg-amber-50 text-amber-700"}`}>{c}</span>
@@ -1217,7 +1296,7 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                       <CheckCircle2 className="w-3.5 h-3.5" /> Решено
                     </button>
                   </div>
-                </div>
+                </div>}
 
                 {/* Pagination nav */}
                 {chatPages.length > 1 && (
@@ -1353,12 +1432,13 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                     <Send className="w-4 h-4" />
                   </button>
                 </div>
+                </div>{/* end main chat column */}
               </div>
             )}
 
             {/* ══ SCREEN: CONFIRM ══ */}
             {screen === "confirm" && (
-              <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-4 pb-8">
+              <div className={`flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-4 pb-8 ${isDesktop ? "max-w-2xl mx-auto w-full" : ""}`}>
                 <div className="text-center py-2">
                   <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold ${isDark ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border border-emerald-100"}`}>
                     <CheckCircle2 className="w-3.5 h-3.5" /> Подтверждение кейса
@@ -1601,7 +1681,7 @@ ${recommendedWorks.length > 0 ? `<div class="section">
 
             {/* ══ SCREEN: SOLVED ══ */}
             {screen === "solved" && (
-              <div className="flex-1 flex flex-col items-center justify-center px-6 text-center gap-5">
+              <div className={`flex-1 flex flex-col items-center justify-center px-6 text-center gap-5 ${isDesktop ? "max-w-xl mx-auto w-full" : ""}`}>
                 <div className={`w-20 h-20 rounded-full flex items-center justify-center ${isDark ? "bg-emerald-500/15 border border-emerald-500/30" : "bg-emerald-50 border border-emerald-200"}`}>
                   <CheckCircle2 className="w-10 h-10 text-emerald-500" />
                 </div>
