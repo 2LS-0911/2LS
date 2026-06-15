@@ -925,31 +925,10 @@ ${recommendedWorks.length > 0 ? `<div class="section">
 
   // ── UI ────────────────────────────────────────────────────────────
   return (
-    <div className={`font-sans transition-colors duration-300 ${isDesktop ? "min-h-screen flex flex-col" : "min-h-screen"} ${isDark ? "bg-slate-950 text-slate-100" : "bg-[#f0f4f8] text-slate-900"}`}>
-      <div className={isDesktop ? "contents" : "flex justify-center p-4"}>
-        <div
-          className={isDesktop
-            ? `flex-1 flex flex-col overflow-hidden ${isDark ? "bg-slate-950" : "bg-[#f0f6fc]"}`
-            : `relative w-full max-w-[430px] rounded-[48px] border-[10px] shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ${
-                isDark ? "border-slate-800 bg-slate-950 ring-8 ring-slate-900/30 shadow-black/80"
-                       : "border-slate-300 bg-white ring-8 ring-slate-100/85 shadow-sky-900/10"}`}
-          style={isDesktop ? {} : { height: "87vh", maxHeight: "840px" }}
+    <div className={`font-sans transition-colors duration-300 flex flex-col h-screen overflow-hidden ${isDark ? "bg-slate-950 text-slate-100" : "bg-[#f0f6fc] text-slate-900"}`}>
+      <div className={`flex-1 flex flex-col overflow-hidden ${isDesktop ? "max-w-4xl mx-auto w-full" : "w-full"}`}>
+        <div className={`flex-1 flex flex-col overflow-hidden ${isDark ? "bg-slate-950" : "bg-[#f0f6fc]"}`}
         >
-          {/* Notch — mobile only */}
-          {!isDesktop && (
-            <div className="absolute top-2 left-1/2 -translate-x-1/2 w-32 h-6 rounded-full z-40 flex items-center justify-center pointer-events-none bg-slate-950">
-              <div className="w-12 h-1 bg-slate-800 rounded-full" />
-              <div className="w-2.5 h-2.5 bg-slate-900 rounded-full ml-auto mr-4" />
-            </div>
-          )}
-
-          {/* Status bar — mobile only */}
-          {!isDesktop && (
-            <div className={`h-10 flex justify-between items-center px-6 pt-3 text-[11px] font-semibold font-mono z-30 ${isDark ? "bg-slate-900 text-slate-300" : "bg-[#0088cc] text-sky-100/90"}`}>
-              <span>17:42</span>
-              <div className="flex items-center gap-1.5"><span className="text-[10px]">5G</span><span>84%</span></div>
-            </div>
-          )}
 
           {/* Header */}
           <div className={`border-b flex items-center justify-between z-30 shrink-0 ${isDesktop ? "h-14 px-8" : "h-12 px-4"} ${isDark ? "bg-slate-900 border-slate-800/80 text-slate-200" : "bg-[#0088cc] border-blue-600/10 text-white"}`}>
