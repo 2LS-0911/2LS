@@ -959,18 +959,21 @@ ${recommendedWorks.length > 0 ? `<div class="section">
 
             {/* ══ SCREEN: CODE ══ */}
             {screen === "code" && (
-              <div className={`flex-1 flex flex-col items-center justify-center gap-4 px-5 pb-4 ${isDesktop ? "max-w-xl mx-auto w-full" : ""}`}>
+              <div className={`flex-1 flex flex-col items-center px-5 pt-2 pb-3 ${isDesktop ? "max-w-xl mx-auto w-full" : ""}`}>
 
-                {/* Логотип */}
-                <img src={logoImg} alt="2LS" className="w-36 h-36 object-contain" style={{ mixBlendMode: "multiply" }} />
+                {/* Логотип — заполняет всё свободное пространство */}
+                <div className="flex-1 min-h-0 flex items-center justify-center w-full">
+                  <img src={logoImg} alt="2LS" className="w-full object-contain" style={{ mixBlendMode: "multiply", maxHeight: "48vh" }} />
+                </div>
 
-                {/* Заголовок */}
-                <h1 className={`text-2xl font-black tracking-tight text-center -mt-1 ${isDark ? "text-slate-100" : "text-slate-800"}`}>
-                  Диагностика автомобилей
-                </h1>
+                {/* Нижняя секция — прижата к тулбару */}
+                <div className="w-full flex flex-col gap-3">
+                  {/* Заголовок */}
+                  <h1 className={`text-2xl font-black tracking-tight text-center ${isDark ? "text-slate-100" : "text-slate-800"}`}>
+                    Диагностика автомобилей
+                  </h1>
 
-                {/* Поле ввода */}
-                <div className="w-full flex flex-col gap-2">
+                  {/* Поле ввода */}
                   <div className={`p-4 rounded-2xl border ${isDark ? "bg-slate-900/60 border-slate-700" : "bg-white border-sky-100 shadow-md"}`}>
                     <label className={`text-[10px] uppercase font-bold tracking-widest mb-2 block ${isDark ? "text-slate-500" : "text-slate-400"}`}>Код сервиса</label>
                     <input type="text" placeholder="svc_xxxxxxxx" value={serviceCodeInput}
@@ -985,14 +988,14 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                     className={`text-center text-[11px] select-none cursor-default ${isDark ? "text-slate-500" : "text-slate-400"}`}>
                     Код выдаётся вашему автосервису менеджером 2LS
                   </p>
-                </div>
 
-                {/* Кнопка */}
-                <button onClick={submitServiceCode} disabled={codeLoading || !serviceCodeInput.trim()}
-                  className="w-full h-14 font-extrabold text-[15px] rounded-2xl flex items-center justify-center gap-2.5 uppercase tracking-wider bg-sky-400 hover:bg-sky-500 active:scale-[0.98] text-white disabled:opacity-40 shadow-lg shadow-sky-400/30 transition-all">
-                  {codeLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <KeyRound className="w-5 h-5" />}
-                  Войти в сервис
-                </button>
+                  {/* Кнопка */}
+                  <button onClick={submitServiceCode} disabled={codeLoading || !serviceCodeInput.trim()}
+                    className="w-full h-14 font-extrabold text-[15px] rounded-2xl flex items-center justify-center gap-2.5 uppercase tracking-wider bg-[#7ec8f0] hover:bg-[#5cb8e8] active:scale-[0.98] text-white disabled:opacity-40 shadow-lg shadow-sky-300/40 transition-all">
+                    {codeLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <KeyRound className="w-5 h-5" />}
+                    Войти в сервис
+                  </button>
+                </div>
 
               </div>
             )}
@@ -1749,17 +1752,15 @@ ${recommendedWorks.length > 0 ? `<div class="section">
           </div>
 
           {/* Bottom toolbar — theme + desktop toggles */}
-          <div className={`shrink-0 border-t flex items-center justify-between px-4 h-10 ${isDark ? "bg-slate-900 border-slate-800 text-slate-300" : screen === "code" ? "bg-[#ede9e1] border-[#ddd8ce] text-slate-600" : "bg-white border-slate-200 text-slate-600"}`}>
-            <div className="flex items-center gap-3">
-              <span className={`text-xs font-black tracking-tight ${isDark ? "text-blue-400" : "text-sky-500"}`}>2LS TOOLS</span>
-              {screen === "code" && (
-                <a href="tel:+79221800911"
-                  className={`text-xs font-semibold ${isDark ? "text-sky-400" : "text-sky-600"}`}>
-                  +7 922 18 00 911
-                </a>
-              )}
-            </div>
-            <div className="flex items-center gap-2">
+          <div className={`shrink-0 border-t flex items-center px-4 h-10 relative ${isDark ? "bg-slate-900 border-slate-800 text-slate-300" : screen === "code" ? "bg-[#ede9e1] border-[#ddd8ce] text-slate-600" : "bg-white border-slate-200 text-slate-600"}`}>
+            <span className={`text-xs font-black tracking-tight ${isDark ? "text-blue-400" : "text-sky-500"}`}>2LS TOOLS</span>
+            {screen === "code" && (
+              <a href="tel:+79221800911"
+                className={`absolute left-1/2 -translate-x-1/2 text-xs font-semibold ${isDark ? "text-sky-400" : "text-sky-600"}`}>
+                +7 922 18 00 911
+              </a>
+            )}
+            <div className="ml-auto flex items-center gap-2">
               {credits !== null && screen !== "code" && (
                 <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${credits > 0 ? (isDark ? "bg-emerald-500/20 text-emerald-400" : "bg-emerald-50 border border-emerald-100 text-emerald-700") : "bg-red-500/10 text-red-500"}`}>
                   <CreditCard className="w-2.5 h-2.5" />{credits}
@@ -1772,7 +1773,7 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                 }}
                 title={isDesktop ? "Мобильный вид" : "Десктопный вид"}
                 className={`p-1.5 rounded-lg flex items-center justify-center transition-colors text-[14px] ${isDark ? "hover:bg-slate-800" : "hover:bg-slate-100"}`}>
-                {isDesktop ? "📱" : "🖥"}
+                📱
               </button>
               <button onClick={() => setTheme(t => t === "dark" ? "light" : "dark")}
                 className={`p-1.5 rounded-lg flex items-center justify-center transition-colors ${isDark ? "text-amber-400 hover:bg-slate-800" : "text-slate-500 hover:bg-slate-100"}`}>
