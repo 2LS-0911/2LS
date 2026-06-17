@@ -194,6 +194,7 @@ function DiagApp() {
       tg.ready();
       tg.expand();
       if (tg.colorScheme === "dark") setTheme("dark");
+      tg.setHeaderColor?.("#7ec8f0");
       const desktopPlatforms = ["tdesktop", "macos", "web", "weba", "webk"];
       if (desktopPlatforms.includes(tg.platform)) setDesktopForced(true);
       // Обновляем высоту при изменении viewport (клавиатура, ориентация)
@@ -961,7 +962,7 @@ ${recommendedWorks.length > 0 ? `<div class="section">
               <div className={`flex-1 flex flex-col items-center justify-center gap-4 px-5 pb-4 ${isDesktop ? "max-w-xl mx-auto w-full" : ""}`}>
 
                 {/* Логотип */}
-                <img src={logoImg} alt="2LS" className="w-32 h-32 object-contain drop-shadow-md" />
+                <img src={logoImg} alt="2LS" className="w-36 h-36 object-contain" style={{ mixBlendMode: "multiply" }} />
 
                 {/* Заголовок */}
                 <h1 className={`text-2xl font-black tracking-tight text-center -mt-1 ${isDark ? "text-slate-100" : "text-slate-800"}`}>
@@ -988,16 +989,10 @@ ${recommendedWorks.length > 0 ? `<div class="section">
 
                 {/* Кнопка */}
                 <button onClick={submitServiceCode} disabled={codeLoading || !serviceCodeInput.trim()}
-                  className="w-full h-14 font-extrabold text-[15px] rounded-2xl flex items-center justify-center gap-2.5 uppercase tracking-wider bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white disabled:opacity-40 shadow-lg shadow-blue-500/30 transition-all">
+                  className="w-full h-14 font-extrabold text-[15px] rounded-2xl flex items-center justify-center gap-2.5 uppercase tracking-wider bg-sky-400 hover:bg-sky-500 active:scale-[0.98] text-white disabled:opacity-40 shadow-lg shadow-sky-400/30 transition-all">
                   {codeLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <KeyRound className="w-5 h-5" />}
                   Войти в сервис
                 </button>
-
-                {/* Контактный телефон */}
-                <a href="tel:+79221800911"
-                  className={`text-sm font-semibold tracking-wide ${isDark ? "text-blue-400" : "text-blue-600"}`}>
-                  +7 922 18 00 911
-                </a>
 
               </div>
             )}
@@ -1755,7 +1750,15 @@ ${recommendedWorks.length > 0 ? `<div class="section">
 
           {/* Bottom toolbar — theme + desktop toggles */}
           <div className={`shrink-0 border-t flex items-center justify-between px-4 h-10 ${isDark ? "bg-slate-900 border-slate-800 text-slate-300" : screen === "code" ? "bg-[#ede9e1] border-[#ddd8ce] text-slate-600" : "bg-white border-slate-200 text-slate-600"}`}>
-            <span className={`text-xs font-black tracking-tight ${isDark ? "text-blue-400" : "text-blue-600"}`}>2LS TOOLS</span>
+            <div className="flex items-center gap-3">
+              <span className={`text-xs font-black tracking-tight ${isDark ? "text-blue-400" : "text-sky-500"}`}>2LS TOOLS</span>
+              {screen === "code" && (
+                <a href="tel:+79221800911"
+                  className={`text-xs font-semibold ${isDark ? "text-sky-400" : "text-sky-600"}`}>
+                  +7 922 18 00 911
+                </a>
+              )}
+            </div>
             <div className="flex items-center gap-2">
               {credits !== null && screen !== "code" && (
                 <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${credits > 0 ? (isDark ? "bg-emerald-500/20 text-emerald-400" : "bg-emerald-50 border border-emerald-100 text-emerald-700") : "bg-red-500/10 text-red-500"}`}>
