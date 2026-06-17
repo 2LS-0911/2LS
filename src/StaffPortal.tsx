@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Shield, Users, Eye, EyeOff, ArrowLeft, Loader2, Wrench, LogOut } from "lucide-react";
+import { Shield, Users, Eye, EyeOff, ArrowLeft, Loader2, Wrench } from "lucide-react";
 import AdminPanel from "./AdminPanel";
 import RepDashboard from "./RepDashboard";
 
@@ -60,18 +60,7 @@ export default function StaffPortal() {
     if (auth.role === "admin") {
       return <AdminPanel adminKey={auth.key} onLogout={logout} />;
     }
-    return (
-      <div className="relative">
-        <button
-          onClick={logout}
-          className="fixed bottom-16 right-3 z-50 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/90 backdrop-blur-sm text-slate-300 hover:text-white text-xs border border-slate-700 hover:border-slate-500 transition-all shadow-lg"
-        >
-          <LogOut className="w-3.5 h-3.5" />
-          Выйти
-        </button>
-        <RepDashboard repToken={auth.token} />
-      </div>
-    );
+    return <RepDashboard repToken={auth.token} onLogout={logout} />;
   }
 
   // ── Role selection ────────────────────────────────────────────────

@@ -22,16 +22,50 @@ interface SuspiciousSession {
 }
 
 const C = {
-  bg: "#f8fafc", surface: "#ffffff", border: "#e2e8f0",
-  text: "#0f172a", textSub: "#64748b", textMuted: "#94a3b8",
-  blue: "#2563eb", blueBg: "#eff6ff", blueBorder: "#bfdbfe",
-  green: "#16a34a", greenBg: "#f0fdf4",
-  amber: "#d97706", amberBg: "#fffbeb",
-  red: "#dc2626", redBg: "#fef2f2",
-  emerald: "#059669", emeraldBg: "#ecfdf5", emeraldBorder: "#6ee7b7",
+  bg: "#f5f3ee",
+  surface: "#ffffff",
+  border: "#ddd8ce",
+  text: "#0f172a",
+  textSub: "#64748b",
+  textMuted: "#94a3b8",
+  blue: "#7ec8f0",
+  blueBg: "#e8f6fd",
+  green: "#16a34a",
+  greenBg: "#f0fdf4",
+  amber: "#d97706",
+  amberBg: "#fffbeb",
+  red: "#dc2626",
+  redBg: "#fef2f2",
+  emerald: "#059669",
+  emeraldBg: "#ecfdf5",
+  emeraldBorder: "#6ee7b7",
 };
 
-export default function RepDashboard({ repToken }: { repToken: string }) {
+function inp(extra?: React.CSSProperties): React.CSSProperties {
+  return { background: "#fff", border: `1px solid ${C.border}`, borderRadius: 8, color: C.text, padding: "9px 12px", fontSize: 14, outline: "none", width: "100%", boxSizing: "border-box" as const, ...extra };
+}
+
+const card: React.CSSProperties = { background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 16, marginBottom: 12 };
+const tdX: React.CSSProperties = { padding: "2px 7px", fontSize: 11, verticalAlign: "middle", borderBottom: `1px solid ${C.border}`, lineHeight: "1.3", whiteSpace: "nowrap" as const };
+const thX: React.CSSProperties = { padding: "4px 7px", color: C.textSub, textAlign: "left" as const, fontWeight: 600, fontSize: 10, borderBottom: `2px solid ${C.border}`, whiteSpace: "nowrap" as const };
+
+function Row({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 0", borderBottom: `1px solid ${C.border}` }}>
+      <span style={{ fontSize: 12, color: C.textMuted, flexShrink: 0, marginRight: 8 }}>{label}</span>
+      <span style={{ fontSize: 13, color: C.text, fontWeight: 500, textAlign: "right" }}>{children}</span>
+    </div>
+  );
+}
+
+export default function RepDashboard({ repToken, onLogout }: { repToken: string; onLogout?: () => void }) {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+  useEffect(() => {
+    const fn = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", fn);
+    return () => window.removeEventListener("resize", fn);
+  }, []);
+
   const [rep, setRep] = useState<Rep | null>(null);
   const [services, setServices] = useState<Service[]>([]);
   const [txns, setTxns] = useState<Transaction[]>([]);
@@ -66,170 +100,227 @@ export default function RepDashboard({ repToken }: { repToken: string }) {
   if (loading || !rep) return (
     <div style={{ fontFamily: "system-ui,-apple-system,sans-serif", background: C.bg, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div style={{ textAlign: "center" }}>
-        <div style={{ width: 36, height: 36, border: `3px solid ${C.border}`, borderTopColor: C.blue, borderRadius: "50%", animation: "spin .7s linear infinite", margin: "0 auto 14px" }} />
+        <div style={{ width: 36, height: 36, border: `3px solid ${C.border}`, borderTopColor: C.emerald, borderRadius: "50%", animation: "spin .7s linear infinite", margin: "0 auto 14px" }} />
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         <div style={{ color: C.textSub, fontSize: 14 }}>Загрузка кабинета...</div>
       </div>
     </div>
   );
 
-  const totalSessions = services.reduce((a, s) => a + s.total_sessions, 0);
   const totalRevenue = services.reduce((a, s) => a + (s.total_paid_rub || 0), 0);
+  const totalSessions = services.reduce((a, s) => a + s.total_sessions, 0);
   const myShare = totalRevenue * (rep.commission_rate || 0.1);
 
-  const card: React.CSSProperties = { background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 20, marginBottom: 16 };
-  const th: React.CSSProperties = { padding: "10px 14px", color: C.textSub, textAlign: "left", fontWeight: 600, fontSize: 12, borderBottom: `2px solid ${C.border}` };
-  const td: React.CSSProperties = { padding: "10px 14px", fontSize: 13, borderBottom: `1px solid ${C.border}`, verticalAlign: "middle" };
+  const openInBrowser = () => {
+    const tg = (window as any).Telegram?.WebApp;
+    const url = `${window.location.origin}${window.location.pathname}?rep_token=${encodeURIComponent(repToken)}`;
+    if (tg?.openLink) tg.openLink(url); else window.open(url, "_blank");
+  };
+
+  const zoomStyle: React.CSSProperties = !isMobile ? {
+    zoom: 1.7,
+    width: "calc(100vw / 1.7)",
+    minHeight: "calc(100vh / 1.7)",
+  } : {};
+
+  const pad = isMobile ? "12px 16px" : "24px 28px";
 
   return (
     <div style={{ fontFamily: "system-ui,-apple-system,sans-serif", background: C.bg, minHeight: "100vh", color: C.text }}>
+      <div style={zoomStyle}>
 
-      {/* Top bar */}
-      <div style={{ background: C.surface, borderBottom: `1px solid ${C.border}`, padding: "14px 28px", display: "flex", alignItems: "center", gap: 14, position: "sticky", top: 0, zIndex: 10 }}>
-        <div style={{ width: 32, height: 32, background: C.emerald, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800, fontSize: 12, letterSpacing: "-0.5px" }}>2LS</div>
-        <div>
-          <div style={{ fontWeight: 700, fontSize: 15, color: C.text, lineHeight: 1.2 }}>{rep.name}</div>
-          <div style={{ fontSize: 12, color: C.textSub }}>{rep.username ? `@${rep.username} · ` : ""}Представитель 2LS · {Math.round((rep.commission_rate || 0.1) * 100)}% комиссия</div>
-        </div>
-      </div>
-
-      <div style={{ padding: "28px", maxWidth: 960, margin: "0 auto" }}>
-
-        {/* KPI row */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))", gap: 14, marginBottom: 20 }}>
-          {[
-            { icon: "🏪", label: "Подключено сервисов", val: services.length, color: C.blue, bg: C.blueBg, border: C.blueBorder },
-            { icon: "🔧", label: "Диагностик всего", val: totalSessions, color: C.text, bg: C.surface, border: C.border },
-            { icon: "💰", label: "Моя выручка", val: `${(rep.total_earned_rub || 0).toLocaleString("ru-RU")} ₽`, color: C.emerald, bg: C.emeraldBg, border: C.emeraldBorder },
-            { icon: "⏳", label: "К выплате", val: `${(rep.pending_payout_rub || 0).toLocaleString("ru-RU")} ₽`, color: (rep.pending_payout_rub || 0) > 0 ? C.amber : C.textSub, bg: (rep.pending_payout_rub || 0) > 0 ? C.amberBg : C.surface, border: (rep.pending_payout_rub || 0) > 0 ? "#fde68a" : C.border },
-          ].map(({ icon, label, val, color, bg, border }) => (
-            <div key={label} style={{ background: bg, border: `1px solid ${border}`, borderRadius: 12, padding: "18px 16px", textAlign: "center" }}>
-              <div style={{ fontSize: 26, marginBottom: 8 }}>{icon}</div>
-              <div style={{ fontSize: 20, fontWeight: 800, color, marginBottom: 4 }}>{val}</div>
-              <div style={{ color: C.textSub, fontSize: 12 }}>{label}</div>
+        {/* ── Top bar (desktop only) ── */}
+        {!isMobile && (
+          <div style={{ background: C.surface, borderBottom: `1px solid ${C.border}`, padding: "14px 28px", display: "flex", alignItems: "center", gap: 12, position: "sticky", top: 0, zIndex: 10 }}>
+            <div style={{ width: 30, height: 30, background: C.emerald, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800, fontSize: 11, flexShrink: 0 }}>2LS</div>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: 15, color: C.text, lineHeight: 1.2 }}>{rep.name}</div>
+              <div style={{ fontSize: 11, color: C.textSub }}>{rep.username ? `@${rep.username} · ` : ""}Представитель · {Math.round((rep.commission_rate || 0.1) * 100)}% комиссия</div>
             </div>
-          ))}
-        </div>
-
-        {/* Revenue insight */}
-        <div style={{ background: C.blueBg, border: `1px solid ${C.blueBorder}`, borderRadius: 12, padding: "14px 20px", marginBottom: 20, display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{ fontSize: 20 }}>📈</div>
-          <div style={{ fontSize: 13, color: C.textSub }}>
-            Общая выручка ваших сервисов:
-            <strong style={{ color: C.text, marginLeft: 6 }}>{totalRevenue.toLocaleString("ru-RU")} ₽</strong>
-            <span style={{ margin: "0 6px", color: C.textMuted }}>·</span>
-            Ваша доля {Math.round((rep.commission_rate || 0.1) * 100)}%:
-            <strong style={{ color: C.emerald, marginLeft: 6 }}>{myShare.toLocaleString("ru-RU")} ₽</strong>
+            <div style={{ marginLeft: "auto", display: "flex", gap: 6, alignItems: "center" }}>
+              <button onClick={openInBrowser} title="Открыть в браузере"
+                style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, padding: "7px 12px", cursor: "pointer", fontSize: 15 }}>🖥</button>
+              {onLogout && (
+                <button onClick={onLogout}
+                  style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, padding: "7px 12px", cursor: "pointer", fontSize: 13, fontWeight: 600, color: C.red }}>
+                  Выйти
+                </button>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Services */}
-        <div style={card}>
-          <h3 style={{ margin: "0 0 16px", fontSize: 15, fontWeight: 700, color: C.text }}>Ваши автосервисы</h3>
+        <div style={{ padding: pad, maxWidth: 1200, margin: "0 auto", paddingBottom: isMobile ? "80px" : pad }}>
+
+          {/* ── KPI cards ── */}
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2,1fr)" : "repeat(4,1fr)", gap: isMobile ? 10 : 12, marginBottom: isMobile ? 14 : 16 }}>
+            {[
+              { icon: "🏪", label: "Сервисов", val: services.length, color: C.blue },
+              { icon: "🔧", label: "Диагностик", val: totalSessions, color: C.text },
+              { icon: "💰", label: "Заработано", val: `${(rep.total_earned_rub || 0).toLocaleString("ru-RU")} ₽`, color: C.emerald },
+              { icon: "⏳", label: "К выплате", val: `${(rep.pending_payout_rub || 0).toLocaleString("ru-RU")} ₽`, color: (rep.pending_payout_rub || 0) > 0 ? C.amber : C.textSub },
+            ].map(({ icon, label, val, color }) => (
+              <div key={label} style={{ ...card, textAlign: "center", marginBottom: 0 }}>
+                <div style={{ fontSize: isMobile ? 20 : 22, marginBottom: 4 }}>{icon}</div>
+                <div style={{ fontSize: isMobile ? 16 : 20, fontWeight: 800, color, marginBottom: 2 }}>{val}</div>
+                <div style={{ color: C.textSub, fontSize: 11 }}>{label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* ── Revenue insight ── */}
+          <div style={{ background: C.blueBg, border: `1px solid ${C.blue}`, borderRadius: 12, padding: isMobile ? "10px 14px" : "12px 18px", marginBottom: isMobile ? 14 : 16, display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ fontSize: 18 }}>📈</div>
+            <div style={{ fontSize: isMobile ? 12 : 13, color: C.textSub, lineHeight: 1.5 }}>
+              Выручка сервисов: <strong style={{ color: C.text }}>{totalRevenue.toLocaleString("ru-RU")} ₽</strong>
+              <span style={{ margin: "0 6px", color: C.textMuted }}>·</span>
+              Ваша доля {Math.round((rep.commission_rate || 0.1) * 100)}%: <strong style={{ color: C.emerald }}>{myShare.toLocaleString("ru-RU")} ₽</strong>
+            </div>
+          </div>
+
+          {/* ── Services ── */}
+          <div style={{ fontWeight: 700, fontSize: 13, color: C.text, marginBottom: 6 }}>Ваши автосервисы ({services.length})</div>
           {services.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "32px 0", color: C.textMuted }}>
-              <div style={{ fontSize: 32, marginBottom: 8 }}>🏪</div>
-              Пока нет подключённых сервисов
+            <div style={{ ...card, textAlign: "center", padding: "32px 0", color: C.textMuted }}>
+              <div style={{ fontSize: 28, marginBottom: 8 }}>🏪</div>Пока нет подключённых сервисов
             </div>
-          ) : (
-            <div style={{ overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead><tr>
-                  <th style={th}>Название</th><th style={th}>Город</th><th style={th}>Кредиты</th>
-                  <th style={th}>Диагностик</th><th style={th}>Оплачено</th><th style={th}>Ваша доля</th><th style={th}>Статус</th>
-                </tr></thead>
-                <tbody>{services.map(s => (
-                  <tr key={s.service_id} onMouseEnter={e => (e.currentTarget.style.background = C.bg)} onMouseLeave={e => (e.currentTarget.style.background = "")}>
-                    <td style={{ ...td, fontWeight: 600 }}>{s.name}</td>
-                    <td style={{ ...td, color: C.textSub }}>{s.city || "—"}</td>
-                    <td style={{ ...td, color: s.credits > 0 ? C.green : C.red, fontWeight: 700 }}>{s.credits}</td>
-                    <td style={td}>{s.total_sessions}</td>
-                    <td style={td}>{(s.total_paid_rub || 0).toLocaleString("ru-RU")} ₽</td>
-                    <td style={{ ...td, color: C.emerald, fontWeight: 600 }}>{((s.total_paid_rub || 0) * (rep.commission_rate || 0.1)).toLocaleString("ru-RU")} ₽</td>
-                    <td style={td}>
-                      <span style={{ background: s.status === "active" ? C.emeraldBg : C.redBg, color: s.status === "active" ? C.emerald : C.red, padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 600 }}>
-                        {s.status === "active" ? "активен" : "заблокирован"}
-                      </span>
-                    </td>
-                  </tr>
-                ))}</tbody>
-              </table>
-            </div>
-          )}
-        </div>
-
-        {/* Suspicious / abandoned sessions */}
-        {suspicious.length > 0 && (
-          <div style={{ ...card, border: `1px solid #fde68a`, background: "#fffbeb" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-              <span style={{ fontSize: 20 }}>⚠️</span>
-              <div>
-                <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: C.amber }}>Сессии без закрытия — проверьте</h3>
-                <div style={{ fontSize: 12, color: C.textSub, marginTop: 2 }}>
-                  Сессии, открытые механиком, но не завершённые. Кредит не списан. Убедитесь, что это не злоупотребление.
+          ) : isMobile ? (
+            services.map(s => (
+              <div key={s.service_id} style={card}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                  <div style={{ fontWeight: 700, fontSize: 15 }}>{s.name}</div>
+                  <span style={{ background: s.status === "active" ? C.emeraldBg : C.redBg, color: s.status === "active" ? C.emerald : C.red, padding: "2px 8px", borderRadius: 20, fontSize: 11, fontWeight: 600, flexShrink: 0 }}>
+                    {s.status === "active" ? "активен" : "заблок"}
+                  </span>
                 </div>
+                <Row label="Город">{s.city || "—"}</Row>
+                <Row label="Кредиты"><span style={{ color: s.credits > 0 ? C.green : C.red, fontWeight: 700 }}>{s.credits}</span></Row>
+                <Row label="Диагностик">{s.total_sessions}</Row>
+                <Row label="Оплачено">{(s.total_paid_rub || 0).toLocaleString("ru-RU")} ₽</Row>
+                <Row label="Ваша доля"><span style={{ color: C.emerald, fontWeight: 600 }}>{((s.total_paid_rub || 0) * (rep.commission_rate || 0.1)).toLocaleString("ru-RU")} ₽</span></Row>
+              </div>
+            ))
+          ) : (
+            <div style={card}>
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                  <thead><tr>{["Название", "Город", "Кредиты", "Диагностик", "Оплачено", "Ваша доля", "Статус"].map(h => <th key={h} style={thX}>{h}</th>)}</tr></thead>
+                  <tbody>{services.map(s => (
+                    <tr key={s.service_id} onMouseEnter={e => (e.currentTarget.style.background = C.bg)} onMouseLeave={e => (e.currentTarget.style.background = "")}>
+                      <td style={{ ...tdX, fontWeight: 600 }}>{s.name}</td>
+                      <td style={{ ...tdX, color: C.textSub }}>{s.city || "—"}</td>
+                      <td style={{ ...tdX, color: s.credits > 0 ? C.green : C.red, fontWeight: 700 }}>{s.credits}</td>
+                      <td style={tdX}>{s.total_sessions}</td>
+                      <td style={tdX}>{(s.total_paid_rub || 0).toLocaleString("ru-RU")} ₽</td>
+                      <td style={{ ...tdX, color: C.emerald, fontWeight: 600 }}>{((s.total_paid_rub || 0) * (rep.commission_rate || 0.1)).toLocaleString("ru-RU")} ₽</td>
+                      <td style={tdX}><span style={{ background: s.status === "active" ? C.emeraldBg : C.redBg, color: s.status === "active" ? C.emerald : C.red, padding: "1px 6px", borderRadius: 10, fontSize: 10, fontWeight: 600 }}>{s.status === "active" ? "активен" : "заблок"}</span></td>
+                    </tr>
+                  ))}</tbody>
+                </table>
               </div>
             </div>
-            <div style={{ overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead><tr>
-                  <th style={{ ...th, borderBottom: `2px solid #fde68a` }}>Дата открытия</th>
-                  <th style={{ ...th, borderBottom: `2px solid #fde68a` }}>Сервис</th>
-                  <th style={{ ...th, borderBottom: `2px solid #fde68a` }}>Авто</th>
-                  <th style={{ ...th, borderBottom: `2px solid #fde68a` }}>Статус</th>
-                  <th style={{ ...th, borderBottom: `2px solid #fde68a` }}>Кредит</th>
-                </tr></thead>
-                <tbody>{suspicious.map(s => {
-                  const vehicleStr = s.vehicle
-                    ? [s.vehicle.brand, s.vehicle.model, s.vehicle.year].filter(Boolean).join(" ") || "—"
-                    : "—";
-                  const isAbandoned = s.status === "abandoned";
+          )}
+
+          {/* ── Suspicious sessions ── */}
+          {suspicious.length > 0 && (
+            <>
+              <div style={{ fontWeight: 700, fontSize: 13, color: C.amber, marginBottom: 6, marginTop: 4 }}>⚠️ Сессии без закрытия ({suspicious.length})</div>
+              <div style={{ color: C.textSub, fontSize: 12, marginBottom: 8 }}>Открыты механиком, но не завершены. Кредит не списан.</div>
+              {isMobile ? (
+                suspicious.map(s => {
+                  const vehicleStr = s.vehicle ? [s.vehicle.brand, s.vehicle.model, s.vehicle.year].filter(Boolean).join(" ") || "—" : "—";
                   return (
-                    <tr key={s.session_id} onMouseEnter={e => (e.currentTarget.style.background = "#fef9c3")} onMouseLeave={e => (e.currentTarget.style.background = "")}>
-                      <td style={{ ...td, fontSize: 12, color: C.textSub }}>{new Date(s.created_at).toLocaleString("ru-RU")}</td>
-                      <td style={{ ...td, fontWeight: 600 }}>{s.service_name}</td>
-                      <td style={{ ...td, color: C.textSub }}>{vehicleStr}</td>
-                      <td style={td}>
-                        <span style={{ background: isAbandoned ? "#fee2e2" : "#fef9c3", color: isAbandoned ? C.red : C.amber, padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 600 }}>
-                          {isAbandoned ? "брошена" : "активна >2ч"}
-                        </span>
-                      </td>
-                      <td style={{ ...td, color: C.textSub, fontSize: 12 }}>{s.credit_hold || "—"}</td>
-                    </tr>
+                    <div key={s.session_id} style={{ ...card, background: C.amberBg, borderColor: "#fde68a" }}>
+                      <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 8 }}>{s.service_name}</div>
+                      <Row label="Авто">{vehicleStr}</Row>
+                      <Row label="Дата">{new Date(s.created_at).toLocaleString("ru-RU")}</Row>
+                      <Row label="Статус"><span style={{ color: s.status === "abandoned" ? C.red : C.amber, fontWeight: 600 }}>{s.status === "abandoned" ? "брошена" : "активна >2ч"}</span></Row>
+                      <Row label="Кредит">{s.credit_hold || "—"}</Row>
+                    </div>
                   );
-                })}</tbody>
-              </table>
+                })
+              ) : (
+                <div style={{ ...card, background: C.amberBg, borderColor: "#fde68a" }}>
+                  <div style={{ overflowX: "auto" }}>
+                    <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                      <thead><tr>{["Дата", "Сервис", "Авто", "Статус", "Кредит"].map(h => <th key={h} style={{ ...thX, borderBottomColor: "#fde68a" }}>{h}</th>)}</tr></thead>
+                      <tbody>{suspicious.map(s => {
+                        const vehicleStr = s.vehicle ? [s.vehicle.brand, s.vehicle.model, s.vehicle.year].filter(Boolean).join(" ") || "—" : "—";
+                        const isAbandoned = s.status === "abandoned";
+                        return (
+                          <tr key={s.session_id} onMouseEnter={e => (e.currentTarget.style.background = "#fef9c3")} onMouseLeave={e => (e.currentTarget.style.background = "")}>
+                            <td style={{ ...tdX, color: C.textSub }}>{new Date(s.created_at).toLocaleString("ru-RU")}</td>
+                            <td style={{ ...tdX, fontWeight: 600 }}>{s.service_name}</td>
+                            <td style={{ ...tdX, color: C.textSub }}>{vehicleStr}</td>
+                            <td style={tdX}><span style={{ background: isAbandoned ? "#fee2e2" : "#fef9c3", color: isAbandoned ? C.red : C.amber, padding: "1px 6px", borderRadius: 10, fontSize: 10, fontWeight: 600 }}>{isAbandoned ? "брошена" : "активна >2ч"}</span></td>
+                            <td style={{ ...tdX, color: C.textSub }}>{s.credit_hold || "—"}</td>
+                          </tr>
+                        );
+                      })}</tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* ── Transactions ── */}
+          {txns.length > 0 && (<>
+            <div style={{ fontWeight: 700, fontSize: 13, color: C.text, marginBottom: 6, marginTop: 4 }}>Последние пополнения ({txns.length})</div>
+            {isMobile ? (
+              txns.map(t => (
+                <div key={t.txn_id} style={card}>
+                  <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 6 }}>{t.service_name}</div>
+                  <Row label="Дата">{new Date(t.created_at).toLocaleString("ru-RU")}</Row>
+                  <Row label="Кредиты"><span style={{ color: C.green, fontWeight: 700 }}>+{t.credits_added}</span></Row>
+                  <Row label="Сумма">{(t.amount_rub || 0).toLocaleString("ru-RU")} ₽</Row>
+                  <Row label="Ваша доля"><span style={{ color: C.emerald, fontWeight: 700 }}>{(t.rep_commission_rub || 0).toLocaleString("ru-RU")} ₽</span></Row>
+                </div>
+              ))
+            ) : (
+              <div style={card}>
+                <div style={{ overflowX: "auto" }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                    <thead><tr>{["Дата", "Сервис", "Кр.", "Сумма", "Ваша доля"].map(h => <th key={h} style={thX}>{h}</th>)}</tr></thead>
+                    <tbody>{txns.map(t => (
+                      <tr key={t.txn_id} onMouseEnter={e => (e.currentTarget.style.background = C.bg)} onMouseLeave={e => (e.currentTarget.style.background = "")}>
+                        <td style={{ ...tdX, color: C.textSub }}>{new Date(t.created_at).toLocaleString("ru-RU")}</td>
+                        <td style={{ ...tdX, fontWeight: 600 }}>{t.service_name}</td>
+                        <td style={{ ...tdX, color: C.green, fontWeight: 700 }}>+{t.credits_added}</td>
+                        <td style={tdX}>{(t.amount_rub || 0).toLocaleString("ru-RU")} ₽</td>
+                        <td style={{ ...tdX, color: C.emerald, fontWeight: 700 }}>{(t.rep_commission_rub || 0).toLocaleString("ru-RU")} ₽</td>
+                      </tr>
+                    ))}</tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </>)}
+
+          <div style={{ textAlign: "center", color: C.textMuted, fontSize: 11, marginTop: 16 }}>2LS · Личный кабинет представителя</div>
+
+        </div>{/* /content */}
+
+        {/* ── Bottom toolbar (mobile only) ── */}
+        {isMobile && (
+          <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: C.surface, borderTop: `1px solid ${C.border}`, padding: "10px 16px", display: "flex", alignItems: "center", gap: 10, zIndex: 20, boxShadow: "0 -4px 16px rgba(0,0,0,.06)" }}>
+            <div style={{ width: 30, height: 30, background: C.emerald, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800, fontSize: 11, flexShrink: 0 }}>2LS</div>
+            <span style={{ fontWeight: 700, fontSize: 13, color: C.text, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{rep.name}</span>
+            <div style={{ marginLeft: "auto", display: "flex", gap: 6, alignItems: "center", flexShrink: 0 }}>
+              {loading && <span style={{ fontSize: 11, color: C.textMuted }}>...</span>}
+              <button onClick={openInBrowser} title="Открыть в браузере"
+                style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, padding: "7px 12px", cursor: "pointer", fontSize: 15 }}>🖥</button>
+              {onLogout && (
+                <button onClick={onLogout}
+                  style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, padding: "7px 10px", cursor: "pointer", fontSize: 12, fontWeight: 600, color: C.red }}>
+                  Выйти
+                </button>
+              )}
             </div>
           </div>
         )}
 
-        {/* Transactions */}
-        {txns.length > 0 && (
-          <div style={card}>
-            <h3 style={{ margin: "0 0 16px", fontSize: 15, fontWeight: 700, color: C.text }}>Последние пополнения</h3>
-            <div style={{ overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead><tr>
-                  <th style={th}>Дата</th><th style={th}>Сервис</th><th style={th}>Кредиты</th><th style={th}>Сумма</th><th style={th}>Ваша доля</th>
-                </tr></thead>
-                <tbody>{txns.map(t => (
-                  <tr key={t.txn_id} onMouseEnter={e => (e.currentTarget.style.background = C.bg)} onMouseLeave={e => (e.currentTarget.style.background = "")}>
-                    <td style={{ ...td, color: C.textSub, fontSize: 12 }}>{new Date(t.created_at).toLocaleString("ru-RU")}</td>
-                    <td style={{ ...td, fontWeight: 600 }}>{t.service_name}</td>
-                    <td style={{ ...td, color: C.green, fontWeight: 700 }}>+{t.credits_added}</td>
-                    <td style={td}>{(t.amount_rub || 0).toLocaleString("ru-RU")} ₽</td>
-                    <td style={{ ...td, color: C.emerald, fontWeight: 700 }}>{(t.rep_commission_rub || 0).toLocaleString("ru-RU")} ₽</td>
-                  </tr>
-                ))}</tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        <div style={{ textAlign: "center", color: C.textMuted, fontSize: 12, marginTop: 24 }}>
-          2LS · Личный кабинет представителя
-        </div>
-      </div>
+      </div>{/* /zoom */}
     </div>
   );
 }
