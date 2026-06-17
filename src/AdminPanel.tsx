@@ -394,41 +394,47 @@ export default function AdminPanel({ adminKey, onLogout }: { adminKey: string; o
               <button style={{ ...btn("primary", !credSvcId || !credCredits), width: "100%" }} onClick={addCredits} disabled={loading || !credSvcId || !credCredits}>Зачислить</button>
             </div>
           </>) : (<>
-            {/* Desktop — two forms side by side, compact */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
-              {/* Добавить сервис */}
-              <div style={{ ...card, padding: "10px 14px", marginBottom: 0 }}>
-                <div style={{ fontWeight: 700, fontSize: 12, marginBottom: 8, color: C.text }}>+ Добавить сервис</div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 8 }}>
-                  <input style={inp({ padding: "5px 8px", fontSize: 12 })} placeholder="Название СТО *" value={newSvcName} onChange={e => setNewSvcName(e.target.value)} />
-                  <input style={inp({ padding: "5px 8px", fontSize: 12 })} placeholder="Город" value={newSvcCity} onChange={e => setNewSvcCity(e.target.value)} />
-                  <input style={inp({ padding: "5px 8px", fontSize: 12 })} placeholder="Телефон" value={newSvcPhone} onChange={e => setNewSvcPhone(e.target.value)} />
-                  <select style={inp({ padding: "5px 8px", fontSize: 12 })} value={newSvcRep} onChange={e => setNewSvcRep(e.target.value)}>
-                    <option value="">— Без представителя —</option>
-                    {reps.map(r => <option key={r.telegram_id} value={r.telegram_id}>{r.name}</option>)}
-                  </select>
+            {/* Desktop — two forms side by side, ultra-compact */}
+            {(() => {
+              const fi = (extra?: React.CSSProperties): React.CSSProperties => inp({ padding: "2px 6px", fontSize: 11, borderRadius: 6, ...extra });
+              const fb = (disabled = false): React.CSSProperties => ({ ...btn("primary", disabled), padding: "3px 10px", fontSize: 11, borderRadius: 6 });
+              return (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
+                  {/* Добавить сервис */}
+                  <div style={{ ...card, padding: "6px 10px", marginBottom: 0 }}>
+                    <div style={{ fontWeight: 700, fontSize: 11, marginBottom: 5, color: C.textSub }}>+ Добавить сервис</div>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4, marginBottom: 5 }}>
+                      <input style={fi()} placeholder="Название СТО *" value={newSvcName} onChange={e => setNewSvcName(e.target.value)} />
+                      <input style={fi()} placeholder="Город" value={newSvcCity} onChange={e => setNewSvcCity(e.target.value)} />
+                      <input style={fi()} placeholder="Телефон" value={newSvcPhone} onChange={e => setNewSvcPhone(e.target.value)} />
+                      <select style={fi()} value={newSvcRep} onChange={e => setNewSvcRep(e.target.value)}>
+                        <option value="">— Представитель —</option>
+                        {reps.map(r => <option key={r.telegram_id} value={r.telegram_id}>{r.name}</option>)}
+                      </select>
+                    </div>
+                    <button style={fb(!newSvcName.trim())} onClick={createService} disabled={loading || !newSvcName.trim()}>Создать</button>
+                  </div>
+                  {/* Пополнить кредиты */}
+                  <div style={{ ...card, padding: "6px 10px", marginBottom: 0 }}>
+                    <div style={{ fontWeight: 700, fontSize: 11, marginBottom: 5, color: C.textSub }}>💳 Пополнить кредиты</div>
+                    <div style={{ display: "grid", gridTemplateColumns: "2fr 60px 70px 1fr", gap: 4, marginBottom: 5 }}>
+                      <select style={fi()} value={credSvcId} onChange={e => setCredSvcId(e.target.value)}>
+                        <option value="">— Сервис —</option>
+                        {services.map(s => <option key={s.service_id} value={s.service_id}>{s.name} [{s.credits}]</option>)}
+                      </select>
+                      <input style={fi()} placeholder="Кред." type="number" min="1" value={credCredits} onChange={e => setCredCredits(e.target.value)} />
+                      <div style={fi({ color: credAmount > 0 ? C.green : C.textMuted, fontWeight: credAmount > 0 ? 700 : 400, lineHeight: "1.6" })}>{credAmount > 0 ? `${credAmount.toLocaleString("ru-RU")} ₽` : "0 ₽"}</div>
+                      <input style={fi()} placeholder="Примечание" value={credNotes} onChange={e => setCredNotes(e.target.value)} />
+                    </div>
+                    <button style={fb(!credSvcId || !credCredits)} onClick={addCredits} disabled={loading || !credSvcId || !credCredits}>Зачислить</button>
+                  </div>
                 </div>
-                <button style={{ ...btn("primary", !newSvcName.trim()), padding: "6px 14px", fontSize: 12 }} onClick={createService} disabled={loading || !newSvcName.trim()}>Создать сервис</button>
-              </div>
-              {/* Пополнить кредиты */}
-              <div style={{ ...card, padding: "10px 14px", marginBottom: 0 }}>
-                <div style={{ fontWeight: 700, fontSize: 12, marginBottom: 8, color: C.text }}>💳 Пополнить кредиты</div>
-                <div style={{ display: "grid", gridTemplateColumns: "2fr 80px 80px 1fr", gap: 6, marginBottom: 8 }}>
-                  <select style={inp({ padding: "5px 8px", fontSize: 12 })} value={credSvcId} onChange={e => setCredSvcId(e.target.value)}>
-                    <option value="">— Выберите сервис —</option>
-                    {services.map(s => <option key={s.service_id} value={s.service_id}>{s.name} [{s.credits} кр.]</option>)}
-                  </select>
-                  <input style={inp({ padding: "5px 8px", fontSize: 12 })} placeholder="Кред." type="number" min="1" value={credCredits} onChange={e => setCredCredits(e.target.value)} />
-                  <div style={inp({ padding: "5px 8px", fontSize: 12, color: credAmount > 0 ? C.green : C.textMuted, fontWeight: credAmount > 0 ? 700 : 400 })}>{credAmount > 0 ? `${credAmount.toLocaleString("ru-RU")} ₽` : "0 ₽"}</div>
-                  <input style={inp({ padding: "5px 8px", fontSize: 12 })} placeholder="Примечание" value={credNotes} onChange={e => setCredNotes(e.target.value)} />
-                </div>
-                <button style={{ ...btn("primary", !credSvcId || !credCredits), padding: "6px 14px", fontSize: 12 }} onClick={addCredits} disabled={loading || !credSvcId || !credCredits}>Зачислить</button>
-              </div>
-            </div>
+              );
+            })()}
           </>)}
 
           {/* List */}
-          <div style={{ fontWeight: 700, fontSize: 14, color: C.text, marginBottom: 10 }}>Все сервисы ({services.length})</div>
+          <div style={{ fontWeight: 700, fontSize: 13, color: C.text, marginBottom: 6 }}>Все сервисы ({services.length})</div>
           {isMobile ? (
             // ── Mobile cards ──
             services.map(s => (
@@ -472,36 +478,44 @@ export default function AdminPanel({ adminKey, onLogout }: { adminKey: string; o
                 </>)}
               </div>
             ))
-          ) : (
-            // ── Desktop table ──
+          ) : (() => {
+            // ── Desktop table — ultra-compact rows ──
+            const tdX: React.CSSProperties = { padding: "2px 7px", fontSize: 11, verticalAlign: "middle", borderBottom: `1px solid ${C.border}`, lineHeight: "1.3", whiteSpace: "nowrap" as const };
+            const thX: React.CSSProperties = { padding: "4px 7px", color: C.textSub, textAlign: "left" as const, fontWeight: 600, fontSize: 10, borderBottom: `2px solid ${C.border}`, whiteSpace: "nowrap" as const };
+            const bXs = (v: "primary"|"success"|"danger"|"ghost" = "ghost"): React.CSSProperties => ({ ...btnSm(v), padding: "1px 6px", fontSize: 10, borderRadius: 4 });
+            const inpX = (ex?: React.CSSProperties): React.CSSProperties => inp({ padding: "1px 5px", fontSize: 11, ...ex });
+            return (
             <div style={card}>
               <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                  <thead><tr>{["Название", "Город", "Телефон", "Представитель", "Кредиты", "Сессий", "Статус", ""].map(h => <th key={h} style={th}>{h}</th>)}</tr></thead>
+                  <thead><tr>{["Название", "Город", "Телефон", "Представитель", "Кр.", "Сес.", "Статус", ""].map(h => <th key={h} style={thX}>{h}</th>)}</tr></thead>
                   <tbody>{services.map(s => (
                     editSvcId === s.service_id ? (
                       <tr key={s.service_id} style={{ background: C.blueBg }}>
-                        <td style={td}><input style={{ ...inp(), fontSize: 12, padding: "5px 8px" }} value={editSvc.name || ""} onChange={e => setEditSvc(p => ({ ...p, name: e.target.value }))} /></td>
-                        <td style={td}><input style={{ ...inp(), fontSize: 12, padding: "5px 8px" }} value={editSvc.city || ""} onChange={e => setEditSvc(p => ({ ...p, city: e.target.value }))} /></td>
-                        <td style={td}><input style={{ ...inp(), fontSize: 12, padding: "5px 8px" }} value={editSvc.phone || ""} onChange={e => setEditSvc(p => ({ ...p, phone: e.target.value }))} /></td>
-                        <td style={td}><select style={{ ...inp(), fontSize: 12, padding: "5px 8px" }} value={editSvc.rep_id ?? ""} onChange={e => setEditSvc(p => ({ ...p, rep_id: e.target.value ? parseInt(e.target.value) : null }))}><option value="">— нет —</option>{reps.map(r => <option key={r.telegram_id} value={r.telegram_id}>{r.name}</option>)}</select></td>
-                        <td style={td}>{s.credits}</td><td style={td}>{s.total_sessions}</td>
-                        <td style={td}><select style={{ ...inp(), fontSize: 12, padding: "5px 8px" }} value={editSvc.status || "active"} onChange={e => setEditSvc(p => ({ ...p, status: e.target.value }))}><option value="active">активен</option><option value="blocked">заблокирован</option></select></td>
-                        <td style={td}><button style={btnSm("success")} onClick={() => saveService(s.service_id)}>Сохранить</button><button style={btnSm()} onClick={() => setEditSvcId(null)}>Отмена</button></td>
+                        <td style={tdX}><input style={inpX()} value={editSvc.name || ""} onChange={e => setEditSvc(p => ({ ...p, name: e.target.value }))} /></td>
+                        <td style={tdX}><input style={inpX()} value={editSvc.city || ""} onChange={e => setEditSvc(p => ({ ...p, city: e.target.value }))} /></td>
+                        <td style={tdX}><input style={inpX()} value={editSvc.phone || ""} onChange={e => setEditSvc(p => ({ ...p, phone: e.target.value }))} /></td>
+                        <td style={tdX}><select style={inpX()} value={editSvc.rep_id ?? ""} onChange={e => setEditSvc(p => ({ ...p, rep_id: e.target.value ? parseInt(e.target.value) : null }))}><option value="">— нет —</option>{reps.map(r => <option key={r.telegram_id} value={r.telegram_id}>{r.name}</option>)}</select></td>
+                        <td style={tdX}>{s.credits}</td>
+                        <td style={tdX}>{s.total_sessions}</td>
+                        <td style={tdX}><select style={inpX()} value={editSvc.status || "active"} onChange={e => setEditSvc(p => ({ ...p, status: e.target.value }))}><option value="active">активен</option><option value="blocked">заблок</option></select></td>
+                        <td style={tdX}><div style={{ display: "flex", gap: 4 }}><button style={bXs("success")} onClick={() => saveService(s.service_id)}>✓</button><button style={bXs()} onClick={() => setEditSvcId(null)}>✕</button></div></td>
                       </tr>
                     ) : (
                       <tr key={s.service_id} onMouseEnter={e => (e.currentTarget.style.background = C.bg)} onMouseLeave={e => (e.currentTarget.style.background = "")}>
-                        <td style={td}><div style={{ fontWeight: 600 }}>{s.name}</div><div style={{ color: C.textMuted, fontSize: 11 }}>{s.service_id}</div></td>
-                        <td style={{ ...td, color: C.textSub }}>{s.city || "—"}</td>
-                        <td style={{ ...td, color: C.textSub }}>{s.phone || "—"}</td>
-                        <td style={{ ...td, color: C.textSub }}>{s.rep_name || "—"}</td>
-                        <td style={{ ...td, color: s.credits > 0 ? C.green : C.red, fontWeight: 700 }}>{s.credits}</td>
-                        <td style={td}>{s.total_sessions}</td>
-                        <td style={td}><span style={{ background: s.status === "active" ? C.greenBg : C.redBg, color: s.status === "active" ? C.green : C.red, padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 600 }}>{s.status === "active" ? "активен" : "заблок"}</span></td>
-                        <td style={td}>
-                          <button style={btnSm("primary")} onClick={() => { setEditSvcId(s.service_id); setEditSvc({ name: s.name, city: s.city, phone: s.phone, rep_id: s.rep_id, status: s.status }); }}>Изменить</button>
-                          <button style={btnSm("ghost")} onClick={() => openAnalytics(s.service_id)}>📊</button>
-                          <button style={btnSm("danger")} onClick={() => deleteService(s.service_id, s.name)}>Удалить</button>
+                        <td style={{ ...tdX, fontWeight: 600 }} title={s.service_id}>{s.name}</td>
+                        <td style={{ ...tdX, color: C.textSub }}>{s.city || "—"}</td>
+                        <td style={{ ...tdX, color: C.textSub }}>{s.phone || "—"}</td>
+                        <td style={{ ...tdX, color: C.textSub }}>{s.rep_name || "—"}</td>
+                        <td style={{ ...tdX, color: s.credits > 0 ? C.green : C.red, fontWeight: 700 }}>{s.credits}</td>
+                        <td style={{ ...tdX, color: C.textSub }}>{s.total_sessions}</td>
+                        <td style={tdX}><span style={{ background: s.status === "active" ? C.greenBg : C.redBg, color: s.status === "active" ? C.green : C.red, padding: "1px 6px", borderRadius: 10, fontSize: 10, fontWeight: 600 }}>{s.status === "active" ? "активен" : "заблок"}</span></td>
+                        <td style={tdX}>
+                          <div style={{ display: "flex", gap: 4 }}>
+                            <button style={bXs("primary")} onClick={() => { setEditSvcId(s.service_id); setEditSvc({ name: s.name, city: s.city, phone: s.phone, rep_id: s.rep_id, status: s.status }); }}>✏</button>
+                            <button style={bXs("ghost")} onClick={() => openAnalytics(s.service_id)}>📊</button>
+                            <button style={bXs("danger")} onClick={() => deleteService(s.service_id, s.name)}>🗑</button>
+                          </div>
                         </td>
                       </tr>
                     )
@@ -509,7 +523,8 @@ export default function AdminPanel({ adminKey, onLogout }: { adminKey: string; o
                 </table>
               </div>
             </div>
-          )}
+            );
+          })()}
         </>)}
 
         {/* ══ REPS ══ */}
