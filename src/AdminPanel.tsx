@@ -592,7 +592,7 @@ export default function AdminPanel({ adminKey, onLogout }: { adminKey: string; o
             <div style={card}>
               <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                  <thead><tr>{["Имя", "Telegram", "Телефон", "Сервисов", "Заработано", "К выплате", ""].map(h => <th key={h} style={thX}>{h}</th>)}</tr></thead>
+                  <thead><tr>{["Имя", "Telegram", "Телефон", "Сервисов", "Заработано", "К выплате", "Токен входа", ""].map(h => <th key={h} style={thX}>{h}</th>)}</tr></thead>
                   <tbody>{reps.map(r => (
                     editRepId === r.telegram_id ? (
                       <tr key={r.telegram_id} style={{ background: C.blueBg }}>
@@ -602,6 +602,7 @@ export default function AdminPanel({ adminKey, onLogout }: { adminKey: string; o
                         <td style={tdX}>{r.services_count}</td>
                         <td style={tdX}>{(r.total_earned_rub||0).toLocaleString("ru-RU")} ₽</td>
                         <td style={tdX}>{(r.pending_payout_rub||0).toLocaleString("ru-RU")} ₽</td>
+                        <td style={tdX}><code style={{ fontSize: 10, color: C.amber }}>{r.rep_token || "—"}</code></td>
                         <td style={tdX}><div style={{ display: "flex", gap: 4 }}><button style={bXs("success")} onClick={() => saveRep(r.telegram_id)}>✓</button><button style={bXs()} onClick={() => setEditRepId(null)}>✕</button></div></td>
                       </tr>
                     ) : (
@@ -612,6 +613,7 @@ export default function AdminPanel({ adminKey, onLogout }: { adminKey: string; o
                         <td style={tdX}>{r.services_count}</td>
                         <td style={{ ...tdX, color: C.green, fontWeight: 600 }}>{(r.total_earned_rub||0).toLocaleString("ru-RU")} ₽</td>
                         <td style={{ ...tdX, color: (r.pending_payout_rub||0) > 0 ? C.amber : C.textSub, fontWeight: (r.pending_payout_rub||0) > 0 ? 700 : 400 }}>{(r.pending_payout_rub||0).toLocaleString("ru-RU")} ₽</td>
+                        <td style={tdX}><code style={{ fontSize: 10, color: C.amber, userSelect: "all" as const }}>{r.rep_token || "—"}</code></td>
                         <td style={tdX}>
                           <div style={{ display: "flex", gap: 4 }}>
                             <button style={bXs("primary")} onClick={() => { setEditRepId(r.telegram_id); setEditRep({ name: r.name, username: r.username, phone: r.phone }); }}>✏</button>
