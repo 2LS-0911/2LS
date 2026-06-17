@@ -91,6 +91,7 @@ export default function AdminPanel({ adminKey }: { adminKey: string }) {
 
   const [analytics, setAnalytics] = useState<ServiceAnalytics | null>(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ message: string; action: () => Promise<void> } | null>(null);
 
   const [editSvcId, setEditSvcId] = useState<string | null>(null);
   const [editSvc, setEditSvc] = useState<Partial<Service>>({});
@@ -143,10 +144,11 @@ export default function AdminPanel({ adminKey }: { adminKey: string }) {
     catch (e: unknown) { setError(e instanceof Error ? e.message : String(e)); } finally { setLoading(false); }
   }
   async function deleteService(id: string, name: string) {
-    if (!confirm(`Удалить сервис «${name}»?`)) return;
-    setLoading(true); setError("");
-    try { await apicall(`${API}/api/admin/service/${id}?key=${adminKey}`, "DELETE"); loadTab("services", true); }
-    catch (e: unknown) { setError(e instanceof Error ? e.message : String(e)); } finally { setLoading(false); }
+    setDeleteConfirm({ message: `Удалить сервис «${name}»?`, action: async () => {
+      setLoading(true); setError("");
+      try { await apicall(`${API}/api/admin/service/${id}?key=${adminKey}`, "DELETE"); loadTab("services", true); }
+      catch (e: unknown) { setError(e instanceof Error ? e.message : String(e)); } finally { setLoading(false); }
+    }});
   }
   async function openAnalytics(service_id: string) {
     setAnalyticsLoading(true); setAnalytics(null);
@@ -165,10 +167,11 @@ export default function AdminPanel({ adminKey }: { adminKey: string }) {
     catch (e: unknown) { setError(e instanceof Error ? e.message : String(e)); } finally { setLoading(false); }
   }
   async function deleteRep(id: number, name: string) {
-    if (!confirm(`Удалить представителя «${name}»?`)) return;
-    setLoading(true); setError("");
-    try { await apicall(`${API}/api/admin/rep/${id}?key=${adminKey}`, "DELETE"); loadTab("reps", true); }
-    catch (e: unknown) { setError(e instanceof Error ? e.message : String(e)); } finally { setLoading(false); }
+    setDeleteConfirm({ message: `Удалить представителя «${name}»?`, action: async () => {
+      setLoading(true); setError("");
+      try { await apicall(`${API}/api/admin/rep/${id}?key=${adminKey}`, "DELETE"); loadTab("reps", true); }
+      catch (e: unknown) { setError(e instanceof Error ? e.message : String(e)); } finally { setLoading(false); }
+    }});
   }
   async function addCredits() {
     if (!credSvcId || !credCredits) return;
@@ -185,22 +188,25 @@ export default function AdminPanel({ adminKey }: { adminKey: string }) {
     catch (e: unknown) { setError(e instanceof Error ? e.message : String(e)); } finally { setLoading(false); }
   }
   async function deleteCase(caseId: string) {
-    if (!confirm("Удалить кейс безвозвратно?")) return;
-    setLoading(true); setError("");
-    try { await apicall(`${API}/api/manager/case/${caseId}?key=${adminKey}`, "DELETE"); loadTab("cases", true); }
-    catch (e: unknown) { setError(e instanceof Error ? e.message : String(e)); } finally { setLoading(false); }
+    setDeleteConfirm({ message: "Удалить кейс безвозвратно?", action: async () => {
+      setLoading(true); setError("");
+      try { await apicall(`${API}/api/manager/case/${caseId}?key=${adminKey}`, "DELETE"); loadTab("cases", true); }
+      catch (e: unknown) { setError(e instanceof Error ? e.message : String(e)); } finally { setLoading(false); }
+    }});
   }
   async function deleteTxn(txnId: string) {
-    if (!confirm("Удалить транзакцию?")) return;
-    setLoading(true); setError("");
-    try { await apicall(`${API}/api/admin/transaction/${txnId}?key=${adminKey}`, "DELETE"); loadTab("txns", true); }
-    catch (e: unknown) { setError(e instanceof Error ? e.message : String(e)); } finally { setLoading(false); }
+    setDeleteConfirm({ message: "Удалить транзакцию?", action: async () => {
+      setLoading(true); setError("");
+      try { await apicall(`${API}/api/admin/transaction/${txnId}?key=${adminKey}`, "DELETE"); loadTab("txns", true); }
+      catch (e: unknown) { setError(e instanceof Error ? e.message : String(e)); } finally { setLoading(false); }
+    }});
   }
   async function deleteZeroTxns() {
-    if (!confirm("Удалить все нулевые транзакции (0 ₽, 0 кредитов)?")) return;
-    setLoading(true); setError("");
-    try { await apicall(`${API}/api/admin/transactions/zero?key=${adminKey}`, "DELETE"); loadTab("txns", true); }
-    catch (e: unknown) { setError(e instanceof Error ? e.message : String(e)); } finally { setLoading(false); }
+    setDeleteConfirm({ message: "Удалить все нулевые транзакции (0 ₽, 0 кредитов)?", action: async () => {
+      setLoading(true); setError("");
+      try { await apicall(`${API}/api/admin/transactions/zero?key=${adminKey}`, "DELETE"); loadTab("txns", true); }
+      catch (e: unknown) { setError(e instanceof Error ? e.message : String(e)); } finally { setLoading(false); }
+    }});
   }
 
   const tabs = [
@@ -261,6 +267,24 @@ export default function AdminPanel({ adminKey }: { adminKey: string }) {
     );
   };
 
+  // ── Confirm Modal ────────────────────────────────────────────────────────
+  const ConfirmModal = () => {
+    if (!deleteConfirm) return null;
+    return (
+      <div style={{ position: "fixed", inset: 0, background: "rgba(15,23,42,.55)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }} onClick={() => setDeleteConfirm(null)}>
+        <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 16, padding: 24, width: "100%", maxWidth: 360, boxShadow: "0 16px 48px rgba(0,0,0,.18)" }} onClick={e => e.stopPropagation()}>
+          <div style={{ fontSize: 32, textAlign: "center", marginBottom: 12 }}>🗑</div>
+          <div style={{ fontSize: 15, fontWeight: 600, color: C.text, textAlign: "center", marginBottom: 6 }}>Подтверждение</div>
+          <div style={{ fontSize: 13, color: C.textSub, textAlign: "center", marginBottom: 24 }}>{deleteConfirm.message}</div>
+          <div style={{ display: "flex", gap: 10 }}>
+            <button style={{ ...btn("ghost"), flex: 1 }} onClick={() => setDeleteConfirm(null)}>Отмена</button>
+            <button style={{ ...btn("danger"), flex: 1 }} onClick={async () => { const a = deleteConfirm.action; setDeleteConfirm(null); await a(); }}>Удалить</button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // ── Desktop zoom wrapper ─────────────────────────────────────────────────
   const zoomStyle: React.CSSProperties = !isMobile ? {
     zoom: 1.7,
@@ -275,23 +299,25 @@ export default function AdminPanel({ adminKey }: { adminKey: string }) {
     <div style={{ fontFamily: "system-ui,-apple-system,sans-serif", background: C.bg, minHeight: "100vh", color: C.text }}>
       <div style={zoomStyle}>
 
-      {/* ── Top bar ── */}
-      <div style={{ background: C.surface, borderBottom: `1px solid ${C.border}`, padding: isMobile ? "12px 16px" : "14px 28px", display: "flex", alignItems: "center", gap: 10, position: "sticky", top: 0, zIndex: 10 }}>
-        <div style={{ width: 30, height: 30, background: C.blue, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800, fontSize: 11, flexShrink: 0 }}>2LS</div>
-        <span style={{ fontWeight: 700, fontSize: isMobile ? 14 : 16, color: C.text }}>Администратор</span>
-        <div style={{ marginLeft: "auto", display: "flex", gap: 6, alignItems: "center" }}>
-          {loading && !isMobile && <span style={{ fontSize: 12, color: C.textMuted }}>Загрузка...</span>}
-          <button style={{ ...btn("ghost"), padding: "7px 12px", fontSize: 13 }} onClick={refresh}>↻</button>
-          <button
-            title="Открыть в браузере (веб-версия)"
-            onClick={() => { const tg = (window as any).Telegram?.WebApp; const url = window.location.href; if (tg?.openLink) tg.openLink(url); else window.open(url, "_blank"); }}
-            style={{ ...btn("ghost"), padding: "7px 12px", fontSize: 15 }}>
-            🖥
-          </button>
+      {/* ── Top bar (desktop only) ── */}
+      {!isMobile && (
+        <div style={{ background: C.surface, borderBottom: `1px solid ${C.border}`, padding: "14px 28px", display: "flex", alignItems: "center", gap: 10, position: "sticky", top: 0, zIndex: 10 }}>
+          <div style={{ width: 30, height: 30, background: C.blue, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800, fontSize: 11, flexShrink: 0 }}>2LS</div>
+          <span style={{ fontWeight: 700, fontSize: 16, color: C.text }}>Администратор</span>
+          <div style={{ marginLeft: "auto", display: "flex", gap: 6, alignItems: "center" }}>
+            {loading && <span style={{ fontSize: 12, color: C.textMuted }}>Загрузка...</span>}
+            <button style={{ ...btn("ghost"), padding: "7px 12px", fontSize: 13 }} onClick={refresh}>↻</button>
+            <button
+              title="Открыть в браузере (веб-версия)"
+              onClick={() => { const tg = (window as any).Telegram?.WebApp; const url = window.location.href; if (tg?.openLink) tg.openLink(url); else window.open(url, "_blank"); }}
+              style={{ ...btn("ghost"), padding: "7px 12px", fontSize: 15 }}>
+              🖥
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
-      <div style={{ padding: pad, maxWidth: maxW, margin: "0 auto" }}>
+      <div style={{ padding: pad, maxWidth: maxW, margin: "0 auto", paddingBottom: isMobile ? "80px" : pad }}>
 
         {error && (
           <div style={{ background: C.redBg, border: `1px solid #fecaca`, borderRadius: 10, padding: "12px 14px", marginBottom: 14, color: C.red, display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 13 }}>
@@ -625,6 +651,25 @@ export default function AdminPanel({ adminKey }: { adminKey: string }) {
       </div>
 
       <AnalyticsModal />
+      <ConfirmModal />
+
+      {/* ── Bottom toolbar (mobile only) ── */}
+      {isMobile && (
+        <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: C.surface, borderTop: `1px solid ${C.border}`, padding: "10px 16px", display: "flex", alignItems: "center", gap: 10, zIndex: 20, boxShadow: "0 -4px 16px rgba(0,0,0,.06)" }}>
+          <div style={{ width: 30, height: 30, background: C.blue, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800, fontSize: 11, flexShrink: 0 }}>2LS</div>
+          <span style={{ fontWeight: 700, fontSize: 14, color: C.text }}>Администратор</span>
+          <div style={{ marginLeft: "auto", display: "flex", gap: 6, alignItems: "center" }}>
+            {loading && <span style={{ fontSize: 11, color: C.textMuted }}>...</span>}
+            <button style={{ ...btn("ghost"), padding: "7px 12px", fontSize: 13 }} onClick={refresh}>↻</button>
+            <button
+              title="Открыть в браузере"
+              onClick={() => { const tg = (window as any).Telegram?.WebApp; const url = window.location.href; if (tg?.openLink) tg.openLink(url); else window.open(url, "_blank"); }}
+              style={{ ...btn("ghost"), padding: "7px 12px", fontSize: 15 }}>
+              🖥
+            </button>
+          </div>
+        </div>
+      )}
 
       </div>{/* /zoom */}
     </div>
