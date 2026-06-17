@@ -953,9 +953,9 @@ ${recommendedWorks.length > 0 ? `<div class="section">
       <div
         className={`flex flex-col overflow-hidden ${isDesktop ? "" : "flex-1 w-full"}`}
         style={isDesktop ? {
-          zoom: 2,
-          width: "50vw",
-          height: "calc(var(--tg-viewport-height, 100dvh) / 2)",
+          zoom: 1.7,
+          width: "calc(100vw / 1.7)",
+          height: "calc(var(--tg-viewport-height, 100dvh) / 1.7)",
         } : undefined}
       >
         <div className={`flex-1 flex flex-col overflow-hidden ${isDark ? "bg-slate-950" : screen === "code" ? "bg-[#f5f3ee]" : "bg-[#f0f6fc]"}`}
