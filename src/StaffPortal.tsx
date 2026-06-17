@@ -81,9 +81,9 @@ export default function StaffPortal() {
         <div className="w-full max-w-sm">
 
           {/* Logo */}
-          <div className="text-center mb-10">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-600 mb-4 shadow-xl shadow-blue-900/60">
-              <Wrench className="w-8 h-8 text-white" />
+          <div className="text-center mb-6">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-600 mb-3 shadow-xl shadow-blue-900/60">
+              <Wrench className="w-7 h-7 text-white" />
             </div>
             <h1 className="text-2xl font-bold text-white tracking-tight">2LS</h1>
             <p className="text-slate-400 text-sm mt-1">Портал сотрудников</p>
@@ -118,7 +118,7 @@ export default function StaffPortal() {
             </button>
           </div>
 
-          <p className="text-center text-slate-600 text-xs mt-8">
+          <p className="text-center text-slate-600 text-xs mt-6">
             Доступ только для авторизованных сотрудников 2LS
           </p>
         </div>
@@ -136,18 +136,18 @@ export default function StaffPortal() {
         {/* Back */}
         <button
           onClick={() => { setRole(null); setPassword(""); setError(""); }}
-          className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-8 text-sm"
+          className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-6 text-sm"
         >
           <ArrowLeft className="w-4 h-4" />
           Назад
         </button>
 
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className={`inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4 shadow-xl ${isAdmin ? "bg-blue-900/60 shadow-blue-900/40" : "bg-emerald-900/60 shadow-emerald-900/40"}`}>
+        <div className="text-center mb-5">
+          <div className={`inline-flex items-center justify-center w-12 h-12 rounded-2xl mb-3 shadow-xl ${isAdmin ? "bg-blue-900/60 shadow-blue-900/40" : "bg-emerald-900/60 shadow-emerald-900/40"}`}>
             {isAdmin
-              ? <Shield className="w-7 h-7 text-blue-400" />
-              : <Users className="w-7 h-7 text-emerald-400" />
+              ? <Shield className="w-6 h-6 text-blue-400" />
+              : <Users className="w-6 h-6 text-emerald-400" />
             }
           </div>
           <h2 className="text-xl font-bold text-white">
@@ -159,7 +159,7 @@ export default function StaffPortal() {
         </div>
 
         {/* Form card */}
-        <div className="bg-slate-800/50 rounded-2xl border border-slate-700 p-6 backdrop-blur-sm">
+        <div className="bg-slate-800/50 rounded-2xl border border-slate-700 p-5 backdrop-blur-sm">
           <div className="relative">
             <input
               type={showPwd ? "text" : "password"}

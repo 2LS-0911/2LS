@@ -346,7 +346,7 @@ export default function AdminPanel({ adminKey }: { adminKey: string }) {
 
       {/* Top bar */}
       <div style={{ background: C.surface, borderBottom: `1px solid ${C.border}`, padding: "14px 28px", display: "flex", alignItems: "center", gap: 12, position: "sticky", top: 0, zIndex: 10 }}>
-        <div style={{ width: 32, height: 32, background: C.blue, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800, fontSize: 14 }}>2L</div>
+        <div style={{ width: 32, height: 32, background: C.blue, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800, fontSize: 12, letterSpacing: "-0.5px" }}>2LS</div>
         <span style={{ fontWeight: 700, fontSize: 16, color: C.text }}>Панель администратора</span>
         <div style={{ marginLeft: "auto", display: "flex", gap: 8, alignItems: "center" }}>
           {loading && <span style={{ fontSize: 12, color: C.textMuted }}>Загрузка...</span>}

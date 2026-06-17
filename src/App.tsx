@@ -102,6 +102,18 @@ function DiagApp() {
   const [desktopForced, setDesktopForced] = useState(false);
   const [screen, setScreen] = useState<Screen>("code");
 
+  // Hidden staff entry — 5 clicks on the "Вход для персонала" link
+  const [showStaffPortal, setShowStaffPortal] = useState(false);
+  const [staffClicks, setStaffClicks] = useState(0);
+  const staffClickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  function handleStaffLinkClick() {
+    if (staffClickTimer.current) clearTimeout(staffClickTimer.current);
+    const next = staffClicks + 1;
+    if (next >= 5) { setShowStaffPortal(true); setStaffClicks(0); return; }
+    setStaffClicks(next);
+    staffClickTimer.current = setTimeout(() => setStaffClicks(0), 1500);
+  }
+
   // Service
   const [serviceCode, setServiceCode] = useState(() => localStorage.getItem("2ls_service_code") || "");
   const [serviceCodeInput, setServiceCodeInput] = useState("");
@@ -603,7 +615,7 @@ function DiagApp() {
           setAiConclusion(conclusionData.conclusion);
         } catch (conclusionError) {
           console.error("Error generating AI conclusion:", conclusionError);
-          setAiConclusion("Не удалось сгенерировать заключение AI.");
+          setAiConclusion("Не удалось сгенерировать заключение.");
         }
 
         // P3 — пакет документов: объяснение клиенту + памятка
@@ -763,7 +775,7 @@ function DiagApp() {
 </div>
 
 ${finalAiConclusion ? `<div class="section">
-  <div class="section-title">Заключение AI-диагноста</div>
+  <div class="section-title">Заключение диагноста</div>
   <div class="diagnosis-box">${finalAiConclusion.replace(/\*([^*]+)\*/g, "<strong>$1</strong>").replace(/\n/g, "<br/>")}</div>
 </div>` : ""}
 
@@ -829,7 +841,7 @@ ${recommendedWorks.length > 0 ? `<div class="section">
 </div>
 
 <div class="footer">
-  <div class="footer-brand">Диагностика выполнена с помощью <strong>2LS</strong> — AI-диагностика для автосервисов</div>
+  <div class="footer-brand">Диагностика выполнена с помощью <strong>2LS</strong> — диагностика для автосервисов</div>
   <div style="font-size:11px;color:#888;">${date}</div>
 </div>
 
@@ -928,6 +940,8 @@ ${recommendedWorks.length > 0 ? `<div class="section">
 
   const problemReady = (dtcCodes.length > 0 || noDtc) && (symptoms.length > 0 || symptomText.trim());
 
+  if (showStaffPortal) return <StaffPortal />;
+
   // ── UI ────────────────────────────────────────────────────────────
   return (
     <div
@@ -938,29 +952,27 @@ ${recommendedWorks.length > 0 ? `<div class="section">
         <div className={`flex-1 flex flex-col overflow-hidden ${isDark ? "bg-slate-950" : "bg-[#f0f6fc]"}`}
         >
 
-          {/* Header */}
-          <div className={`border-b flex items-center justify-between z-30 shrink-0 ${isDesktop ? "h-14 px-8" : "h-12 px-4"} ${isDark ? "bg-slate-900 border-slate-800/80 text-slate-200" : "bg-[#0088cc] border-blue-600/10 text-white"}`}>
+          {/* System toolbar */}
+          <div className={`border-b flex items-center justify-between z-30 shrink-0 px-3 h-9 ${isDark ? "bg-slate-900/95 border-slate-800 text-slate-200" : "bg-white/95 border-slate-200 text-slate-800"}`}>
             <div className="flex items-center gap-1.5">
-              <button
-                onClick={() => { if (screen === "problem") setScreen("form"); else if (screen === "form") {} }}
-                disabled={!canGoBack}
-                className={`p-1.5 rounded-full transition-colors ${canGoBack ? (isDark ? "hover:bg-slate-800" : "hover:bg-white/10") : "opacity-30 cursor-default"}`}
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </button>
-              <div className="flex flex-col">
-                <span className="text-xs font-bold leading-none tracking-tight">2LS</span>
-                <span className={`text-[9px] font-medium ${isDark ? "text-emerald-400" : "text-sky-200"}`}>{headerSubtitle}</span>
-              </div>
+              {canGoBack && (
+                <button
+                  onClick={() => { if (screen === "problem") setScreen("form"); else if (screen === "form") {} }}
+                  className={`p-1 rounded-full transition-colors ${isDark ? "hover:bg-slate-800 text-slate-400" : "hover:bg-slate-100 text-slate-500"}`}
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                </button>
+              )}
+              <span className={`text-sm font-black tracking-tight ${isDark ? "text-blue-400" : "text-blue-600"}`}>2LS</span>
             </div>
-            <div className="flex gap-2 items-center">
+            <div className="flex gap-1.5 items-center">
               {credits !== null && screen !== "code" && (
-                <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${credits > 0 ? (isDark ? "bg-emerald-500/20 text-emerald-400" : "bg-white/20 text-white") : "bg-red-500/30 text-red-300"}`}>
+                <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold ${credits > 0 ? (isDark ? "bg-emerald-500/20 text-emerald-400" : "bg-emerald-50 border border-emerald-100 text-emerald-700") : "bg-red-500/10 text-red-500"}`}>
                   <CreditCard className="w-2.5 h-2.5" />{credits}
                 </div>
               )}
               <button onClick={() => setTheme(t => t === "dark" ? "light" : "dark")}
-                className={`p-1 rounded-md border flex items-center justify-center transition-colors ${isDark ? "bg-slate-800 border-slate-700/50 text-amber-400" : "bg-white/10 border-white/20 text-yellow-300"}`}>
+                className={`p-1 rounded-md flex items-center justify-center transition-colors ${isDark ? "text-amber-400 hover:bg-slate-800" : "text-slate-500 hover:bg-slate-100"}`}>
                 {isDark ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
               </button>
               <button
@@ -969,7 +981,7 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                   else { setIsDesktop(true); setDesktopForced(true); }
                 }}
                 title={isDesktop ? "Мобильный вид" : "Десктопный вид"}
-                className={`p-1 rounded-md border flex items-center justify-center transition-colors text-[13px] ${isDark ? "bg-slate-800 border-slate-700/50 text-slate-300 hover:text-white" : "bg-white/10 border-white/20 text-white/80 hover:text-white"}`}>
+                className={`p-1 rounded-md flex items-center justify-center transition-colors text-[13px] ${isDark ? "text-slate-400 hover:bg-slate-800" : "text-slate-500 hover:bg-slate-100"}`}>
                 {isDesktop ? "📱" : "🖥"}
               </button>
             </div>
@@ -980,18 +992,12 @@ ${recommendedWorks.length > 0 ? `<div class="section">
 
             {/* ══ SCREEN: CODE ══ */}
             {screen === "code" && (
-              <div className={`flex-1 flex flex-col items-center justify-center gap-8 px-5 py-6 ${isDesktop ? "max-w-xl mx-auto w-full" : ""}`}>
+              <div className={`flex-1 flex flex-col items-center justify-center gap-5 px-5 ${isDesktop ? "max-w-xl mx-auto w-full" : ""}`}>
 
-                {/* Брендинг */}
-                <div className="flex flex-col items-center gap-3">
-                  <div className={`w-24 h-24 rounded-3xl flex items-center justify-center shadow-xl ${isDark ? "bg-blue-600 shadow-blue-900/60" : "bg-blue-600 shadow-blue-300/70"}`}>
-                    <Wrench className="w-12 h-12 text-white" />
-                  </div>
-                  <div className="text-center">
-                    <div className={`text-4xl font-black tracking-tight ${isDark ? "text-white" : "text-slate-900"}`}>2LS</div>
-                    <div className={`text-sm font-medium mt-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>AI-диагностика автомобилей</div>
-                  </div>
-                </div>
+                {/* Заголовок */}
+                <h1 className={`text-2xl font-black tracking-tight text-center ${isDark ? "text-slate-100" : "text-slate-800"}`}>
+                  Диагностика автомобилей
+                </h1>
 
                 {/* Поле ввода */}
                 <div className="w-full flex flex-col gap-2">
@@ -1003,8 +1009,11 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                       className={`${fieldCls} font-mono text-base tracking-wider`} />
                     {codeError && <p className="mt-2 text-xs text-red-400 font-medium">{codeError}</p>}
                   </div>
-                  <p className={`text-center text-[11px] ${isDark ? "text-slate-500" : "text-slate-400"}`}>
-                    Код выдаётся вашему автосервису администратором 2LS
+                  {/* Секретный вход — 5 кликов подряд */}
+                  <p
+                    onClick={handleStaffLinkClick}
+                    className={`text-center text-[11px] select-none cursor-default ${isDark ? "text-slate-500" : "text-slate-400"}`}>
+                    Код выдаётся вашему автосервису менеджером 2LS
                   </p>
                 </div>
 
@@ -1014,6 +1023,12 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                   {codeLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <KeyRound className="w-5 h-5" />}
                   Войти в сервис
                 </button>
+
+                {/* Контактный телефон */}
+                <a href="tel:+79221800911"
+                  className={`text-sm font-semibold tracking-wide ${isDark ? "text-blue-400" : "text-blue-600"}`}>
+                  +7 922 18 00 911
+                </a>
 
               </div>
             )}
@@ -1515,7 +1530,7 @@ ${recommendedWorks.length > 0 ? `<div class="section">
 
                 {/* Rating */}
                 <div className={`p-4 rounded-3xl border ${isDark ? "bg-slate-900/40 border-slate-800/80" : "bg-white border-sky-100 shadow-sm"}`}>
-                  <p className="text-[10px] uppercase font-bold text-slate-400 mb-3 tracking-wider">Оцените ответ AI</p>
+                  <p className="text-[10px] uppercase font-bold text-slate-400 mb-3 tracking-wider">Оцените ответ</p>
                   <div className="flex gap-2">
                     {[1, 2, 3, 4, 5].map(n => (
                       <button key={n} onClick={() => setAiRating(n)}

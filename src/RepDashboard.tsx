@@ -86,7 +86,7 @@ export default function RepDashboard({ repToken }: { repToken: string }) {
 
       {/* Top bar */}
       <div style={{ background: C.surface, borderBottom: `1px solid ${C.border}`, padding: "14px 28px", display: "flex", alignItems: "center", gap: 14, position: "sticky", top: 0, zIndex: 10 }}>
-        <div style={{ width: 32, height: 32, background: C.emerald, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800, fontSize: 14 }}>2L</div>
+        <div style={{ width: 32, height: 32, background: C.emerald, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800, fontSize: 12, letterSpacing: "-0.5px" }}>2LS</div>
         <div>
           <div style={{ fontWeight: 700, fontSize: 15, color: C.text, lineHeight: 1.2 }}>{rep.name}</div>
           <div style={{ fontSize: 12, color: C.textSub }}>{rep.username ? `@${rep.username} · ` : ""}Представитель 2LS · {Math.round((rep.commission_rate || 0.1) * 100)}% комиссия</div>
