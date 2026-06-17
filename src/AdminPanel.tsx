@@ -365,35 +365,67 @@ export default function AdminPanel({ adminKey, onLogout }: { adminKey: string; o
         {/* ══ SERVICES ══ */}
         {tab === "services" && (loading && services.length === 0 ? <Spinner /> : <>
 
-          {/* Form — добавить сервис */}
-          <div style={card}>
-            <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 12, color: C.text }}>Добавить сервис</div>
-            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 10, marginBottom: 10 }}>
-              <input style={inp()} placeholder="Название СТО *" value={newSvcName} onChange={e => setNewSvcName(e.target.value)} />
-              <input style={inp()} placeholder="Город" value={newSvcCity} onChange={e => setNewSvcCity(e.target.value)} />
-              <input style={inp()} placeholder="Телефон" value={newSvcPhone} onChange={e => setNewSvcPhone(e.target.value)} />
-              <select style={inp()} value={newSvcRep} onChange={e => setNewSvcRep(e.target.value)}>
-                <option value="">— Без представителя —</option>
-                {reps.map(r => <option key={r.telegram_id} value={r.telegram_id}>{r.name}</option>)}
-              </select>
+          {isMobile ? (<>
+            {/* Mobile — stacked forms */}
+            <div style={card}>
+              <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 12, color: C.text }}>Добавить сервис</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 10, marginBottom: 10 }}>
+                <input style={inp()} placeholder="Название СТО *" value={newSvcName} onChange={e => setNewSvcName(e.target.value)} />
+                <input style={inp()} placeholder="Город" value={newSvcCity} onChange={e => setNewSvcCity(e.target.value)} />
+                <input style={inp()} placeholder="Телефон" value={newSvcPhone} onChange={e => setNewSvcPhone(e.target.value)} />
+                <select style={inp()} value={newSvcRep} onChange={e => setNewSvcRep(e.target.value)}>
+                  <option value="">— Без представителя —</option>
+                  {reps.map(r => <option key={r.telegram_id} value={r.telegram_id}>{r.name}</option>)}
+                </select>
+              </div>
+              <button style={{ ...btn("primary", !newSvcName.trim()), width: "100%" }} onClick={createService} disabled={loading || !newSvcName.trim()}>Создать сервис</button>
             </div>
-            <button style={{ ...btn("primary", !newSvcName.trim()), width: isMobile ? "100%" : "auto" }} onClick={createService} disabled={loading || !newSvcName.trim()}>Создать сервис</button>
-          </div>
-
-          {/* Form — пополнить кредиты */}
-          <div style={card}>
-            <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 12, color: C.text }}>Пополнить кредиты</div>
-            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "2fr 1fr 1fr 2fr", gap: 10, marginBottom: 10 }}>
-              <select style={inp()} value={credSvcId} onChange={e => setCredSvcId(e.target.value)}>
-                <option value="">— Выберите сервис —</option>
-                {services.map(s => <option key={s.service_id} value={s.service_id}>{s.name} [{s.credits} кр.]</option>)}
-              </select>
-              <input style={inp()} placeholder="Кредиты" type="number" min="1" value={credCredits} onChange={e => setCredCredits(e.target.value)} />
-              <div style={inp({ color: credAmount > 0 ? C.green : C.textMuted, fontWeight: credAmount > 0 ? 700 : 400 })}>{credAmount > 0 ? `${credAmount.toLocaleString("ru-RU")} ₽` : "0 ₽"}</div>
-              <input style={inp()} placeholder="Примечание" value={credNotes} onChange={e => setCredNotes(e.target.value)} />
+            <div style={card}>
+              <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 12, color: C.text }}>Пополнить кредиты</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 10, marginBottom: 10 }}>
+                <select style={inp()} value={credSvcId} onChange={e => setCredSvcId(e.target.value)}>
+                  <option value="">— Выберите сервис —</option>
+                  {services.map(s => <option key={s.service_id} value={s.service_id}>{s.name} [{s.credits} кр.]</option>)}
+                </select>
+                <input style={inp()} placeholder="Кредиты" type="number" min="1" value={credCredits} onChange={e => setCredCredits(e.target.value)} />
+                <div style={inp({ color: credAmount > 0 ? C.green : C.textMuted, fontWeight: credAmount > 0 ? 700 : 400 })}>{credAmount > 0 ? `${credAmount.toLocaleString("ru-RU")} ₽` : "0 ₽"}</div>
+                <input style={inp()} placeholder="Примечание" value={credNotes} onChange={e => setCredNotes(e.target.value)} />
+              </div>
+              <button style={{ ...btn("primary", !credSvcId || !credCredits), width: "100%" }} onClick={addCredits} disabled={loading || !credSvcId || !credCredits}>Зачислить</button>
             </div>
-            <button style={{ ...btn("primary", !credSvcId || !credCredits), width: isMobile ? "100%" : "auto" }} onClick={addCredits} disabled={loading || !credSvcId || !credCredits}>Зачислить</button>
-          </div>
+          </>) : (<>
+            {/* Desktop — two forms side by side, compact */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+              {/* Добавить сервис */}
+              <div style={{ ...card, padding: "10px 14px", marginBottom: 0 }}>
+                <div style={{ fontWeight: 700, fontSize: 12, marginBottom: 8, color: C.text }}>+ Добавить сервис</div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 8 }}>
+                  <input style={inp({ padding: "5px 8px", fontSize: 12 })} placeholder="Название СТО *" value={newSvcName} onChange={e => setNewSvcName(e.target.value)} />
+                  <input style={inp({ padding: "5px 8px", fontSize: 12 })} placeholder="Город" value={newSvcCity} onChange={e => setNewSvcCity(e.target.value)} />
+                  <input style={inp({ padding: "5px 8px", fontSize: 12 })} placeholder="Телефон" value={newSvcPhone} onChange={e => setNewSvcPhone(e.target.value)} />
+                  <select style={inp({ padding: "5px 8px", fontSize: 12 })} value={newSvcRep} onChange={e => setNewSvcRep(e.target.value)}>
+                    <option value="">— Без представителя —</option>
+                    {reps.map(r => <option key={r.telegram_id} value={r.telegram_id}>{r.name}</option>)}
+                  </select>
+                </div>
+                <button style={{ ...btn("primary", !newSvcName.trim()), padding: "6px 14px", fontSize: 12 }} onClick={createService} disabled={loading || !newSvcName.trim()}>Создать сервис</button>
+              </div>
+              {/* Пополнить кредиты */}
+              <div style={{ ...card, padding: "10px 14px", marginBottom: 0 }}>
+                <div style={{ fontWeight: 700, fontSize: 12, marginBottom: 8, color: C.text }}>💳 Пополнить кредиты</div>
+                <div style={{ display: "grid", gridTemplateColumns: "2fr 80px 80px 1fr", gap: 6, marginBottom: 8 }}>
+                  <select style={inp({ padding: "5px 8px", fontSize: 12 })} value={credSvcId} onChange={e => setCredSvcId(e.target.value)}>
+                    <option value="">— Выберите сервис —</option>
+                    {services.map(s => <option key={s.service_id} value={s.service_id}>{s.name} [{s.credits} кр.]</option>)}
+                  </select>
+                  <input style={inp({ padding: "5px 8px", fontSize: 12 })} placeholder="Кред." type="number" min="1" value={credCredits} onChange={e => setCredCredits(e.target.value)} />
+                  <div style={inp({ padding: "5px 8px", fontSize: 12, color: credAmount > 0 ? C.green : C.textMuted, fontWeight: credAmount > 0 ? 700 : 400 })}>{credAmount > 0 ? `${credAmount.toLocaleString("ru-RU")} ₽` : "0 ₽"}</div>
+                  <input style={inp({ padding: "5px 8px", fontSize: 12 })} placeholder="Примечание" value={credNotes} onChange={e => setCredNotes(e.target.value)} />
+                </div>
+                <button style={{ ...btn("primary", !credSvcId || !credCredits), padding: "6px 14px", fontSize: 12 }} onClick={addCredits} disabled={loading || !credSvcId || !credCredits}>Зачислить</button>
+              </div>
+            </div>
+          </>)}
 
           {/* List */}
           <div style={{ fontWeight: 700, fontSize: 14, color: C.text, marginBottom: 10 }}>Все сервисы ({services.length})</div>
