@@ -3,6 +3,7 @@ import {
   Wrench, Send, CheckCircle2, ArrowLeft, Moon, Sun,
   MoreVertical, Sparkles, Loader2, KeyRound, CreditCard, Star,
 } from "lucide-react";
+import logoImg from "./Logo.webp";
 import { getModels, getEngines, CHINESE_BRANDS_LIST, VEHICLE_DATA } from "./data/vehicleData";
 import AdminPanel from "./AdminPanel";
 import RepDashboard from "./RepDashboard";
@@ -952,50 +953,18 @@ ${recommendedWorks.length > 0 ? `<div class="section">
         <div className={`flex-1 flex flex-col overflow-hidden ${isDark ? "bg-slate-950" : "bg-[#f0f6fc]"}`}
         >
 
-          {/* System toolbar */}
-          <div className={`border-b flex items-center justify-between z-30 shrink-0 px-3 h-9 ${isDark ? "bg-slate-900/95 border-slate-800 text-slate-200" : "bg-white/95 border-slate-200 text-slate-800"}`}>
-            <div className="flex items-center gap-1.5">
-              {canGoBack && (
-                <button
-                  onClick={() => { if (screen === "problem") setScreen("form"); else if (screen === "form") {} }}
-                  className={`p-1 rounded-full transition-colors ${isDark ? "hover:bg-slate-800 text-slate-400" : "hover:bg-slate-100 text-slate-500"}`}
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                </button>
-              )}
-              <span className={`text-sm font-black tracking-tight ${isDark ? "text-blue-400" : "text-blue-600"}`}>2LS</span>
-            </div>
-            <div className="flex gap-1.5 items-center">
-              {credits !== null && screen !== "code" && (
-                <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold ${credits > 0 ? (isDark ? "bg-emerald-500/20 text-emerald-400" : "bg-emerald-50 border border-emerald-100 text-emerald-700") : "bg-red-500/10 text-red-500"}`}>
-                  <CreditCard className="w-2.5 h-2.5" />{credits}
-                </div>
-              )}
-              <button onClick={() => setTheme(t => t === "dark" ? "light" : "dark")}
-                className={`p-1 rounded-md flex items-center justify-center transition-colors ${isDark ? "text-amber-400 hover:bg-slate-800" : "text-slate-500 hover:bg-slate-100"}`}>
-                {isDark ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
-              </button>
-              <button
-                onClick={() => {
-                  if (isDesktop) { setIsDesktop(false); setDesktopForced(false); }
-                  else { setIsDesktop(true); setDesktopForced(true); }
-                }}
-                title={isDesktop ? "Мобильный вид" : "Десктопный вид"}
-                className={`p-1 rounded-md flex items-center justify-center transition-colors text-[13px] ${isDark ? "text-slate-400 hover:bg-slate-800" : "text-slate-500 hover:bg-slate-100"}`}>
-                {isDesktop ? "📱" : "🖥"}
-              </button>
-            </div>
-          </div>
-
           {/* Content */}
           <div className={`flex-1 overflow-hidden flex flex-col ${isDark ? "bg-slate-950" : "bg-[#f0f6fc]"}`}>
 
             {/* ══ SCREEN: CODE ══ */}
             {screen === "code" && (
-              <div className={`flex-1 flex flex-col items-center justify-center gap-5 px-5 ${isDesktop ? "max-w-xl mx-auto w-full" : ""}`}>
+              <div className={`flex-1 flex flex-col items-center justify-center gap-4 px-5 pb-4 ${isDesktop ? "max-w-xl mx-auto w-full" : ""}`}>
+
+                {/* Логотип */}
+                <img src={logoImg} alt="2LS" className="w-32 h-32 object-contain drop-shadow-md" />
 
                 {/* Заголовок */}
-                <h1 className={`text-2xl font-black tracking-tight text-center ${isDark ? "text-slate-100" : "text-slate-800"}`}>
+                <h1 className={`text-2xl font-black tracking-tight text-center -mt-1 ${isDark ? "text-slate-100" : "text-slate-800"}`}>
                   Диагностика автомобилей
                 </h1>
 
@@ -1113,7 +1082,12 @@ ${recommendedWorks.length > 0 ? `<div class="section">
             {/* ══ SCREEN: PROBLEM ══ */}
             {screen === "problem" && (
               <div className={`flex-1 flex flex-col overflow-hidden px-4 ${isDesktop ? "max-w-xl mx-auto w-full" : ""}`}>
-              <div className="flex-1 overflow-y-auto pt-2 pb-2 flex flex-col gap-2">
+              {/* Back nav */}
+              <button onClick={() => setScreen("form")}
+                className={`flex items-center gap-1 text-xs font-semibold mt-2 mb-1 self-start px-1 py-0.5 rounded-lg transition-colors ${isDark ? "text-slate-400 hover:text-slate-200 hover:bg-slate-800" : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"}`}>
+                <ArrowLeft className="w-3.5 h-3.5" /> Назад
+              </button>
+              <div className="flex-1 overflow-y-auto pb-2 flex flex-col gap-2">
 
                 {/* Vehicle summary */}
                 <div className={`px-3 py-1.5 rounded-xl border text-[11px] flex items-center gap-2 ${isDark ? "bg-slate-900/40 border-slate-800" : "bg-white border-sky-100 shadow-sm"}`}>
@@ -1778,6 +1752,32 @@ ${recommendedWorks.length > 0 ? `<div class="section">
               </div>
             )}
           </div>
+
+          {/* Bottom toolbar — theme + desktop toggles */}
+          <div className={`shrink-0 border-t flex items-center justify-between px-4 h-10 ${isDark ? "bg-slate-900 border-slate-800 text-slate-300" : "bg-white border-slate-200 text-slate-600"}`}>
+            <span className={`text-xs font-black tracking-tight ${isDark ? "text-blue-400" : "text-blue-600"}`}>2LS TOOLS</span>
+            <div className="flex items-center gap-2">
+              {credits !== null && screen !== "code" && (
+                <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${credits > 0 ? (isDark ? "bg-emerald-500/20 text-emerald-400" : "bg-emerald-50 border border-emerald-100 text-emerald-700") : "bg-red-500/10 text-red-500"}`}>
+                  <CreditCard className="w-2.5 h-2.5" />{credits}
+                </div>
+              )}
+              <button
+                onClick={() => {
+                  if (isDesktop) { setIsDesktop(false); setDesktopForced(false); }
+                  else { setIsDesktop(true); setDesktopForced(true); }
+                }}
+                title={isDesktop ? "Мобильный вид" : "Десктопный вид"}
+                className={`p-1.5 rounded-lg flex items-center justify-center transition-colors text-[14px] ${isDark ? "hover:bg-slate-800" : "hover:bg-slate-100"}`}>
+                {isDesktop ? "📱" : "🖥"}
+              </button>
+              <button onClick={() => setTheme(t => t === "dark" ? "light" : "dark")}
+                className={`p-1.5 rounded-lg flex items-center justify-center transition-colors ${isDark ? "text-amber-400 hover:bg-slate-800" : "text-slate-500 hover:bg-slate-100"}`}>
+                {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
