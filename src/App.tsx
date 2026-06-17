@@ -97,13 +97,10 @@ export default function App() {
   return <DiagApp />;
 }
 
-const DESKTOP_WIDTH = 1024;
-
 function DiagApp() {
   const [theme, setTheme] = useState<"dark" | "light">("light");
   const [isDesktop, setIsDesktop] = useState(() => window.innerWidth >= 768);
   const [desktopForced, setDesktopForced] = useState(false);
-  const [viewportWidth, setViewportWidth] = useState(() => window.innerWidth);
   const [screen, setScreen] = useState<Screen>("code");
 
   // Hidden staff entry — 5 clicks on the "Вход для персонала" link
@@ -182,11 +179,7 @@ function DiagApp() {
   const [odometer, setOdometer] = useState("");
 
   useEffect(() => {
-    const handleResize = () => {
-      const w = window.innerWidth;
-      setViewportWidth(w);
-      if (!desktopForced) setIsDesktop(w >= 768);
-    };
+    const handleResize = () => { if (!desktopForced) setIsDesktop(window.innerWidth >= 768); };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [desktopForced]);
@@ -951,23 +944,11 @@ ${recommendedWorks.length > 0 ? `<div class="section">
 
   if (showStaffPortal) return <StaffPortal />;
 
-  // Desktop scale: when forced on narrow screen, scale content to simulate 1024px width
-  const desktopScale = desktopForced && viewportWidth < DESKTOP_WIDTH
-    ? viewportWidth / DESKTOP_WIDTH
-    : 1;
-  const needsScale = desktopScale < 1;
-
   // ── UI ────────────────────────────────────────────────────────────
   return (
-    <div style={{ height: "var(--tg-viewport-height, 100dvh)", overflow: "hidden" }}>
     <div
       className={`font-sans transition-colors duration-300 flex flex-col overflow-hidden ${isDark ? "bg-slate-950 text-slate-100" : screen === "code" ? "bg-[#f5f3ee] text-slate-900" : "bg-[#f0f6fc] text-slate-900"}`}
-      style={needsScale ? {
-        width: `${DESKTOP_WIDTH}px`,
-        height: `calc(var(--tg-viewport-height, 100dvh) / ${desktopScale})`,
-        transform: `scale(${desktopScale})`,
-        transformOrigin: "top left",
-      } : { height: "var(--tg-viewport-height, 100dvh)" }}
+      style={{ height: "var(--tg-viewport-height, 100dvh)" }}
     >
       <div className={`flex-1 flex flex-col overflow-hidden ${isDesktop ? "max-w-4xl mx-auto w-full" : "w-full"}`}>
         <div className={`flex-1 flex flex-col overflow-hidden ${isDark ? "bg-slate-950" : screen === "code" ? "bg-[#f5f3ee]" : "bg-[#f0f6fc]"}`}
@@ -1787,10 +1768,12 @@ ${recommendedWorks.length > 0 ? `<div class="section">
               )}
               <button
                 onClick={() => {
-                  if (isDesktop) { setIsDesktop(false); setDesktopForced(false); }
-                  else { setIsDesktop(true); setDesktopForced(true); }
+                  const tg = (window as any).Telegram?.WebApp;
+                  const url = window.location.href;
+                  if (tg?.openLink) { tg.openLink(url); }
+                  else { window.open(url, "_blank"); }
                 }}
-                title={isDesktop ? "Мобильный вид" : "Десктопный вид"}
+                title="Открыть в браузере"
                 className={`p-1.5 rounded-lg flex items-center justify-center transition-colors text-[14px] ${isDark ? "hover:bg-slate-800" : "hover:bg-slate-100"}`}>
                 📱
               </button>
@@ -1803,7 +1786,6 @@ ${recommendedWorks.length > 0 ? `<div class="section">
 
         </div>
       </div>
-    </div>
     </div>
   );
 }
