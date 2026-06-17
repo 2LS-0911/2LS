@@ -55,21 +55,21 @@ export default function StaffPortal() {
     }
   }
 
-  // ── Authenticated — show panel + logout button ────────────────────
+  // ── Authenticated — show panel ────────────────────────────────────
   if (auth) {
+    if (auth.role === "admin") {
+      return <AdminPanel adminKey={auth.key} onLogout={logout} />;
+    }
     return (
       <div className="relative">
         <button
           onClick={logout}
-          className="fixed top-3 right-3 z-50 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/90 backdrop-blur-sm text-slate-300 hover:text-white text-xs border border-slate-700 hover:border-slate-500 transition-all shadow-lg"
+          className="fixed bottom-16 right-3 z-50 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/90 backdrop-blur-sm text-slate-300 hover:text-white text-xs border border-slate-700 hover:border-slate-500 transition-all shadow-lg"
         >
           <LogOut className="w-3.5 h-3.5" />
           Выйти
         </button>
-        {auth.role === "admin"
-          ? <AdminPanel adminKey={auth.key} />
-          : <RepDashboard repToken={auth.token} />
-        }
+        <RepDashboard repToken={auth.token} />
       </div>
     );
   }

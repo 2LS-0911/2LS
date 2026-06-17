@@ -71,7 +71,7 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
   );
 }
 
-export default function AdminPanel({ adminKey }: { adminKey: string }) {
+export default function AdminPanel({ adminKey, onLogout }: { adminKey: string; onLogout?: () => void }) {
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
   useEffect(() => {
     const fn = () => setIsMobile(window.innerWidth < 768);
@@ -309,10 +309,15 @@ export default function AdminPanel({ adminKey }: { adminKey: string }) {
             <button style={{ ...btn("ghost"), padding: "7px 12px", fontSize: 13 }} onClick={refresh}>↻</button>
             <button
               title="Открыть в браузере (веб-версия)"
-              onClick={() => { const tg = (window as any).Telegram?.WebApp; const url = window.location.href; if (tg?.openLink) tg.openLink(url); else window.open(url, "_blank"); }}
+              onClick={() => { const tg = (window as any).Telegram?.WebApp; const url = `${window.location.origin}${window.location.pathname}?admin=1&key=${encodeURIComponent(adminKey)}`; if (tg?.openLink) tg.openLink(url); else window.open(url, "_blank"); }}
               style={{ ...btn("ghost"), padding: "7px 12px", fontSize: 15 }}>
               🖥
             </button>
+            {onLogout && (
+              <button style={{ ...btn("ghost"), padding: "7px 12px", fontSize: 13, color: C.red }} onClick={onLogout} title="Выйти">
+                Выйти
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -663,10 +668,15 @@ export default function AdminPanel({ adminKey }: { adminKey: string }) {
             <button style={{ ...btn("ghost"), padding: "7px 12px", fontSize: 13 }} onClick={refresh}>↻</button>
             <button
               title="Открыть в браузере"
-              onClick={() => { const tg = (window as any).Telegram?.WebApp; const url = window.location.href; if (tg?.openLink) tg.openLink(url); else window.open(url, "_blank"); }}
+              onClick={() => { const tg = (window as any).Telegram?.WebApp; const url = `${window.location.origin}${window.location.pathname}?admin=1&key=${encodeURIComponent(adminKey)}`; if (tg?.openLink) tg.openLink(url); else window.open(url, "_blank"); }}
               style={{ ...btn("ghost"), padding: "7px 12px", fontSize: 15 }}>
               🖥
             </button>
+            {onLogout && (
+              <button style={{ ...btn("ghost"), padding: "7px 10px", fontSize: 12, color: C.red }} onClick={onLogout} title="Выйти">
+                Выйти
+              </button>
+            )}
           </div>
         </div>
       )}
