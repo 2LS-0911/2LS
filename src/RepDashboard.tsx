@@ -72,6 +72,7 @@ export default function RepDashboard({ repToken, onLogout }: { repToken: string;
   const [suspicious, setSuspicious] = useState<SuspiciousSession[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ message: string; action: () => Promise<void> } | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -111,6 +112,16 @@ export default function RepDashboard({ repToken, onLogout }: { repToken: string;
   const totalSessions = services.reduce((a, s) => a + s.total_sessions, 0);
   const myShare = totalRevenue * (rep.commission_rate || 0.1);
 
+  async function deleteSession(sessionId: string) {
+    setDeleteConfirm({ message: "Удалить брошенную сессию?", action: async () => {
+      try {
+        const r = await fetch(`${API}/api/rep/session/${sessionId}?token=${encodeURIComponent(repToken)}`, { method: "DELETE" });
+        if (!r.ok) throw new Error(await r.text());
+        setSuspicious(prev => prev.filter(s => s.session_id !== sessionId));
+      } catch (e: unknown) { setError(e instanceof Error ? e.message : String(e)); }
+    }});
+  }
+
   const openInBrowser = () => {
     const tg = (window as any).Telegram?.WebApp;
     const url = `${window.location.origin}${window.location.pathname}?rep_token=${encodeURIComponent(repToken)}`;
@@ -124,6 +135,23 @@ export default function RepDashboard({ repToken, onLogout }: { repToken: string;
   } : {};
 
   const pad = isMobile ? "12px 16px" : "24px 28px";
+
+  const ConfirmModal = () => {
+    if (!deleteConfirm) return null;
+    return (
+      <div style={{ position: "fixed", inset: 0, background: "rgba(15,23,42,.55)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }} onClick={() => setDeleteConfirm(null)}>
+        <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 16, padding: 24, width: "100%", maxWidth: 360, boxShadow: "0 16px 48px rgba(0,0,0,.18)" }} onClick={e => e.stopPropagation()}>
+          <div style={{ fontSize: 32, textAlign: "center", marginBottom: 12 }}>🗑</div>
+          <div style={{ fontSize: 15, fontWeight: 600, color: C.text, textAlign: "center", marginBottom: 6 }}>Подтверждение</div>
+          <div style={{ fontSize: 13, color: C.textSub, textAlign: "center", marginBottom: 24 }}>{deleteConfirm.message}</div>
+          <div style={{ display: "flex", gap: 10 }}>
+            <button style={{ flex: 1, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, padding: "10px 18px", cursor: "pointer", fontSize: 14, fontWeight: 600, color: C.text }} onClick={() => setDeleteConfirm(null)}>Отмена</button>
+            <button style={{ flex: 1, background: C.red, border: "none", borderRadius: 8, padding: "10px 18px", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#fff" }} onClick={async () => { const a = deleteConfirm.action; setDeleteConfirm(null); await a(); }}>Удалить</button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div style={{ fontFamily: "system-ui,-apple-system,sans-serif", background: C.bg, minHeight: "100vh", color: C.text }}>
@@ -160,18 +188,18 @@ export default function RepDashboard({ repToken, onLogout }: { repToken: string;
               { icon: "💰", label: "Заработано", val: `${(rep.total_earned_rub || 0).toLocaleString("ru-RU")} ₽`, color: C.emerald },
               { icon: "⏳", label: "К выплате", val: `${(rep.pending_payout_rub || 0).toLocaleString("ru-RU")} ₽`, color: (rep.pending_payout_rub || 0) > 0 ? C.amber : C.textSub },
             ].map(({ icon, label, val, color }) => (
-              <div key={label} style={{ ...card, textAlign: "center", marginBottom: 0 }}>
-                <div style={{ fontSize: isMobile ? 20 : 22, marginBottom: 4 }}>{icon}</div>
-                <div style={{ fontSize: isMobile ? 16 : 20, fontWeight: 800, color, marginBottom: 2 }}>{val}</div>
-                <div style={{ color: C.textSub, fontSize: 11 }}>{label}</div>
+              <div key={label} style={{ ...card, textAlign: "center", marginBottom: 0, padding: isMobile ? 16 : "4px 8px" }}>
+                <div style={{ fontSize: isMobile ? 20 : 13, marginBottom: isMobile ? 4 : 2 }}>{icon}</div>
+                <div style={{ fontSize: isMobile ? 16 : 12, fontWeight: 800, color, marginBottom: isMobile ? 2 : 1 }}>{val}</div>
+                <div style={{ color: C.textSub, fontSize: isMobile ? 11 : 9 }}>{label}</div>
               </div>
             ))}
           </div>
 
           {/* ── Revenue insight ── */}
-          <div style={{ background: C.blueBg, border: `1px solid ${C.blue}`, borderRadius: 12, padding: isMobile ? "10px 14px" : "12px 18px", marginBottom: isMobile ? 14 : 16, display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ fontSize: 18 }}>📈</div>
-            <div style={{ fontSize: isMobile ? 12 : 13, color: C.textSub, lineHeight: 1.5 }}>
+          <div style={{ background: C.blueBg, border: `1px solid ${C.blue}`, borderRadius: 12, padding: isMobile ? "10px 14px" : "5px 10px", marginBottom: isMobile ? 14 : 16, display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ fontSize: isMobile ? 18 : 14 }}>📈</div>
+            <div style={{ fontSize: isMobile ? 12 : 11, color: C.textSub, lineHeight: 1.4 }}>
               Выручка сервисов: <strong style={{ color: C.text }}>{totalRevenue.toLocaleString("ru-RU")} ₽</strong>
               <span style={{ margin: "0 6px", color: C.textMuted }}>·</span>
               Ваша доля {Math.round((rep.commission_rate || 0.1) * 100)}%: <strong style={{ color: C.emerald }}>{myShare.toLocaleString("ru-RU")} ₽</strong>
@@ -231,7 +259,10 @@ export default function RepDashboard({ repToken, onLogout }: { repToken: string;
                   const vehicleStr = s.vehicle ? [s.vehicle.brand, s.vehicle.model, s.vehicle.year].filter(Boolean).join(" ") || "—" : "—";
                   return (
                     <div key={s.session_id} style={{ ...card, background: C.amberBg, borderColor: "#fde68a" }}>
-                      <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 8 }}>{s.service_name}</div>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                        <div style={{ fontWeight: 700, fontSize: 14 }}>{s.service_name}</div>
+                        <button onClick={() => deleteSession(s.session_id)} style={{ background: C.redBg, border: `1px solid ${C.red}`, borderRadius: 6, padding: "3px 8px", cursor: "pointer", fontSize: 11, fontWeight: 600, color: C.red, flexShrink: 0 }}>🗑 Удалить</button>
+                      </div>
                       <Row label="Авто">{vehicleStr}</Row>
                       <Row label="Дата">{new Date(s.created_at).toLocaleString("ru-RU")}</Row>
                       <Row label="Статус"><span style={{ color: s.status === "abandoned" ? C.red : C.amber, fontWeight: 600 }}>{s.status === "abandoned" ? "брошена" : "активна >2ч"}</span></Row>
@@ -243,7 +274,7 @@ export default function RepDashboard({ repToken, onLogout }: { repToken: string;
                 <div style={{ ...card, background: C.amberBg, borderColor: "#fde68a" }}>
                   <div style={{ overflowX: "auto" }}>
                     <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                      <thead><tr>{["Дата", "Сервис", "Авто", "Статус", "Кредит"].map(h => <th key={h} style={{ ...thX, borderBottomColor: "#fde68a" }}>{h}</th>)}</tr></thead>
+                      <thead><tr>{["Дата", "Сервис", "Авто", "Статус", "Кредит", ""].map(h => <th key={h} style={{ ...thX, borderBottomColor: "#fde68a" }}>{h}</th>)}</tr></thead>
                       <tbody>{suspicious.map(s => {
                         const vehicleStr = s.vehicle ? [s.vehicle.brand, s.vehicle.model, s.vehicle.year].filter(Boolean).join(" ") || "—" : "—";
                         const isAbandoned = s.status === "abandoned";
@@ -254,6 +285,7 @@ export default function RepDashboard({ repToken, onLogout }: { repToken: string;
                             <td style={{ ...tdX, color: C.textSub }}>{vehicleStr}</td>
                             <td style={tdX}><span style={{ background: isAbandoned ? "#fee2e2" : "#fef9c3", color: isAbandoned ? C.red : C.amber, padding: "1px 6px", borderRadius: 10, fontSize: 10, fontWeight: 600 }}>{isAbandoned ? "брошена" : "активна >2ч"}</span></td>
                             <td style={{ ...tdX, color: C.textSub }}>{s.credit_hold || "—"}</td>
+                            <td style={tdX}><button onClick={() => deleteSession(s.session_id)} style={{ background: C.redBg, border: `1px solid ${C.red}`, borderRadius: 4, padding: "1px 6px", cursor: "pointer", fontSize: 10, fontWeight: 600, color: C.red }}>🗑</button></td>
                           </tr>
                         );
                       })}</tbody>
@@ -300,6 +332,8 @@ export default function RepDashboard({ repToken, onLogout }: { repToken: string;
           <div style={{ textAlign: "center", color: C.textMuted, fontSize: 11, marginTop: 16 }}>2LS · Личный кабинет представителя</div>
 
         </div>{/* /content */}
+
+        <ConfirmModal />
 
         {/* ── Bottom toolbar (mobile only) ── */}
         {isMobile && (
