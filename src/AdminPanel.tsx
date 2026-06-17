@@ -79,12 +79,14 @@ const S = {
 };
 
 export default function AdminPanel({ adminKey }: { adminKey: string }) {
+  const [desktopForced, setDesktopForced] = useState<boolean | null>(null);
   const [isDesktop, setIsDesktop] = useState(() => window.innerWidth >= 768);
   useEffect(() => {
-    const onResize = () => setIsDesktop(window.innerWidth >= 768);
+    const onResize = () => { if (desktopForced === null) setIsDesktop(window.innerWidth >= 768); };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
-  }, []);
+  }, [desktopForced]);
+  const effectiveDesktop = desktopForced !== null ? desktopForced : isDesktop;
 
   const [tab, setTab] = useState<"stats" | "services" | "reps" | "cases" | "txns">("stats");
   const [stats, setStats] = useState<Stats | null>(null);
@@ -348,7 +350,7 @@ export default function AdminPanel({ adminKey }: { adminKey: string }) {
   };
 
   // ── Render ────────────────────────────────────────────────────────────────
-  const zoomStyle: React.CSSProperties = isDesktop ? {
+  const zoomStyle: React.CSSProperties = effectiveDesktop ? {
     zoom: 1.7,
     width: "calc(100vw / 1.7)",
     minHeight: "calc(100vh / 1.7)",
@@ -366,6 +368,12 @@ export default function AdminPanel({ adminKey }: { adminKey: string }) {
         <div style={{ marginLeft: "auto", display: "flex", gap: 8, alignItems: "center" }}>
           {loading && <span style={{ fontSize: 12, color: C.textMuted }}>Загрузка...</span>}
           <button style={S.btn("ghost")} onClick={refresh}>↻ Обновить</button>
+          <button
+            title={effectiveDesktop ? "Мобильный вид" : "Веб вид"}
+            onClick={() => setDesktopForced(effectiveDesktop ? false : true)}
+            style={{ ...S.btn("ghost"), marginRight: 0, marginBottom: 0, fontSize: 16, padding: "6px 10px" }}>
+            {effectiveDesktop ? "📱" : "🖥"}
+          </button>
         </div>
       </div>
 
