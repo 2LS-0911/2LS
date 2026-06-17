@@ -950,7 +950,14 @@ ${recommendedWorks.length > 0 ? `<div class="section">
       className={`font-sans transition-colors duration-300 flex flex-col overflow-hidden ${isDark ? "bg-slate-950 text-slate-100" : screen === "code" ? "bg-[#f5f3ee] text-slate-900" : "bg-[#f0f6fc] text-slate-900"}`}
       style={{ height: "var(--tg-viewport-height, 100dvh)" }}
     >
-      <div className={`flex-1 flex flex-col overflow-hidden ${isDesktop ? "max-w-4xl mx-auto w-full" : "w-full"}`}>
+      <div
+        className={`flex flex-col overflow-hidden ${isDesktop ? "" : "flex-1 w-full"}`}
+        style={isDesktop ? {
+          zoom: 2,
+          width: "50vw",
+          height: "calc(var(--tg-viewport-height, 100dvh) / 2)",
+        } : undefined}
+      >
         <div className={`flex-1 flex flex-col overflow-hidden ${isDark ? "bg-slate-950" : screen === "code" ? "bg-[#f5f3ee]" : "bg-[#f0f6fc]"}`}
         >
 
