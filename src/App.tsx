@@ -185,7 +185,7 @@ function DiagApp() {
   }, [desktopForced]);
 
   useEffect(() => {
-    if (desktopForced) setIsDesktop(true);
+    if (desktopForced && window.innerWidth >= 768) setIsDesktop(true);
   }, [desktopForced]);
 
   useEffect(() => {
@@ -913,7 +913,7 @@ ${recommendedWorks.length > 0 ? `<div class="section">
   // ── Render helpers ────────────────────────────────────────────────
   const isDark = theme === "dark";
 
-  const fieldCls = `h-11 px-3 rounded-xl text-xs font-bold border outline-none transition-colors w-full ${
+  const fieldCls = `${isDesktop ? "h-9" : "h-11"} px-3 rounded-xl text-xs font-bold border outline-none transition-colors w-full ${
     isDark ? "bg-slate-900 border-slate-800 text-slate-200 focus:border-blue-500"
            : "bg-[#f5f9fc] border-sky-100/90 text-slate-800 focus:border-blue-500 focus:bg-white"}`;
 
@@ -1011,15 +1011,15 @@ ${recommendedWorks.length > 0 ? `<div class="section">
             {screen === "form" && (
               <div className={`flex-1 flex flex-col overflow-hidden px-4 ${isDesktop ? "max-w-xl mx-auto w-full" : ""}`}>
                 {/* Скроллируемая область формы */}
-                <div className="flex-1 overflow-y-auto pt-2 pb-2 flex flex-col gap-2">
+                <div className={`flex-1 overflow-y-auto pt-2 pb-2 flex flex-col ${isDesktop ? "gap-1.5" : "gap-2"}`}>
                   {credits !== null && (
                     <div className={`flex items-center justify-between px-3 py-1.5 rounded-xl text-[10px] ${credits > 0 ? (isDark ? "bg-emerald-500/5 border border-emerald-500/20 text-emerald-400" : "bg-emerald-50 border border-emerald-100 text-emerald-700") : "bg-red-500/5 border border-red-500/20 text-red-400"}`}>
                       <div className="flex items-center gap-1.5"><CreditCard className="w-3 h-3" /><span className="font-semibold truncate max-w-[140px]">{serviceName || serviceCode}</span></div>
                       <span className="font-bold shrink-0">{credits > 0 ? `${credits} кр.` : "Кредиты закончились"}</span>
                     </div>
                   )}
-                  <div className={`p-3 rounded-3xl border ${isDark ? "bg-slate-900/40 border-slate-800/80" : "bg-white border-sky-100 shadow-sm"}`}>
-                    <div className="flex flex-col gap-2">
+                  <div className={`${isDesktop ? "p-2" : "p-3"} rounded-3xl border ${isDark ? "bg-slate-900/40 border-slate-800/80" : "bg-white border-sky-100 shadow-sm"}`}>
+                    <div className={`flex flex-col ${isDesktop ? "gap-1.5" : "gap-2"}`}>
                       <div className="flex flex-col gap-0.5">
                         <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">Марка *</label>
                         <div className={`flex rounded-xl border overflow-hidden text-xs font-semibold mb-0.5 ${isDark ? "border-slate-700" : "border-slate-200"}`}>
@@ -1071,9 +1071,9 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                   </div>
                 </div>
                 {/* Кнопки прижаты к низу */}
-                <div className="pb-6 pt-2 flex flex-col gap-2">
+                <div className={`${isDesktop ? "pb-3 pt-1" : "pb-6 pt-2"} flex flex-col gap-2`}>
                   <button onClick={goToProblem} disabled={!brand || credits === 0}
-                    className={`w-full py-3.5 font-extrabold text-[14px] rounded-2xl flex items-center justify-center gap-2 h-12 uppercase tracking-wider transition-all ${!brand || credits === 0 ? "bg-slate-400 text-slate-200 cursor-not-allowed opacity-60" : isDark ? "bg-emerald-500 hover:bg-emerald-600 text-slate-950" : "bg-blue-600 hover:bg-blue-700 text-white"}`}>
+                    className={`w-full font-extrabold rounded-2xl flex items-center justify-center gap-2 uppercase tracking-wider transition-all ${isDesktop ? "py-2 h-10 text-xs" : "py-3.5 h-12 text-[14px]"} ${!brand || credits === 0 ? "bg-slate-400 text-slate-200 cursor-not-allowed opacity-60" : isDark ? "bg-emerald-500 hover:bg-emerald-600 text-slate-950" : "bg-blue-600 hover:bg-blue-700 text-white"}`}>
                     Далее → Описание проблемы
                   </button>
                   <button onClick={() => { setServiceCode(""); localStorage.removeItem("2ls_service_code"); localStorage.removeItem("2ls_service_name"); setScreen("code"); setCredits(null); }}
@@ -1089,10 +1089,10 @@ ${recommendedWorks.length > 0 ? `<div class="section">
               <div className={`flex-1 flex flex-col overflow-hidden px-4 ${isDesktop ? "max-w-xl mx-auto w-full" : ""}`}>
               {/* Back nav */}
               <button onClick={() => setScreen("form")}
-                className={`flex items-center gap-1 text-xs font-semibold mt-2 mb-1 self-start px-1 py-0.5 rounded-lg transition-colors ${isDark ? "text-slate-400 hover:text-slate-200 hover:bg-slate-800" : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"}`}>
+                className={`flex items-center gap-1 text-xs font-semibold self-start px-1 py-0.5 rounded-lg transition-colors ${isDesktop ? "mt-1 mb-0.5" : "mt-2 mb-1"} ${isDark ? "text-slate-400 hover:text-slate-200 hover:bg-slate-800" : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"}`}>
                 <ArrowLeft className="w-3.5 h-3.5" /> Назад
               </button>
-              <div className="flex-1 overflow-y-auto pb-2 flex flex-col gap-2">
+              <div className={`flex-1 overflow-y-auto pb-2 flex flex-col ${isDesktop ? "gap-1.5" : "gap-2"}`}>
 
                 {/* Vehicle summary */}
                 <div className={`px-3 py-1.5 rounded-xl border text-[11px] flex items-center gap-2 ${isDark ? "bg-slate-900/40 border-slate-800" : "bg-white border-sky-100 shadow-sm"}`}>
@@ -1104,7 +1104,7 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                 </div>
 
                 {/* DTC — chips input */}
-                <div className={`px-3 py-2.5 rounded-2xl border ${isDark ? "bg-slate-900/40 border-slate-800/80" : "bg-white border-sky-100 shadow-sm"}`}>
+                <div className={`${isDesktop ? "px-2.5 py-2" : "px-3 py-2.5"} rounded-2xl border ${isDark ? "bg-slate-900/40 border-slate-800/80" : "bg-white border-sky-100 shadow-sm"}`}>
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="text-[10px] font-bold uppercase text-slate-400">Коды ошибок DTC</span>
                     <button
@@ -1184,7 +1184,7 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                 </div>
 
                 {/* Symptoms chips — компактно */}
-                <div className={`p-3 rounded-3xl border ${isDark ? "bg-slate-900/40 border-slate-800/80" : "bg-white border-sky-100 shadow-sm"}`}>
+                <div className={`${isDesktop ? "p-2" : "p-3"} rounded-3xl border ${isDark ? "bg-slate-900/40 border-slate-800/80" : "bg-white border-sky-100 shadow-sm"}`}>
                   <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 block">Симптомы</label>
                   <div className="flex flex-wrap gap-1 mb-2">
                     {SYMPTOM_CHIPS.map(chip => (
@@ -1199,7 +1199,7 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                     ))}
                   </div>
                   <textarea
-                    rows={2}
+                    rows={isDesktop ? 1 : 2}
                     placeholder="Дополнительное описание (необязательно)..."
                     value={symptomText}
                     onChange={e => setSymptomText(e.target.value)}
@@ -1209,9 +1209,9 @@ ${recommendedWorks.length > 0 ? `<div class="section">
 
                 </div>
                 {/* Кнопка прижата к низу */}
-                <div className="pb-6 pt-2 flex flex-col gap-1.5">
+                <div className={`${isDesktop ? "pb-3 pt-1" : "pb-6 pt-2"} flex flex-col gap-1.5`}>
                   <button onClick={startChat} disabled={!problemReady}
-                    className={`w-full py-3.5 font-extrabold text-[14px] rounded-2xl flex items-center justify-center gap-2 h-12 uppercase tracking-wider transition-all ${
+                    className={`w-full font-extrabold rounded-2xl flex items-center justify-center gap-2 uppercase tracking-wider transition-all ${isDesktop ? "py-2 h-10 text-xs" : "py-3.5 h-12 text-[14px]"} ${
                       problemReady
                         ? isDark ? "bg-emerald-500 hover:bg-emerald-600 text-slate-950" : "bg-blue-600 hover:bg-blue-700 text-white"
                         : "bg-slate-400 text-slate-200 cursor-not-allowed opacity-60"}`}>
