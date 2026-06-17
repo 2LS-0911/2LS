@@ -188,6 +188,17 @@ function DiagApp() {
     if (desktopForced) setIsDesktop(true);
   }, [desktopForced]);
 
+  // Меняем viewport при переключении десктоп/мобайл — работает как "Request Desktop Site"
+  useEffect(() => {
+    const meta = document.querySelector('meta[name="viewport"]');
+    if (!meta) return;
+    if (desktopForced) {
+      meta.setAttribute("content", "width=1024, initial-scale=1");
+    } else {
+      meta.setAttribute("content", "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no");
+    }
+  }, [desktopForced]);
+
   useEffect(() => {
     const tg = (window as any).Telegram?.WebApp;
     if (tg) {
