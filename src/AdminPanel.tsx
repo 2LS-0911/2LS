@@ -60,6 +60,15 @@ function btnSm(variant: "primary"|"success"|"danger"|"ghost" = "ghost"): React.C
 const card: React.CSSProperties = { background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 16, marginBottom: 12 };
 const th: React.CSSProperties = { padding: "10px 12px", color: C.textSub, textAlign: "left", fontWeight: 600, fontSize: 12, borderBottom: `2px solid ${C.border}` };
 const td: React.CSSProperties = { padding: "10px 12px", fontSize: 13, verticalAlign: "middle", borderBottom: `1px solid ${C.border}` };
+// ── Desktop ultra-compact table ──────────────────────────────────────────
+const tdX: React.CSSProperties = { padding: "2px 7px", fontSize: 11, verticalAlign: "middle", borderBottom: `1px solid ${C.border}`, lineHeight: "1.3", whiteSpace: "nowrap" as const };
+const thX: React.CSSProperties = { padding: "4px 7px", color: C.textSub, textAlign: "left" as const, fontWeight: 600, fontSize: 10, borderBottom: `2px solid ${C.border}`, whiteSpace: "nowrap" as const };
+function bXs(variant: "primary"|"success"|"danger"|"ghost" = "ghost"): React.CSSProperties {
+  return { ...btnSm(variant), padding: "1px 6px", fontSize: 10, borderRadius: 4 };
+}
+function inpX(extra?: React.CSSProperties): React.CSSProperties {
+  return inp({ padding: "1px 5px", fontSize: 11, ...extra });
+}
 
 // ── Mobile info row helper ──────────────────────────────────────────────────
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
@@ -394,16 +403,16 @@ export default function AdminPanel({ adminKey, onLogout }: { adminKey: string; o
               <button style={{ ...btn("primary", !credSvcId || !credCredits), width: "100%" }} onClick={addCredits} disabled={loading || !credSvcId || !credCredits}>Зачислить</button>
             </div>
           </>) : (<>
-            {/* Desktop — two forms side by side, ultra-compact */}
+            {/* Desktop — two forms side by side, micro-compact */}
             {(() => {
-              const fi = (extra?: React.CSSProperties): React.CSSProperties => inp({ padding: "2px 6px", fontSize: 11, borderRadius: 6, ...extra });
-              const fb = (disabled = false): React.CSSProperties => ({ ...btn("primary", disabled), padding: "3px 10px", fontSize: 11, borderRadius: 6 });
+              const fi = (ex?: React.CSSProperties): React.CSSProperties => inp({ padding: "1px 4px", fontSize: 10, borderRadius: 5, ...ex });
+              const fb = (dis = false): React.CSSProperties => ({ ...btn("primary", dis), padding: "2px 8px", fontSize: 10, borderRadius: 5 });
               return (
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 6 }}>
                   {/* Добавить сервис */}
-                  <div style={{ ...card, padding: "6px 10px", marginBottom: 0 }}>
-                    <div style={{ fontWeight: 700, fontSize: 11, marginBottom: 5, color: C.textSub }}>+ Добавить сервис</div>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4, marginBottom: 5 }}>
+                  <div style={{ ...card, padding: "4px 8px", marginBottom: 0 }}>
+                    <div style={{ fontWeight: 700, fontSize: 10, marginBottom: 3, color: C.textSub }}>+ Добавить сервис</div>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 3, marginBottom: 4 }}>
                       <input style={fi()} placeholder="Название СТО *" value={newSvcName} onChange={e => setNewSvcName(e.target.value)} />
                       <input style={fi()} placeholder="Город" value={newSvcCity} onChange={e => setNewSvcCity(e.target.value)} />
                       <input style={fi()} placeholder="Телефон" value={newSvcPhone} onChange={e => setNewSvcPhone(e.target.value)} />
@@ -415,15 +424,15 @@ export default function AdminPanel({ adminKey, onLogout }: { adminKey: string; o
                     <button style={fb(!newSvcName.trim())} onClick={createService} disabled={loading || !newSvcName.trim()}>Создать</button>
                   </div>
                   {/* Пополнить кредиты */}
-                  <div style={{ ...card, padding: "6px 10px", marginBottom: 0 }}>
-                    <div style={{ fontWeight: 700, fontSize: 11, marginBottom: 5, color: C.textSub }}>💳 Пополнить кредиты</div>
-                    <div style={{ display: "grid", gridTemplateColumns: "2fr 60px 70px 1fr", gap: 4, marginBottom: 5 }}>
+                  <div style={{ ...card, padding: "4px 8px", marginBottom: 0 }}>
+                    <div style={{ fontWeight: 700, fontSize: 10, marginBottom: 3, color: C.textSub }}>💳 Пополнить кредиты</div>
+                    <div style={{ display: "grid", gridTemplateColumns: "2fr 55px 65px 1fr", gap: 3, marginBottom: 4 }}>
                       <select style={fi()} value={credSvcId} onChange={e => setCredSvcId(e.target.value)}>
                         <option value="">— Сервис —</option>
                         {services.map(s => <option key={s.service_id} value={s.service_id}>{s.name} [{s.credits}]</option>)}
                       </select>
                       <input style={fi()} placeholder="Кред." type="number" min="1" value={credCredits} onChange={e => setCredCredits(e.target.value)} />
-                      <div style={fi({ color: credAmount > 0 ? C.green : C.textMuted, fontWeight: credAmount > 0 ? 700 : 400, lineHeight: "1.6" })}>{credAmount > 0 ? `${credAmount.toLocaleString("ru-RU")} ₽` : "0 ₽"}</div>
+                      <div style={fi({ color: credAmount > 0 ? C.green : C.textMuted, fontWeight: credAmount > 0 ? 700 : 400 })}>{credAmount > 0 ? `${credAmount.toLocaleString("ru-RU")} ₽` : "0 ₽"}</div>
                       <input style={fi()} placeholder="Примечание" value={credNotes} onChange={e => setCredNotes(e.target.value)} />
                     </div>
                     <button style={fb(!credSvcId || !credCredits)} onClick={addCredits} disabled={loading || !credSvcId || !credCredits}>Зачислить</button>
@@ -479,11 +488,6 @@ export default function AdminPanel({ adminKey, onLogout }: { adminKey: string; o
               </div>
             ))
           ) : (() => {
-            // ── Desktop table — ultra-compact rows ──
-            const tdX: React.CSSProperties = { padding: "2px 7px", fontSize: 11, verticalAlign: "middle", borderBottom: `1px solid ${C.border}`, lineHeight: "1.3", whiteSpace: "nowrap" as const };
-            const thX: React.CSSProperties = { padding: "4px 7px", color: C.textSub, textAlign: "left" as const, fontWeight: 600, fontSize: 10, borderBottom: `2px solid ${C.border}`, whiteSpace: "nowrap" as const };
-            const bXs = (v: "primary"|"success"|"danger"|"ghost" = "ghost"): React.CSSProperties => ({ ...btnSm(v), padding: "1px 6px", fontSize: 10, borderRadius: 4 });
-            const inpX = (ex?: React.CSSProperties): React.CSSProperties => inp({ padding: "1px 5px", fontSize: 11, ...ex });
             return (
             <div style={card}>
               <div style={{ overflowX: "auto" }}>
@@ -527,20 +531,35 @@ export default function AdminPanel({ adminKey, onLogout }: { adminKey: string; o
           })()}
         </>)}
 
-        {/* ══ REPS ══ */}
+        {/* ���═ REPS ══ */}
         {tab === "reps" && (loading && reps.length === 0 ? <Spinner /> : <>
-          <div style={card}>
-            <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 12 }}>Добавить представителя</div>
-            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 10, marginBottom: 10 }}>
-              <input style={inp()} placeholder="Имя *" value={newRepName} onChange={e => setNewRepName(e.target.value)} />
-              <input style={inp()} placeholder="@username" value={newRepUsername} onChange={e => setNewRepUsername(e.target.value)} />
-              <input style={inp()} placeholder="Телефон" value={newRepPhone} onChange={e => setNewRepPhone(e.target.value)} />
-              <input style={inp()} placeholder="Telegram ID" value={newRepTgId} onChange={e => setNewRepTgId(e.target.value)} />
-            </div>
-            <button style={{ ...btn("primary", !newRepName.trim()), width: isMobile ? "100%" : "auto" }} onClick={createRep} disabled={loading || !newRepName.trim()}>Добавить</button>
-          </div>
 
-          <div style={{ fontWeight: 700, fontSize: 14, color: C.text, marginBottom: 10 }}>Представители ({reps.length})</div>
+          {/* Form — добавить представителя */}
+          {isMobile ? (
+            <div style={card}>
+              <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 12 }}>Добавить представителя</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 10, marginBottom: 10 }}>
+                <input style={inp()} placeholder="Имя *" value={newRepName} onChange={e => setNewRepName(e.target.value)} />
+                <input style={inp()} placeholder="@username" value={newRepUsername} onChange={e => setNewRepUsername(e.target.value)} />
+                <input style={inp()} placeholder="Телефон" value={newRepPhone} onChange={e => setNewRepPhone(e.target.value)} />
+                <input style={inp()} placeholder="Telegram ID" value={newRepTgId} onChange={e => setNewRepTgId(e.target.value)} />
+              </div>
+              <button style={{ ...btn("primary", !newRepName.trim()), width: "100%" }} onClick={createRep} disabled={loading || !newRepName.trim()}>Добавить</button>
+            </div>
+          ) : (
+            <div style={{ ...card, padding: "6px 10px", marginBottom: 6 }}>
+              <div style={{ fontWeight: 700, fontSize: 11, marginBottom: 5, color: C.textSub }}>+ Добавить представителя</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 4, marginBottom: 5 }}>
+                <input style={inpX()} placeholder="Имя *" value={newRepName} onChange={e => setNewRepName(e.target.value)} />
+                <input style={inpX()} placeholder="@username" value={newRepUsername} onChange={e => setNewRepUsername(e.target.value)} />
+                <input style={inpX()} placeholder="Телефон" value={newRepPhone} onChange={e => setNewRepPhone(e.target.value)} />
+                <input style={inpX()} placeholder="Telegram ID" value={newRepTgId} onChange={e => setNewRepTgId(e.target.value)} />
+              </div>
+              <button style={bXs("primary")} onClick={createRep} disabled={loading || !newRepName.trim()}>Добавить</button>
+            </div>
+          )}
+
+          <div style={{ fontWeight: 700, fontSize: 13, color: C.text, marginBottom: 6 }}>Представители ({reps.length})</div>
           {isMobile ? (
             reps.map(r => (
               <div key={r.telegram_id} style={card}>
@@ -573,31 +592,32 @@ export default function AdminPanel({ adminKey, onLogout }: { adminKey: string; o
             <div style={card}>
               <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                  <thead><tr>{["Имя", "Telegram", "Телефон", "Сервисов", "Заработано", "К выплате", "Ссылка", ""].map(h => <th key={h} style={th}>{h}</th>)}</tr></thead>
+                  <thead><tr>{["Имя", "Telegram", "Телефон", "Сервисов", "Заработано", "К выплате", ""].map(h => <th key={h} style={thX}>{h}</th>)}</tr></thead>
                   <tbody>{reps.map(r => (
                     editRepId === r.telegram_id ? (
                       <tr key={r.telegram_id} style={{ background: C.blueBg }}>
-                        <td style={td}><input style={{ ...inp(), fontSize: 12, padding: "5px 8px" }} value={editRep.name || ""} onChange={e => setEditRep(p => ({ ...p, name: e.target.value }))} /></td>
-                        <td style={td}><input style={{ ...inp(), fontSize: 12, padding: "5px 8px" }} value={editRep.username || ""} onChange={e => setEditRep(p => ({ ...p, username: e.target.value }))} /></td>
-                        <td style={td}><input style={{ ...inp(), fontSize: 12, padding: "5px 8px" }} value={editRep.phone || ""} onChange={e => setEditRep(p => ({ ...p, phone: e.target.value }))} /></td>
-                        <td style={td}>{r.services_count}</td>
-                        <td style={td}>{(r.total_earned_rub||0).toLocaleString("ru-RU")} ₽</td>
-                        <td style={td}>{(r.pending_payout_rub||0).toLocaleString("ru-RU")} ₽</td>
-                        <td style={td} />
-                        <td style={td}><button style={btnSm("success")} onClick={() => saveRep(r.telegram_id)}>Сохранить</button><button style={btnSm()} onClick={() => setEditRepId(null)}>Отмена</button></td>
+                        <td style={tdX}><input style={inpX()} value={editRep.name || ""} onChange={e => setEditRep(p => ({ ...p, name: e.target.value }))} /></td>
+                        <td style={tdX}><input style={inpX()} value={editRep.username || ""} onChange={e => setEditRep(p => ({ ...p, username: e.target.value }))} /></td>
+                        <td style={tdX}><input style={inpX()} value={editRep.phone || ""} onChange={e => setEditRep(p => ({ ...p, phone: e.target.value }))} /></td>
+                        <td style={tdX}>{r.services_count}</td>
+                        <td style={tdX}>{(r.total_earned_rub||0).toLocaleString("ru-RU")} ₽</td>
+                        <td style={tdX}>{(r.pending_payout_rub||0).toLocaleString("ru-RU")} ₽</td>
+                        <td style={tdX}><div style={{ display: "flex", gap: 4 }}><button style={bXs("success")} onClick={() => saveRep(r.telegram_id)}>✓</button><button style={bXs()} onClick={() => setEditRepId(null)}>✕</button></div></td>
                       </tr>
                     ) : (
                       <tr key={r.telegram_id} onMouseEnter={e => (e.currentTarget.style.background = C.bg)} onMouseLeave={e => (e.currentTarget.style.background = "")}>
-                        <td style={{ ...td, fontWeight: 600 }}>{r.name}</td>
-                        <td style={{ ...td, color: C.textSub }}>@{r.username || "—"}</td>
-                        <td style={{ ...td, color: C.textSub }}>{r.phone || "—"}</td>
-                        <td style={td}>{r.services_count}</td>
-                        <td style={{ ...td, color: C.green, fontWeight: 600 }}>{(r.total_earned_rub||0).toLocaleString("ru-RU")} ₽</td>
-                        <td style={{ ...td, color: (r.pending_payout_rub||0) > 0 ? C.amber : C.textSub, fontWeight: (r.pending_payout_rub||0) > 0 ? 700 : 400 }}>{(r.pending_payout_rub||0).toLocaleString("ru-RU")} ₽</td>
-                        <td style={td}><button style={btnSm("ghost")} onClick={() => navigator.clipboard.writeText(`${window.location.origin}/?rep_token=${r.rep_token}`)}>📋 Скопировать</button></td>
-                        <td style={td}>
-                          <button style={btnSm("primary")} onClick={() => { setEditRepId(r.telegram_id); setEditRep({ name: r.name, username: r.username, phone: r.phone }); }}>Изменить</button>
-                          <button style={btnSm("danger")} onClick={() => deleteRep(r.telegram_id, r.name)}>Удалить</button>
+                        <td style={{ ...tdX, fontWeight: 600 }}>{r.name}</td>
+                        <td style={{ ...tdX, color: C.textSub }}>@{r.username || "—"}</td>
+                        <td style={{ ...tdX, color: C.textSub }}>{r.phone || "—"}</td>
+                        <td style={tdX}>{r.services_count}</td>
+                        <td style={{ ...tdX, color: C.green, fontWeight: 600 }}>{(r.total_earned_rub||0).toLocaleString("ru-RU")} ₽</td>
+                        <td style={{ ...tdX, color: (r.pending_payout_rub||0) > 0 ? C.amber : C.textSub, fontWeight: (r.pending_payout_rub||0) > 0 ? 700 : 400 }}>{(r.pending_payout_rub||0).toLocaleString("ru-RU")} ₽</td>
+                        <td style={tdX}>
+                          <div style={{ display: "flex", gap: 4 }}>
+                            <button style={bXs("primary")} onClick={() => { setEditRepId(r.telegram_id); setEditRep({ name: r.name, username: r.username, phone: r.phone }); }}>✏</button>
+                            <button style={bXs("ghost")} onClick={() => navigator.clipboard.writeText(`${window.location.origin}/?rep_token=${r.rep_token}`)}>📋</button>
+                            <button style={bXs("danger")} onClick={() => deleteRep(r.telegram_id, r.name)}>🗑</button>
+                          </div>
                         </td>
                       </tr>
                     )
@@ -610,8 +630,7 @@ export default function AdminPanel({ adminKey, onLogout }: { adminKey: string; o
 
         {/* ══ CASES ══ */}
         {tab === "cases" && (loading && cases.length === 0 ? <Spinner /> : <>
-          <div style={{ fontWeight: 700, fontSize: 14, color: C.text, marginBottom: 4 }}>Кейсы на проверку ({cases.length})</div>
-          <div style={{ color: C.textSub, fontSize: 12, marginBottom: 14 }}>Нажмите «Одобрить» — кейс уйдёт в базу знаний как новый атом.</div>
+          <div style={{ fontWeight: 700, fontSize: 13, color: C.text, marginBottom: 4 }}>Кейсы на проверку ({cases.length})</div>
           {cases.length === 0
             ? <div style={{ ...card, textAlign: "center", padding: "40px 0", color: C.textMuted }}>Новых кейсов нет</div>
             : isMobile ? (
@@ -637,16 +656,17 @@ export default function AdminPanel({ adminKey, onLogout }: { adminKey: string; o
               <div style={card}>
                 <div style={{ overflowX: "auto" }}>
                   <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                    <thead><tr>{["Авто", "Сервис", "DTC", "Причина", "Оценка", "Дата", ""].map(h => <th key={h} style={th}>{h}</th>)}</tr></thead>
+                    <thead><tr>{["Авто", "Год · Двиг.", "Сервис", "DTC", "Причина", "★", "Дата", ""].map(h => <th key={h} style={thX}>{h}</th>)}</tr></thead>
                     <tbody>{cases.map(c => (
                       <tr key={c.case_id} onMouseEnter={e => (e.currentTarget.style.background = C.bg)} onMouseLeave={e => (e.currentTarget.style.background = "")}>
-                        <td style={td}><div style={{ fontWeight: 600 }}>{c.vehicle?.brand} {c.vehicle?.model}</div><div style={{ color: C.textMuted, fontSize: 11 }}>{c.vehicle?.year} · {c.vehicle?.engine}</div></td>
-                        <td style={{ ...td, color: C.textSub }}>{c.service_name || "—"}</td>
-                        <td style={td}>{(c.dtc_codes||[]).map(d => <code key={d} style={{ background: C.amberBg, color: C.amber, padding: "1px 5px", borderRadius: 4, fontSize: 11, marginRight: 4 }}>{d}</code>)}{!c.dtc_codes?.length && <span style={{ color: C.textMuted, fontSize: 12 }}>симптомы</span>}</td>
-                        <td style={{ ...td, maxWidth: 220 }}><div style={{ fontSize: 12, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.root_cause || "—"}</div></td>
-                        <td style={td}><span style={{ color: C.amber, fontWeight: 700 }}>{"★".repeat(Math.max(0,c.ai_rating||0))}</span></td>
-                        <td style={{ ...td, color: C.textMuted, fontSize: 12 }}>{new Date(c.created_at).toLocaleDateString("ru-RU")}</td>
-                        <td style={td}><div style={{ display: "flex", gap: 6 }}><button style={btnSm("success")} onClick={() => approveCase(c.case_id)} disabled={loading}>✓ Одобрить</button><button style={btnSm("danger")} onClick={() => deleteCase(c.case_id)} disabled={loading}>🗑</button></div></td>
+                        <td style={{ ...tdX, fontWeight: 600 }}>{c.vehicle?.brand} {c.vehicle?.model}</td>
+                        <td style={{ ...tdX, color: C.textMuted }}>{c.vehicle?.year}{c.vehicle?.engine ? ` · ${c.vehicle.engine}` : ""}</td>
+                        <td style={{ ...tdX, color: C.textSub }}>{c.service_name || "—"}</td>
+                        <td style={tdX}>{(c.dtc_codes||[]).map(d => <code key={d} style={{ background: C.amberBg, color: C.amber, padding: "0px 4px", borderRadius: 3, fontSize: 10, marginRight: 3 }}>{d}</code>)}{!c.dtc_codes?.length && <span style={{ color: C.textMuted }}>симптомы</span>}</td>
+                        <td style={{ ...tdX, maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis" }}>{c.root_cause || "—"}</td>
+                        <td style={{ ...tdX, color: C.amber, fontWeight: 700 }}>{"★".repeat(Math.max(0,c.ai_rating||0))}</td>
+                        <td style={{ ...tdX, color: C.textMuted }}>{new Date(c.created_at).toLocaleDateString("ru-RU")}</td>
+                        <td style={tdX}><div style={{ display: "flex", gap: 4 }}><button style={bXs("success")} onClick={() => approveCase(c.case_id)} disabled={loading}>✓</button><button style={bXs("danger")} onClick={() => deleteCase(c.case_id)} disabled={loading}>🗑</button></div></td>
                       </tr>
                     ))}</tbody>
                   </table>
@@ -658,10 +678,10 @@ export default function AdminPanel({ adminKey, onLogout }: { adminKey: string; o
 
         {/* ══ TXNS ══ */}
         {tab === "txns" && (loading && txns.length === 0 ? <Spinner /> : <>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-            <div style={{ fontWeight: 700, fontSize: 14, color: C.text }}>Транзакции ({txns.length})</div>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+            <div style={{ fontWeight: 700, fontSize: 13, color: C.text }}>Транзакции ({txns.length})</div>
             {txns.some(t => (t.amount_rub||0) <= 0 && (t.credits_added||0) <= 0) && (
-              <button style={btnSm("danger")} onClick={deleteZeroTxns} disabled={loading}>🗑 Удалить нулевые</button>
+              <button style={bXs("danger")} onClick={deleteZeroTxns} disabled={loading}>🗑 Нулевые</button>
             )}
           </div>
           {isMobile ? (
@@ -682,16 +702,16 @@ export default function AdminPanel({ adminKey, onLogout }: { adminKey: string; o
             <div style={card}>
               <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                  <thead><tr>{["Дата", "Сервис", "Кредиты", "Сумма", "Комиссия", "Примечание", ""].map(h => <th key={h} style={th}>{h}</th>)}</tr></thead>
+                  <thead><tr>{["Дата", "Сервис", "Кр.", "Сумма", "Комиссия", "Примечание", ""].map(h => <th key={h} style={thX}>{h}</th>)}</tr></thead>
                   <tbody>{txns.map(t => (
                     <tr key={t.txn_id} style={{ background: (t.amount_rub||0) <= 0 && (t.credits_added||0) <= 0 ? C.redBg : "" }} onMouseEnter={e => (e.currentTarget.style.background = C.bg)} onMouseLeave={e => (e.currentTarget.style.background = (t.amount_rub||0) <= 0 && (t.credits_added||0) <= 0 ? C.redBg : "")}>
-                      <td style={{ ...td, color: C.textSub, fontSize: 12 }}>{new Date(t.created_at).toLocaleString("ru-RU")}</td>
-                      <td style={{ ...td, fontWeight: 600 }}>{t.service_name}</td>
-                      <td style={{ ...td, color: C.green, fontWeight: 700 }}>+{t.credits_added}</td>
-                      <td style={td}>{(t.amount_rub||0).toLocaleString("ru-RU")} ₽</td>
-                      <td style={{ ...td, color: C.amber, fontWeight: t.rep_commission_rub > 0 ? 700 : 400 }}>{(t.rep_commission_rub||0).toLocaleString("ru-RU")} ₽</td>
-                      <td style={{ ...td, color: C.textSub }}>{t.notes || "—"}</td>
-                      <td style={td}><button style={btnSm("danger")} onClick={() => deleteTxn(t.txn_id)} disabled={loading}>🗑</button></td>
+                      <td style={{ ...tdX, color: C.textSub }}>{new Date(t.created_at).toLocaleString("ru-RU")}</td>
+                      <td style={{ ...tdX, fontWeight: 600 }}>{t.service_name}</td>
+                      <td style={{ ...tdX, color: C.green, fontWeight: 700 }}>+{t.credits_added}</td>
+                      <td style={tdX}>{(t.amount_rub||0).toLocaleString("ru-RU")} ₽</td>
+                      <td style={{ ...tdX, color: C.amber, fontWeight: t.rep_commission_rub > 0 ? 700 : 400 }}>{(t.rep_commission_rub||0).toLocaleString("ru-RU")} ₽</td>
+                      <td style={{ ...tdX, color: C.textSub }}>{t.notes || "—"}</td>
+                      <td style={tdX}><button style={bXs("danger")} onClick={() => deleteTxn(t.txn_id)} disabled={loading}>🗑</button></td>
                     </tr>
                   ))}</tbody>
                 </table>
