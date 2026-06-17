@@ -30,17 +30,17 @@ interface Transaction {
 
 const CREDIT_PRICE = 600;
 
-// ── Light design tokens ───────────────────────────────────────────────────────
+// ── Design tokens — warm cream palette matching main app ─────────────────────
 const C = {
-  bg: "#f8fafc",
+  bg: "#f5f3ee",
   surface: "#ffffff",
-  border: "#e2e8f0",
-  borderHover: "#cbd5e1",
+  border: "#ddd8ce",
+  borderHover: "#c8c0b0",
   text: "#0f172a",
   textSub: "#64748b",
   textMuted: "#94a3b8",
-  blue: "#2563eb",
-  blueBg: "#eff6ff",
+  blue: "#7ec8f0",
+  blueBg: "#e8f6fd",
   green: "#16a34a",
   greenBg: "#f0fdf4",
   amber: "#d97706",
@@ -51,12 +51,12 @@ const C = {
 
 const S = {
   inp: {
-    background: "#f8fafc", border: `1px solid ${C.border}`, borderRadius: 8,
+    background: "#ffffff", border: `1px solid ${C.border}`, borderRadius: 8,
     color: C.text, padding: "8px 12px", fontSize: 13, marginRight: 8, marginBottom: 8,
     outline: "none", transition: "border-color .15s",
   } as React.CSSProperties,
   inpSm: {
-    background: "#f8fafc", border: `1px solid ${C.border}`, borderRadius: 6,
+    background: "#ffffff", border: `1px solid ${C.border}`, borderRadius: 6,
     color: C.text, padding: "5px 8px", fontSize: 12, outline: "none", width: "100%",
   } as React.CSSProperties,
   btn: (variant: "primary" | "success" | "danger" | "ghost" = "primary", disabled = false): React.CSSProperties => ({
@@ -79,6 +79,13 @@ const S = {
 };
 
 export default function AdminPanel({ adminKey }: { adminKey: string }) {
+  const [isDesktop, setIsDesktop] = useState(() => window.innerWidth >= 768);
+  useEffect(() => {
+    const onResize = () => setIsDesktop(window.innerWidth >= 768);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
   const [tab, setTab] = useState<"stats" | "services" | "reps" | "cases" | "txns">("stats");
   const [stats, setStats] = useState<Stats | null>(null);
   const [services, setServices] = useState<Service[]>([]);
@@ -341,8 +348,16 @@ export default function AdminPanel({ adminKey }: { adminKey: string }) {
   };
 
   // ── Render ────────────────────────────────────────────────────────────────
+  const zoomStyle: React.CSSProperties = isDesktop ? {
+    zoom: 1.7,
+    width: "calc(100vw / 1.7)",
+    minHeight: "calc(100vh / 1.7)",
+    transformOrigin: "top left",
+  } : {};
+
   return (
     <div style={{ fontFamily: "system-ui,-apple-system,sans-serif", background: C.bg, minHeight: "100vh", color: C.text }}>
+      <div style={zoomStyle}>
 
       {/* Top bar */}
       <div style={{ background: C.surface, borderBottom: `1px solid ${C.border}`, padding: "14px 28px", display: "flex", alignItems: "center", gap: 12, position: "sticky", top: 0, zIndex: 10 }}>
@@ -364,7 +379,7 @@ export default function AdminPanel({ adminKey }: { adminKey: string }) {
         )}
 
         {/* Tabs */}
-        <div style={{ display: "flex", gap: 4, marginBottom: 24, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 10, padding: 4, width: "fit-content" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 24, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 10, padding: 4 }}>
           {tabs.map(t => (
             <button key={t.id} onClick={() => setTab(t.id)}
               style={{ background: tab === t.id ? C.blue : "none", color: tab === t.id ? "#fff" : C.textSub, border: "none", borderRadius: 7, padding: "7px 16px", cursor: "pointer", fontSize: 13, fontWeight: tab === t.id ? 700 : 500, transition: "all .15s", whiteSpace: "nowrap" as const }}>
@@ -612,6 +627,8 @@ export default function AdminPanel({ adminKey }: { adminKey: string }) {
       </div>
 
       <AnalyticsModal />
+
+      </div>{/* /zoom */}
     </div>
   );
 }
