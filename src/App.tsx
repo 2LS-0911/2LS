@@ -946,15 +946,15 @@ ${recommendedWorks.length > 0 ? `<div class="section">
   // ── UI ────────────────────────────────────────────────────────────
   return (
     <div
-      className={`font-sans transition-colors duration-300 flex flex-col overflow-hidden ${isDark ? "bg-slate-950 text-slate-100" : "bg-[#f0f6fc] text-slate-900"}`}
+      className={`font-sans transition-colors duration-300 flex flex-col overflow-hidden ${isDark ? "bg-slate-950 text-slate-100" : screen === "code" ? "bg-[#f5f3ee] text-slate-900" : "bg-[#f0f6fc] text-slate-900"}`}
       style={{ height: "var(--tg-viewport-height, 100dvh)" }}
     >
       <div className={`flex-1 flex flex-col overflow-hidden ${isDesktop ? "max-w-4xl mx-auto w-full" : "w-full"}`}>
-        <div className={`flex-1 flex flex-col overflow-hidden ${isDark ? "bg-slate-950" : "bg-[#f0f6fc]"}`}
+        <div className={`flex-1 flex flex-col overflow-hidden ${isDark ? "bg-slate-950" : screen === "code" ? "bg-[#f5f3ee]" : "bg-[#f0f6fc]"}`}
         >
 
           {/* Content */}
-          <div className={`flex-1 overflow-hidden flex flex-col ${isDark ? "bg-slate-950" : "bg-[#f0f6fc]"}`}>
+          <div className={`flex-1 overflow-hidden flex flex-col ${isDark ? "bg-slate-950" : screen === "code" ? "bg-[#f5f3ee]" : "bg-[#f0f6fc]"}`}>
 
             {/* ══ SCREEN: CODE ══ */}
             {screen === "code" && (
@@ -1754,7 +1754,7 @@ ${recommendedWorks.length > 0 ? `<div class="section">
           </div>
 
           {/* Bottom toolbar — theme + desktop toggles */}
-          <div className={`shrink-0 border-t flex items-center justify-between px-4 h-10 ${isDark ? "bg-slate-900 border-slate-800 text-slate-300" : "bg-white border-slate-200 text-slate-600"}`}>
+          <div className={`shrink-0 border-t flex items-center justify-between px-4 h-10 ${isDark ? "bg-slate-900 border-slate-800 text-slate-300" : screen === "code" ? "bg-[#ede9e1] border-[#ddd8ce] text-slate-600" : "bg-white border-slate-200 text-slate-600"}`}>
             <span className={`text-xs font-black tracking-tight ${isDark ? "text-blue-400" : "text-blue-600"}`}>2LS TOOLS</span>
             <div className="flex items-center gap-2">
               {credits !== null && screen !== "code" && (
