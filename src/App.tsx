@@ -97,10 +97,13 @@ export default function App() {
   return <DiagApp />;
 }
 
+const DESKTOP_WIDTH = 1024;
+
 function DiagApp() {
   const [theme, setTheme] = useState<"dark" | "light">("light");
   const [isDesktop, setIsDesktop] = useState(() => window.innerWidth >= 768);
   const [desktopForced, setDesktopForced] = useState(false);
+  const [viewportWidth, setViewportWidth] = useState(() => window.innerWidth);
   const [screen, setScreen] = useState<Screen>("code");
 
   // Hidden staff entry — 5 clicks on the "Вход для персонала" link
@@ -179,24 +182,17 @@ function DiagApp() {
   const [odometer, setOdometer] = useState("");
 
   useEffect(() => {
-    const handleResize = () => { if (!desktopForced) setIsDesktop(window.innerWidth >= 768); };
+    const handleResize = () => {
+      const w = window.innerWidth;
+      setViewportWidth(w);
+      if (!desktopForced) setIsDesktop(w >= 768);
+    };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [desktopForced]);
 
   useEffect(() => {
     if (desktopForced) setIsDesktop(true);
-  }, [desktopForced]);
-
-  // Меняем viewport при переключении десктоп/мобайл — работает как "Request Desktop Site"
-  useEffect(() => {
-    const meta = document.querySelector('meta[name="viewport"]');
-    if (!meta) return;
-    if (desktopForced) {
-      meta.setAttribute("content", "width=1024, initial-scale=1");
-    } else {
-      meta.setAttribute("content", "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no");
-    }
   }, [desktopForced]);
 
   useEffect(() => {
@@ -955,11 +951,23 @@ ${recommendedWorks.length > 0 ? `<div class="section">
 
   if (showStaffPortal) return <StaffPortal />;
 
+  // Desktop scale: when forced on narrow screen, scale content to simulate 1024px width
+  const desktopScale = desktopForced && viewportWidth < DESKTOP_WIDTH
+    ? viewportWidth / DESKTOP_WIDTH
+    : 1;
+  const needsScale = desktopScale < 1;
+
   // ── UI ────────────────────────────────────────────────────────────
   return (
+    <div style={{ height: "var(--tg-viewport-height, 100dvh)", overflow: "hidden" }}>
     <div
       className={`font-sans transition-colors duration-300 flex flex-col overflow-hidden ${isDark ? "bg-slate-950 text-slate-100" : screen === "code" ? "bg-[#f5f3ee] text-slate-900" : "bg-[#f0f6fc] text-slate-900"}`}
-      style={{ height: "var(--tg-viewport-height, 100dvh)" }}
+      style={needsScale ? {
+        width: `${DESKTOP_WIDTH}px`,
+        height: `calc(var(--tg-viewport-height, 100dvh) / ${desktopScale})`,
+        transform: `scale(${desktopScale})`,
+        transformOrigin: "top left",
+      } : { height: "var(--tg-viewport-height, 100dvh)" }}
     >
       <div className={`flex-1 flex flex-col overflow-hidden ${isDesktop ? "max-w-4xl mx-auto w-full" : "w-full"}`}>
         <div className={`flex-1 flex flex-col overflow-hidden ${isDark ? "bg-slate-950" : screen === "code" ? "bg-[#f5f3ee]" : "bg-[#f0f6fc]"}`}
@@ -1795,6 +1803,7 @@ ${recommendedWorks.length > 0 ? `<div class="section">
 
         </div>
       </div>
+    </div>
     </div>
   );
 }
