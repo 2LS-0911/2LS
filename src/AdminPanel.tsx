@@ -468,7 +468,7 @@ export default function AdminPanel({ adminKey, onLogout }: { adminKey: string; o
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
                     <div>
                       <div style={{ fontWeight: 700, fontSize: 15 }}>{s.name}</div>
-                      <div style={{ fontSize: 11, color: C.textMuted, marginTop: 2 }}>{s.service_id}</div>
+                      <code style={{ fontSize: 11, color: C.amber, marginTop: 2, display: "block", cursor: "pointer", userSelect: "all" as const }} title="Нажмите чтобы скопировать" onClick={() => navigator.clipboard.writeText(s.service_id)}>{s.service_id}</code>
                     </div>
                     <span style={{ background: s.status === "active" ? C.greenBg : C.redBg, color: s.status === "active" ? C.green : C.red, padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 600, flexShrink: 0 }}>
                       {s.status === "active" ? "активен" : "заблок"}
@@ -492,11 +492,12 @@ export default function AdminPanel({ adminKey, onLogout }: { adminKey: string; o
             <div style={card}>
               <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                  <thead><tr>{["Название", "Город", "Телефон", "Представитель", "Кр.", "Сес.", "Статус", ""].map(h => <th key={h} style={thX}>{h}</th>)}</tr></thead>
+                  <thead><tr>{["Название", "Код", "Город", "Телефон", "Представитель", "Кр.", "Сес.", "Статус", ""].map(h => <th key={h} style={thX}>{h}</th>)}</tr></thead>
                   <tbody>{services.map(s => (
                     editSvcId === s.service_id ? (
                       <tr key={s.service_id} style={{ background: C.blueBg }}>
                         <td style={tdX}><input style={inpX()} value={editSvc.name || ""} onChange={e => setEditSvc(p => ({ ...p, name: e.target.value }))} /></td>
+                        <td style={tdX}><code style={{ fontSize: 10, color: C.amber }}>{s.service_id}</code></td>
                         <td style={tdX}><input style={inpX()} value={editSvc.city || ""} onChange={e => setEditSvc(p => ({ ...p, city: e.target.value }))} /></td>
                         <td style={tdX}><input style={inpX()} value={editSvc.phone || ""} onChange={e => setEditSvc(p => ({ ...p, phone: e.target.value }))} /></td>
                         <td style={tdX}><select style={inpX()} value={editSvc.rep_id ?? ""} onChange={e => setEditSvc(p => ({ ...p, rep_id: e.target.value ? parseInt(e.target.value) : null }))}><option value="">— нет —</option>{reps.map(r => <option key={r.telegram_id} value={r.telegram_id}>{r.name}</option>)}</select></td>
@@ -507,7 +508,8 @@ export default function AdminPanel({ adminKey, onLogout }: { adminKey: string; o
                       </tr>
                     ) : (
                       <tr key={s.service_id} onMouseEnter={e => (e.currentTarget.style.background = C.bg)} onMouseLeave={e => (e.currentTarget.style.background = "")}>
-                        <td style={{ ...tdX, fontWeight: 600 }} title={s.service_id}>{s.name}</td>
+                        <td style={{ ...tdX, fontWeight: 600 }}>{s.name}</td>
+                        <td style={tdX}><code style={{ fontSize: 10, color: C.amber, cursor: "pointer", userSelect: "all" as const }} title="Нажмите чтобы скопировать" onClick={() => navigator.clipboard.writeText(s.service_id)}>{s.service_id}</code></td>
                         <td style={{ ...tdX, color: C.textSub }}>{s.city || "—"}</td>
                         <td style={{ ...tdX, color: C.textSub }}>{s.phone || "—"}</td>
                         <td style={{ ...tdX, color: C.textSub }}>{s.rep_name || "—"}</td>
