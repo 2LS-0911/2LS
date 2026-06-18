@@ -352,22 +352,27 @@ export default function AdminPanel({ adminKey, onLogout }: { adminKey: string; o
 
         {/* ══ STATS ══ */}
         {tab === "stats" && (loading && !stats ? <Spinner /> : stats ? (
-          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2,1fr)" : "repeat(auto-fill,minmax(200px,1fr))", gap: 12 }}>
-            {[
-              { label: "Сервисов всего", val: stats.total_services, icon: "🏪", color: C.blue },
-              { label: "Активных", val: stats.active_services, icon: "✅", color: C.green },
-              { label: "Выручка", val: `${stats.total_revenue_rub.toLocaleString("ru-RU")} ₽`, icon: "💰", color: C.green },
-              { label: "Сессий всего", val: stats.total_sessions, icon: "🔧", color: C.text },
-              { label: "Кредитов остаток", val: stats.total_credits_remaining, icon: "🎫", color: C.amber },
-              { label: "Кейсов на проверку", val: stats.pending_cases, icon: "📋", color: stats.pending_cases > 0 ? C.amber : C.text },
-              { label: "Долг перед пред.", val: `${stats.total_rep_debt_rub.toLocaleString("ru-RU")} ₽`, icon: "👥", color: stats.total_rep_debt_rub > 0 ? C.red : C.text },
-            ].map(({ label, val, icon, color }) => (
-              <div key={label} style={{ ...card, textAlign: "center", marginBottom: 0 }}>
-                <div style={{ fontSize: 24, marginBottom: 6 }}>{icon}</div>
-                <div style={{ fontSize: isMobile ? 18 : 22, fontWeight: 800, color, marginBottom: 4 }}>{val}</div>
-                <div style={{ color: C.textSub, fontSize: 11 }}>{label}</div>
-              </div>
-            ))}
+          <div style={{ ...card, padding: isMobile ? "8px 12px" : "6px 14px", marginBottom: 0 }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 0 }}>
+              {[
+                { label: "Сервисов", val: stats.total_services, icon: "🏪", color: C.blue },
+                { label: "Активных", val: stats.active_services, icon: "✅", color: C.green },
+                { label: "Выручка", val: `${stats.total_revenue_rub.toLocaleString("ru-RU")} ₽`, icon: "💰", color: C.green },
+                { label: "Сессий", val: stats.total_sessions, icon: "🔧", color: C.text },
+                { label: "Кредитов", val: stats.total_credits_remaining, icon: "🎫", color: C.amber },
+                { label: "На проверке", val: stats.pending_cases, icon: "📋", color: stats.pending_cases > 0 ? C.amber : C.text },
+                { label: "Долг пред.", val: `${stats.total_rep_debt_rub.toLocaleString("ru-RU")} ₽`, icon: "👥", color: stats.total_rep_debt_rub > 0 ? C.red : C.text },
+              ].map(({ label, val, icon, color }, i, arr) => (
+                <React.Fragment key={label}>
+                  <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 4 : 5, padding: isMobile ? "5px 8px" : "4px 10px", flexShrink: 0 }}>
+                    <span style={{ fontSize: isMobile ? 14 : 13 }}>{icon}</span>
+                    <span style={{ fontWeight: 800, fontSize: isMobile ? 14 : 13, color }}>{val}</span>
+                    <span style={{ fontSize: isMobile ? 11 : 10, color: C.textSub, whiteSpace: "nowrap" as const }}>{label}</span>
+                  </div>
+                  {i < arr.length - 1 && <div style={{ width: 1, height: isMobile ? 16 : 14, background: C.border, flexShrink: 0, alignSelf: "center" }} />}
+                </React.Fragment>
+              ))}
+            </div>
           </div>
         ) : null)}
 
