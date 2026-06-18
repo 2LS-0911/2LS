@@ -2188,6 +2188,20 @@ def rep_dashboard(token: str):
     }
 
 
+@app.delete("/api/rep/session/{session_id}")
+def rep_delete_session(session_id: str, token: str):
+    rep = _get_reps_col().find_one({"rep_token": token})
+    if not rep:
+        raise HTTPException(status_code=403, detail="Неверный токен")
+    # Проверяем что сессия принадлежит одному из сервисов представителя
+    service_ids = [s["service_id"] for s in _get_services_col().find({"rep_id": rep["telegram_id"]}, {"service_id": 1})]
+    sess = _get_sessions_col().find_one({"session_id": session_id, "service_id": {"$in": service_ids}})
+    if not sess:
+        raise HTTPException(status_code=404, detail="Сессия не найдена")
+    _get_sessions_col().delete_one({"session_id": session_id})
+    return {"ok": True}
+
+
 # ── Механик: проверка кредитов и старт сессии ─────────────────────
 
 @app.get("/api/service/credits")
