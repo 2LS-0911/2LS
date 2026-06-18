@@ -602,7 +602,7 @@ export default function AdminPanel({ adminKey, onLogout }: { adminKey: string; o
                         <td style={tdX}>{r.services_count}</td>
                         <td style={tdX}>{(r.total_earned_rub||0).toLocaleString("ru-RU")} ₽</td>
                         <td style={tdX}>{(r.pending_payout_rub||0).toLocaleString("ru-RU")} ₽</td>
-                        <td style={tdX}><code style={{ fontSize: 10, color: C.amber }}>{r.rep_token || "—"}</code></td>
+                        <td style={tdX}><code style={{ fontSize: 10, color: C.amber, cursor: "pointer" }} title="Нажмите чтобы скопировать" onClick={() => navigator.clipboard.writeText(r.rep_token || "")}>{r.rep_token || "—"}</code></td>
                         <td style={tdX}><div style={{ display: "flex", gap: 4 }}><button style={bXs("success")} onClick={() => saveRep(r.telegram_id)}>✓</button><button style={bXs()} onClick={() => setEditRepId(null)}>✕</button></div></td>
                       </tr>
                     ) : (
@@ -613,7 +613,7 @@ export default function AdminPanel({ adminKey, onLogout }: { adminKey: string; o
                         <td style={tdX}>{r.services_count}</td>
                         <td style={{ ...tdX, color: C.green, fontWeight: 600 }}>{(r.total_earned_rub||0).toLocaleString("ru-RU")} ₽</td>
                         <td style={{ ...tdX, color: (r.pending_payout_rub||0) > 0 ? C.amber : C.textSub, fontWeight: (r.pending_payout_rub||0) > 0 ? 700 : 400 }}>{(r.pending_payout_rub||0).toLocaleString("ru-RU")} ₽</td>
-                        <td style={tdX}><code style={{ fontSize: 10, color: C.amber, userSelect: "all" as const }}>{r.rep_token || "—"}</code></td>
+                        <td style={tdX}><code style={{ fontSize: 10, color: C.amber, userSelect: "all" as const, cursor: "pointer" }} title="Нажмите чтобы скопировать" onClick={() => navigator.clipboard.writeText(r.rep_token || "")}>{r.rep_token || "—"}</code></td>
                         <td style={tdX}>
                           <div style={{ display: "flex", gap: 4 }}>
                             <button style={bXs("primary")} onClick={() => { setEditRepId(r.telegram_id); setEditRep({ name: r.name, username: r.username, phone: r.phone }); }}>✏</button>
