@@ -181,18 +181,21 @@ export default function RepDashboard({ repToken, onLogout }: { repToken: string;
         <div style={{ padding: pad, maxWidth: 1200, margin: "0 auto", paddingBottom: isMobile ? "80px" : pad }}>
 
           {/* ── KPI cards ── */}
-          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2,1fr)" : "repeat(4,1fr)", gap: isMobile ? 10 : 12, marginBottom: isMobile ? 14 : 16 }}>
+          <div style={{ ...card, display: "flex", alignItems: "center", gap: 0, marginBottom: isMobile ? 10 : 8, padding: isMobile ? "10px 14px" : "5px 12px", overflowX: "auto" }}>
             {[
-              { icon: "🏪", label: "Сервисов", val: services.length, color: C.blue },
+              { icon: "🏪", label: "Сервисов", val: services.length, color: C.text },
               { icon: "🔧", label: "Диагностик", val: totalSessions, color: C.text },
               { icon: "💰", label: "Заработано", val: `${(rep.total_earned_rub || 0).toLocaleString("ru-RU")} ₽`, color: C.emerald },
               { icon: "⏳", label: "К выплате", val: `${(rep.pending_payout_rub || 0).toLocaleString("ru-RU")} ₽`, color: (rep.pending_payout_rub || 0) > 0 ? C.amber : C.textSub },
-            ].map(({ icon, label, val, color }) => (
-              <div key={label} style={{ ...card, textAlign: "center", marginBottom: 0, padding: isMobile ? 16 : "4px 8px" }}>
-                <div style={{ fontSize: isMobile ? 20 : 13, marginBottom: isMobile ? 4 : 2 }}>{icon}</div>
-                <div style={{ fontSize: isMobile ? 16 : 12, fontWeight: 800, color, marginBottom: isMobile ? 2 : 1 }}>{val}</div>
-                <div style={{ color: C.textSub, fontSize: isMobile ? 11 : 9 }}>{label}</div>
-              </div>
+            ].map(({ icon, label, val, color }, i, arr) => (
+              <React.Fragment key={label}>
+                <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 5 : 4, padding: isMobile ? "2px 10px" : "2px 8px", flexShrink: 0 }}>
+                  <span style={{ fontSize: isMobile ? 15 : 13 }}>{icon}</span>
+                  <span style={{ fontWeight: 800, fontSize: isMobile ? 15 : 13, color }}>{val}</span>
+                  <span style={{ fontSize: isMobile ? 11 : 10, color: C.textSub, whiteSpace: "nowrap" as const }}>{label}</span>
+                </div>
+                {i < arr.length - 1 && <div style={{ width: 1, height: isMobile ? 18 : 14, background: C.border, flexShrink: 0 }} />}
+              </React.Fragment>
             ))}
           </div>
 
