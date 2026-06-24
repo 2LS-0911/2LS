@@ -207,40 +207,61 @@ function DiagApp() {
       applyViewport();
     }
 
-    // Load persisted state
+    // Load persisted state — URL ?state= param takes priority (cross-browser share from Telegram)
+    function applyState(state: Record<string, unknown>, hasCode: boolean) {
+      if (state.screen && (state.screen === "code" || hasCode)) setScreen(state.screen as Screen);
+      if (state.brandCategory) setBrandCategory(state.brandCategory as "regular" | "chinese");
+      if (state.brand) setBrand(state.brand as string);
+      if (state.model) setModel(state.model as string);
+      if (state.year) setYear(state.year as string);
+      if (state.engine) setEngine(state.engine as string);
+      if (state.vin) setVin(state.vin as string);
+      if (state.odometer) setOdometer(state.odometer as string);
+      if (state.dtcCodes) setDtcCodes(state.dtcCodes as string[]);
+      else if (state.dtcCode) setDtcCodes([state.dtcCode as string]); // backward compat
+      if (state.noDtc !== undefined) setNoDtc(state.noDtc as boolean);
+      if (state.symptoms) setSymptoms(state.symptoms as string[]);
+      if (state.symptomText) setSymptomText(state.symptomText as string);
+      if (state.messages) setMessages(state.messages as Message[]);
+      if (state.sessionId) setSessionId(state.sessionId as string);
+      if (state.noAnswer !== undefined) setNoAnswer(state.noAnswer as boolean);
+      if (state.rootCause) setRootCause(state.rootCause as string);
+      if (state.aiRating) setAiRating(state.aiRating as number);
+      if (state.toolsUsed) setToolsUsed(state.toolsUsed as string[]);
+      if (state.refValue) setRefValue(state.refValue as string);
+      if (state.clientName) setClientName(state.clientName as string);
+      if (state.clientPhone) setClientPhone(state.clientPhone as string);
+      if (state.clientCar) setClientCar(state.clientCar as string);
+      if (state.laborHours) setLaborHours(state.laborHours as string);
+      if (state.laborRate) setLaborRate(state.laborRate as string);
+      if (state.reportNote) setReportNote(state.reportNote as string);
+      if (state.recommendedWorks) setRecommendedWorks(state.recommendedWorks as RecommendedWork[]);
+    }
+
     try {
-      const saved = localStorage.getItem(PERSIST_KEY);
-      if (saved) {
-        const state = JSON.parse(saved);
-        // Only restore non-login screens if service code exists
-        const hasCode = !!localStorage.getItem("2ls_service_code");
-        if (state.screen && (state.screen === "code" || hasCode)) setScreen(state.screen);
-        if (state.brandCategory) setBrandCategory(state.brandCategory);
-        if (state.brand) setBrand(state.brand);
-        if (state.model) setModel(state.model);
-        if (state.year) setYear(state.year);
-        if (state.engine) setEngine(state.engine);
-        if (state.vin) setVin(state.vin);
-        if (state.odometer) setOdometer(state.odometer);
-        if (state.dtcCodes) setDtcCodes(state.dtcCodes);
-        else if (state.dtcCode) setDtcCodes([state.dtcCode]); // backward compat
-        if (state.noDtc !== undefined) setNoDtc(state.noDtc);
-        if (state.symptoms) setSymptoms(state.symptoms);
-        if (state.symptomText) setSymptomText(state.symptomText);
-        if (state.messages) setMessages(state.messages);
-        if (state.sessionId) setSessionId(state.sessionId);
-        if (state.noAnswer !== undefined) setNoAnswer(state.noAnswer);
-        if (state.rootCause) setRootCause(state.rootCause);
-        if (state.aiRating) setAiRating(state.aiRating);
-        if (state.toolsUsed) setToolsUsed(state.toolsUsed);
-        if (state.refValue) setRefValue(state.refValue);
-        if (state.clientName) setClientName(state.clientName);
-        if (state.clientPhone) setClientPhone(state.clientPhone);
-        if (state.clientCar) setClientCar(state.clientCar);
-        if (state.laborHours) setLaborHours(state.laborHours);
-        if (state.laborRate) setLaborRate(state.laborRate);
-        if (state.reportNote) setReportNote(state.reportNote);
-        if (state.recommendedWorks) setRecommendedWorks(state.recommendedWorks);
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlStateRaw = urlParams.get("state");
+      if (urlStateRaw) {
+        const state = JSON.parse(decodeURIComponent(escape(atob(urlStateRaw))));
+        // Restore service code to localStorage so fetchCredits works
+        if (state.serviceCode) {
+          localStorage.setItem("2ls_service_code", state.serviceCode);
+          setServiceCode(state.serviceCode);
+        }
+        if (state.serviceName) {
+          localStorage.setItem("2ls_service_name", state.serviceName);
+          setServiceName(state.serviceName);
+        }
+        applyState(state, !!state.serviceCode);
+        // Clean URL so Telegram hash and state param don't pollute the address bar
+        window.history.replaceState({}, "", window.location.origin + window.location.pathname);
+      } else {
+        const saved = localStorage.getItem(PERSIST_KEY);
+        if (saved) {
+          const state = JSON.parse(saved);
+          const hasCode = !!localStorage.getItem("2ls_service_code");
+          applyState(state, hasCode);
+        }
       }
     } catch (e) { console.error("Failed to load state", e); }
   }, []);
@@ -1777,8 +1798,18 @@ ${recommendedWorks.length > 0 ? `<div class="section">
               )}
               <button
                 onClick={() => {
+                  const stateSnap = {
+                    screen, brandCategory, brand, model, year, engine, vin, odometer,
+                    dtcCodes, noDtc, symptoms, symptomText,
+                    messages, sessionId, noAnswer,
+                    rootCause, aiRating, toolsUsed, refValue,
+                    clientName, clientPhone, clientCar, laborHours, laborRate, reportNote,
+                    recommendedWorks,
+                    serviceCode, serviceName,
+                  };
+                  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(stateSnap))));
+                  const url = `${window.location.origin}${window.location.pathname}?state=${encoded}`;
                   const tg = (window as any).Telegram?.WebApp;
-                  const url = window.location.href;
                   if (tg?.openLink) { tg.openLink(url); }
                   else { window.open(url, "_blank"); }
                 }}
