@@ -1115,10 +1115,10 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                 className={`flex items-center gap-1 text-xs font-semibold self-start px-1 py-0.5 rounded-lg transition-colors ${isDesktop ? "mt-1 mb-0.5" : "mt-2 mb-1"} ${isDark ? "text-slate-400 hover:text-slate-200 hover:bg-slate-800" : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"}`}>
                 <ArrowLeft className="w-3.5 h-3.5" /> Назад
               </button>
-              <div className={`flex-1 overflow-y-auto pb-2 flex flex-col ${isDesktop ? "gap-1.5" : "gap-2"}`}>
+              <div className={`flex-1 overflow-y-auto pb-1 flex flex-col ${isDesktop ? "gap-1.5" : "gap-1.5"}`}>
 
                 {/* Vehicle summary */}
-                <div className={`px-3 py-1.5 rounded-xl border text-[11px] flex items-center gap-2 ${isDark ? "bg-slate-900/40 border-slate-800" : "bg-white border-[#ddd8ce] shadow-sm"}`}>
+                <div className={`px-3 py-1 rounded-xl border text-[11px] flex items-center gap-2 ${isDark ? "bg-slate-900/40 border-slate-800" : "bg-white border-[#ddd8ce] shadow-sm"}`}>
                   <Wrench className="w-3 h-3 text-slate-400 shrink-0" />
                   <span className={isDark ? "text-slate-400" : "text-slate-500"}>
                     <strong className={isDark ? "text-slate-200" : "text-slate-700"}>{brand} {model}</strong>
@@ -1127,12 +1127,12 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                 </div>
 
                 {/* DTC — chips input */}
-                <div className={`${isDesktop ? "px-2.5 py-2" : "px-3 py-2.5"} rounded-2xl border ${isDark ? "bg-slate-900/40 border-slate-800/80" : "bg-white border-[#ddd8ce] shadow-sm"}`}>
-                  <div className="flex items-center justify-between mb-1.5">
+                <div className={`px-2.5 py-1.5 rounded-2xl border ${isDark ? "bg-slate-900/40 border-slate-800/80" : "bg-white border-[#ddd8ce] shadow-sm"}`}>
+                  <div className="flex items-center justify-between mb-1">
                     <span className="text-[10px] font-bold uppercase text-slate-400">Коды ошибок DTC</span>
                     <button
                       onClick={() => { setNoDtc(v => !v); if (!noDtc) { setDtcCodes([]); setDtcInput(""); setDtcError(""); } }}
-                      className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-colors ${noDtc ? (isDark ? "bg-slate-700 border-slate-600 text-white" : "bg-slate-200 border-slate-300 text-slate-700") : (isDark ? "bg-slate-800 border-slate-700 text-slate-400" : "bg-white border-slate-200 text-slate-500")}`}
+                      className={`px-2 py-0.5 rounded-lg text-[10px] font-bold border transition-colors ${noDtc ? (isDark ? "bg-slate-700 border-slate-600 text-white" : "bg-slate-200 border-slate-300 text-slate-700") : (isDark ? "bg-slate-800 border-slate-700 text-slate-400" : "bg-white border-slate-200 text-slate-500")}`}
                     >Нет кода</button>
                   </div>
 
@@ -1207,12 +1207,12 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                 </div>
 
                 {/* Symptoms chips — компактно */}
-                <div className={`${isDesktop ? "p-2" : "p-3"} rounded-3xl border ${isDark ? "bg-slate-900/40 border-slate-800/80" : "bg-white border-[#ddd8ce] shadow-sm"}`}>
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 block">Симптомы</label>
-                  <div className="flex flex-wrap gap-1 mb-2">
+                <div className={`p-2 rounded-3xl border ${isDark ? "bg-slate-900/40 border-slate-800/80" : "bg-white border-[#ddd8ce] shadow-sm"}`}>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1 block">Симптомы</label>
+                  <div className="flex flex-wrap gap-0.5 mb-1.5">
                     {SYMPTOM_CHIPS.map(chip => (
                       <button key={chip.id} onClick={() => toggleSymptom(chip.id)}
-                        className={`px-2 py-1 rounded-full text-[11px] font-semibold border transition-all ${
+                        className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold border transition-all ${
                           symptoms.includes(chip.id)
                             ? isDark ? "bg-blue-600 border-blue-500 text-white" : "bg-blue-600 border-blue-600 text-white"
                             : isDark ? "bg-slate-800 border-slate-700 text-slate-300" : "bg-slate-50 border-slate-200 text-slate-600"
@@ -1222,19 +1222,19 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                     ))}
                   </div>
                   <textarea
-                    rows={isDesktop ? 1 : 2}
+                    rows={1}
                     placeholder="Дополнительное описание (необязательно)..."
                     value={symptomText}
                     onChange={e => setSymptomText(e.target.value)}
-                    className={`w-full px-3 py-2 rounded-xl text-xs border outline-none resize-none ${isDark ? "bg-slate-800 border-slate-700 text-slate-200 placeholder-slate-500" : "bg-white border-[#ddd8ce] text-slate-800 placeholder-slate-400"}`}
+                    className={`w-full px-2.5 py-1.5 rounded-xl text-xs border outline-none resize-none ${isDark ? "bg-slate-800 border-slate-700 text-slate-200 placeholder-slate-500" : "bg-white border-[#ddd8ce] text-slate-800 placeholder-slate-400"}`}
                   />
                 </div>
 
                 </div>
                 {/* Кнопка прижата к низу */}
-                <div className={`${isDesktop ? "pb-3 pt-1" : "pb-6 pt-2"} flex flex-col gap-1.5`}>
+                <div className={`${isDesktop ? "pb-3 pt-1" : "pb-4 pt-1"} flex flex-col gap-1`}>
                   <button onClick={startChat} disabled={!problemReady}
-                    className={`w-full font-extrabold rounded-2xl flex items-center justify-center gap-2 uppercase tracking-wider transition-all ${isDesktop ? "py-2 h-10 text-xs" : "py-3.5 h-12 text-[14px]"} ${
+                    className={`w-full font-extrabold rounded-2xl flex items-center justify-center gap-2 uppercase tracking-wider transition-all ${isDesktop ? "py-2 h-10 text-xs" : "py-2.5 h-11 text-[13px]"} ${
                       problemReady
                         ? isDark ? "bg-emerald-500 hover:bg-emerald-600 text-slate-950" : "bg-[#7ec8f0] hover:bg-[#5cb8e8] text-white"
                         : "bg-slate-400 text-slate-200 cursor-not-allowed opacity-60"}`}>
