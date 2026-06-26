@@ -953,8 +953,11 @@ ${recommendedWorks.length > 0 ? `<div class="section">
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setTorqueResult(await res.json());
-    } catch {
-      setTorqueError("Не удалось получить данные. Проверьте интернет.");
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      setTorqueError(msg.includes("503") || msg.includes("500")
+        ? "Ошибка сервера при получении данных. Попробуйте ещё раз."
+        : "Не удалось подключиться к серверу. Проверьте что бэкенд запущен.");
     } finally {
       setTorqueLoading(false);
     }

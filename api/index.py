@@ -2443,7 +2443,7 @@ _NODE_LABELS = {
     "subframe": "подрамник",
 }
 
-def _call_llm_json(prompt: str, model: str = "google/gemini-2.0-flash-001") -> dict:
+def _call_llm_json(prompt: str, model: str = "google/gemini-2.5-flash-lite") -> dict:
     resp = requests.post(
         OPENROUTER_URL,
         headers={"Authorization": f"Bearer {OPENROUTER_API_KEY}", "Content-Type": "application/json"},
