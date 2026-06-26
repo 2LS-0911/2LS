@@ -2411,6 +2411,129 @@ def mark_abandoned_sessions(threshold_hours: int = 24):
         raise HTTPException(status_code=503, detail=str(e))
 
 
+
+# ── Torque endpoint ───────────────────────────────────────────────
+
+class TorqueRequest(BaseModel):
+    brand: str
+    model: str = ""
+    year: str = ""
+    engine: str = ""
+    node: str
+    service_code: Optional[str] = None
+
+_NODE_LABELS = {
+    "cylinder_head": "головка блока цилиндров (ГБЦ)",
+    "wheel_bolts": "колёсные болты / гайки",
+    "brake_caliper_front": "тормозной суппорт передний",
+    "brake_caliper_rear": "тормозной суппорт задний",
+    "oil_pan": "поддон картера",
+    "intake_manifold": "впускной коллектор",
+    "exhaust_manifold": "выпускной коллектор",
+    "spark_plug": "свечи зажигания",
+    "drain_plug": "сливная пробка масла",
+    "crankshaft_pulley": "шкив / болт коленвала",
+    "wheel_hub_nut": "гайка ступицы",
+    "suspension_arm": "рычаги подвески",
+    "strut_top_mount": "опора стойки верхняя",
+    "ball_joint": "шаровая опора",
+    "tie_rod_end": "наконечник рулевой тяги",
+    "steering_rack": "рулевая рейка крепление",
+    "timing_cover": "крышка ГРМ",
+    "subframe": "подрамник",
+}
+
+def _call_llm_json(prompt: str, model: str = "google/gemini-2.0-flash-001") -> dict:
+    resp = requests.post(
+        OPENROUTER_URL,
+        headers={"Authorization": f"Bearer {OPENROUTER_API_KEY}", "Content-Type": "application/json"},
+        json={"model": model, "messages": [{"role": "user", "content": prompt}], "max_tokens": 800},
+        timeout=25,
+    )
+    resp.raise_for_status()
+    text = resp.json()["choices"][0]["message"]["content"]
+    # Extract JSON block
+    match = re.search(r"\{[\s\S]*\}", text)
+    if not match:
+        raise ValueError("No JSON in LLM response")
+    return json.loads(match.group())
+
+@app.post("/api/torque")
+def get_torque(req: TorqueRequest):
+    node_label = _NODE_LABELS.get(req.node, req.node.replace("_", " "))
+    vehicle = f"{req.brand} {req.model} {req.year} {req.engine}".strip()
+
+    # 1. Check cache
+    try:
+        cache_col = _db()["torque_cache"]
+        cached = cache_col.find_one({"brand": req.brand, "model": req.model, "engine": req.engine, "node": req.node}, {"_id": 0})
+        if cached:
+            cached.pop("created_at", None)
+            cached["source"] = "cache"
+            return cached
+    except Exception:
+        pass
+
+    # 2. Call LLM (Gemini Flash — cheap, fast)
+    prompt = f"""Ты эксперт по техническому обслуживанию автомобилей. Предоставь точные данные о моментах затяжки.
+
+Автомобиль: {vehicle}
+Узел: {node_label}
+
+Верни ТОЛЬКО JSON (без пояснений) в таком формате:
+{{
+  "torque_nm": {{"min": <число>, "max": <число>}},
+  "angle_degrees": <число или null>,
+  "stages": [
+    {{"step": "Предварительная", "value": "20-25 Н·м"}},
+    {{"step": "Окончательная", "value": "80-90 Н·м"}}
+  ],
+  "tightening_order_desc": "<описание порядка затяжки, напр. 'крест-накрест от центра'>",
+  "bolt_class": "<класс прочности или null>",
+  "reusable": <true/false/null>,
+  "pattern": "<circle|rectangle_grid|linear_row|single>",
+  "pattern_data": {{
+    "rows": <число или null>,
+    "cols": <число или null>,
+    "points": <число или null>,
+    "sequence": [<массив 1-based индексов порядка затяжки или []>]
+  }},
+  "confidence": "medium",
+  "note": "<важное примечание или null>"
+}}
+
+Правила для pattern:
+- circle: колёсные болты, ступичные гайки
+- rectangle_grid: ГБЦ, поддон картера, фланцы
+- linear_row: коллекторы, суппорты, рейки
+- single: одиночные болты (свечи, сливная пробка, шкив коленвала)
+
+Для rectangle_grid и circle обязательно укажи sequence — порядок затяжки (1-based номера болтов).
+Если данные точно известны из заводских источников, confidence = "high". Иначе "medium".
+"""
+
+    try:
+        data = _call_llm_json(prompt)
+        data["source"] = "ai"
+        # Save to cache
+        try:
+            cache_col.insert_one({
+                **data,
+                "brand": req.brand,
+                "model": req.model,
+                "year": req.year,
+                "engine": req.engine,
+                "node": req.node,
+                "created_at": datetime.utcnow().isoformat(),
+            })
+        except Exception:
+            pass
+        return data
+    except Exception as e:
+        logger.error(f"Torque LLM error: {e}")
+        raise HTTPException(status_code=503, detail="Не удалось получить данные о моментах затяжки")
+
+
 @app.get("/api/manager/sessions")
 def manager_sessions(status: str = "active", limit: int = 50):
     """Список сессий для аналитики (брошенные = сигнал слабости скилла)."""

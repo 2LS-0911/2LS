@@ -11,9 +11,44 @@ import StaffPortal from "./StaffPortal";
 
 const API_URL = "/api";
 
-type Screen = "code" | "form" | "problem" | "chat" | "confirm" | "solved";
+type Screen = "code" | "menu" | "form" | "problem" | "chat" | "confirm" | "solved" | "torque_form" | "torque_result";
 
 interface Message { role: "user" | "assistant"; content: string; }
+
+interface TorqueData {
+  torque_nm: { min: number; max: number };
+  angle_degrees?: number;
+  stages?: Array<{ step: string; value: string }>;
+  tightening_order_desc?: string;
+  bolt_class?: string;
+  reusable?: boolean | null;
+  pattern: "circle" | "rectangle_grid" | "linear_row" | "single";
+  pattern_data?: { rows?: number; cols?: number; points?: number; sequence?: number[] };
+  source: "cache" | "olp" | "ai";
+  confidence: "high" | "medium";
+  note?: string;
+}
+
+const TORQUE_NODES = [
+  { id: "cylinder_head",       label: "ГБЦ — головка блока цилиндров" },
+  { id: "wheel_bolts",         label: "Колёсные болты / гайки" },
+  { id: "brake_caliper_front", label: "Тормозной суппорт передний" },
+  { id: "brake_caliper_rear",  label: "Тормозной суппорт задний" },
+  { id: "oil_pan",             label: "Поддон картера" },
+  { id: "intake_manifold",     label: "Коллектор впускной" },
+  { id: "exhaust_manifold",    label: "Коллектор выпускной" },
+  { id: "spark_plug",          label: "Свечи зажигания" },
+  { id: "drain_plug",          label: "Сливная пробка масла" },
+  { id: "crankshaft_pulley",   label: "Шкив / болт коленвала" },
+  { id: "wheel_hub_nut",       label: "Гайка ступицы" },
+  { id: "suspension_arm",      label: "Рычаги подвески" },
+  { id: "strut_top_mount",     label: "Опора стойки (верхняя)" },
+  { id: "ball_joint",          label: "Шаровая опора" },
+  { id: "tie_rod_end",         label: "Наконечник рулевой тяги" },
+  { id: "steering_rack",       label: "Рулевая рейка (крепление)" },
+  { id: "timing_cover",        label: "Крышка ГРМ" },
+  { id: "subframe",            label: "Подрамник" },
+];
 
 interface RecommendedWork {
   work: string;
@@ -139,6 +174,12 @@ function DiagApp() {
   const [noDtc, setNoDtc] = useState(false);
   const [symptoms, setSymptoms] = useState<string[]>([]);
   const [symptomText, setSymptomText] = useState("");
+
+  // Torque module
+  const [torqueNode, setTorqueNode] = useState("");
+  const [torqueLoading, setTorqueLoading] = useState(false);
+  const [torqueResult, setTorqueResult] = useState<TorqueData | null>(null);
+  const [torqueError, setTorqueError] = useState("");
 
   // Screen 3 — Chat
   const [messages, setMessages] = useState<Message[]>([]);
@@ -293,7 +334,7 @@ function DiagApp() {
       setScreen(prev => {
         // If we already loaded a screen from PERSIST_KEY (e.g. 'chat'), keep it
         if (prev !== "code") return prev;
-        return "form";
+        return "menu";
       });
     }
   }, []);
@@ -431,7 +472,7 @@ function DiagApp() {
       setServiceCode(code); setServiceName(d.service_name || ""); setCredits(d.credits);
       localStorage.setItem("2ls_service_code", code);
       localStorage.setItem("2ls_service_name", d.service_name || "");
-      setScreen("form");
+      setScreen("menu");
     } catch (e: unknown) { setCodeError(e instanceof Error ? e.message : String(e)); }
     finally { setCodeLoading(false); }
   }
@@ -885,7 +926,7 @@ ${recommendedWorks.length > 0 ? `<div class="section">
 
   function resetApp() {
     localStorage.removeItem(PERSIST_KEY);
-    setScreen("form");
+    setScreen("menu");
     setMessages([]); setInput(""); setSessionId(null);
     setBrandCategory("regular"); setBrand(""); setModel(""); setYear("2020"); setEngine("");
     setDtcCodes([]); setDtcInput(""); setDtcError(""); setNoDtc(false); setSymptoms([]); setSymptomText("");
@@ -895,6 +936,28 @@ ${recommendedWorks.length > 0 ? `<div class="section">
     setClientExplanation(""); setRepairMemo("");
     setCurrentPage(0);
     if (serviceCode) fetchCredits(serviceCode);
+  }
+
+  // ── Torque query ──────────────────────────────────────────────────
+  async function handleTorqueQuery() {
+    if (!brand || !torqueNode) return;
+    setTorqueLoading(true);
+    setTorqueError("");
+    setTorqueResult(null);
+    setScreen("torque_result");
+    try {
+      const res = await fetch(`${API_URL}/torque`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ brand, model, year, engine, node: torqueNode, service_code: serviceCode || null }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setTorqueResult(await res.json());
+    } catch {
+      setTorqueError("Не удалось получить данные. Проверьте интернет.");
+    } finally {
+      setTorqueLoading(false);
+    }
   }
 
   // ── Chat pagination ───────────────────────────────────────────────
@@ -954,12 +1017,101 @@ ${recommendedWorks.length > 0 ? `<div class="section">
 
   const headerSubtitle = {
     code: "Введите код сервиса",
+    menu: serviceName || "Выбор инструмента",
     form: serviceName || "Идентификация авто",
     problem: "Описание проблемы",
     chat: `${brand} ${model}${year ? ` · ${year}` : ""}`,
     confirm: "Подтверждение кейса",
     solved: "Кейс сохранён",
+    torque_form: "Моменты затяжки",
+    torque_result: TORQUE_NODES.find(n => n.id === torqueNode)?.label || "Результат",
   }[screen];
+
+  function TorqueSVG({ pattern, patternData }: { pattern: string; patternData?: TorqueData["pattern_data"] }) {
+    const blue = "#0088cc";
+    if (pattern === "circle") {
+      const n = patternData?.points || 5;
+      const seq = patternData?.sequence || [];
+      const cx = 90, cy = 90, r = 65;
+      const pts = Array.from({ length: n }, (_, i) => {
+        const a = (i * 2 * Math.PI / n) - Math.PI / 2;
+        return { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) };
+      });
+      const boltLabel: number[] = Array(n).fill(0);
+      if (seq.length === n) { seq.forEach((boltIdx, step) => { boltLabel[boltIdx - 1] = step + 1; }); }
+      else { boltLabel.forEach((_, i) => { boltLabel[i] = i + 1; }); }
+      return (
+        <svg viewBox="0 0 180 180" className="w-full max-w-[200px] mx-auto">
+          <circle cx={cx} cy={cy} r={22} fill={isDark ? "#334155" : "#f1f5f9"} stroke="#94a3b8" strokeWidth="1.5" />
+          <circle cx={cx} cy={cy} r={r} fill="none" stroke={isDark ? "#334155" : "#e2e8f0"} strokeWidth="1" strokeDasharray="4 4" />
+          {pts.map((p, i) => (
+            <g key={i}>
+              <circle cx={p.x} cy={p.y} r={14} fill={blue} fillOpacity={0.15} stroke={blue} strokeWidth="1.5" />
+              <text x={p.x} y={p.y + 4.5} textAnchor="middle" fontSize="12" fontWeight="bold" fill={blue}>{boltLabel[i]}</text>
+            </g>
+          ))}
+        </svg>
+      );
+    }
+    if (pattern === "rectangle_grid") {
+      const rows = patternData?.rows || 2;
+      const cols = patternData?.cols || 5;
+      const total = rows * cols;
+      const seq = patternData?.sequence || [];
+      const boltLabel: number[] = Array(total).fill(0);
+      if (seq.length === total) { seq.forEach((boltIdx, step) => { boltLabel[boltIdx - 1] = step + 1; }); }
+      else { boltLabel.forEach((_, i) => { boltLabel[i] = i + 1; }); }
+      const W = 220, H = 100, padX = 22, padY = 20;
+      const cellW = cols > 1 ? (W - 2 * padX) / (cols - 1) : 0;
+      const cellH = rows > 1 ? (H - 2 * padY) / (rows - 1) : 0;
+      return (
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-full max-w-[260px] mx-auto">
+          {Array.from({ length: rows }, (_, r) =>
+            Array.from({ length: cols }, (_, c) => {
+              const idx = r * cols + c;
+              const x = cols > 1 ? padX + c * cellW : W / 2;
+              const y = rows > 1 ? padY + r * cellH : H / 2;
+              return (
+                <g key={idx}>
+                  <circle cx={x} cy={y} r={11} fill={blue} fillOpacity={0.15} stroke={blue} strokeWidth="1.5" />
+                  <text x={x} y={y + 4} textAnchor="middle" fontSize="9" fontWeight="bold" fill={blue}>{boltLabel[idx]}</text>
+                </g>
+              );
+            })
+          )}
+        </svg>
+      );
+    }
+    if (pattern === "linear_row") {
+      const n = patternData?.points || 4;
+      const seq = patternData?.sequence || [];
+      const boltLabel: number[] = Array(n).fill(0);
+      if (seq.length === n) { seq.forEach((boltIdx, step) => { boltLabel[boltIdx - 1] = step + 1; }); }
+      else { boltLabel.forEach((_, i) => { boltLabel[i] = i + 1; }); }
+      const W = 220, H = 60, padX = 22, cy2 = 30;
+      const spacing = n > 1 ? (W - 2 * padX) / (n - 1) : 0;
+      return (
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-full max-w-[260px] mx-auto">
+          <line x1={padX} y1={cy2} x2={W - padX} y2={cy2} stroke={isDark ? "#334155" : "#e2e8f0"} strokeWidth="1.5" />
+          {Array.from({ length: n }, (_, i) => {
+            const x = n > 1 ? padX + i * spacing : W / 2;
+            return (
+              <g key={i}>
+                <circle cx={x} cy={cy2} r={11} fill={blue} fillOpacity={0.15} stroke={blue} strokeWidth="1.5" />
+                <text x={x} y={cy2 + 4} textAnchor="middle" fontSize="9" fontWeight="bold" fill={blue}>{boltLabel[i]}</text>
+              </g>
+            );
+          })}
+        </svg>
+      );
+    }
+    return (
+      <svg viewBox="0 0 80 80" className="w-20 h-20 mx-auto">
+        <circle cx={40} cy={40} r={30} fill={blue} fillOpacity={0.15} stroke={blue} strokeWidth="2" />
+        <text x={40} y={45} textAnchor="middle" fontSize="13" fill={blue} fontWeight="bold">1</text>
+      </svg>
+    );
+  }
 
   const canGoBack = screen === "problem" || screen === "form";
 
@@ -1030,11 +1182,47 @@ ${recommendedWorks.length > 0 ? `<div class="section">
               </div>
             )}
 
+            {/* ══ SCREEN: MENU ══ */}
+            {screen === "menu" && (
+              <div className={`flex-1 flex flex-col items-center px-5 pt-3 pb-3 ${isDesktop ? "max-w-xl mx-auto w-full" : ""}`}>
+                {credits !== null && (
+                  <div className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-[11px] mb-3 ${credits > 0 ? (isDark ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400" : "bg-emerald-50 border border-emerald-100 text-emerald-700") : "bg-red-500/5 border border-red-500/20 text-red-400"}`}>
+                    <div className="flex items-center gap-1.5"><CreditCard className="w-3 h-3" /><span className="font-semibold truncate max-w-[160px]">{serviceName || serviceCode}</span></div>
+                    <span className="font-bold shrink-0">{credits > 0 ? `${credits} кр.` : "Кредиты закончились"}</span>
+                  </div>
+                )}
+                <div className="flex-1 min-h-0 flex items-center justify-center w-full">
+                  <img src={logoImg} alt="2LS" className="w-3/4 object-contain" style={{ mixBlendMode: "multiply", maxHeight: "28vh" }} />
+                </div>
+                <div className="w-full flex flex-col gap-3 pb-2">
+                  <p className={`text-center text-[10px] font-bold uppercase tracking-widest ${isDark ? "text-slate-500" : "text-slate-400"}`}>Выберите инструмент</p>
+                  <button onClick={() => setScreen("form")}
+                    className={`w-full h-[72px] rounded-3xl flex items-center justify-center gap-3 font-extrabold text-base uppercase tracking-wider transition-all shadow-sm ${isDark ? "bg-slate-900 border border-slate-700 text-slate-100 hover:border-sky-500" : "bg-white border border-[#ddd8ce] text-slate-800 hover:border-[#7ec8f0] hover:shadow-md"}`}>
+                    <Wrench className="w-6 h-6 text-[#7ec8f0] shrink-0" />
+                    Диагностика
+                  </button>
+                  <button onClick={() => setScreen("torque_form")}
+                    className={`w-full h-[72px] rounded-3xl flex items-center justify-center gap-3 font-extrabold text-base uppercase tracking-wider transition-all shadow-sm ${isDark ? "bg-slate-900 border border-slate-700 text-slate-100 hover:border-amber-500" : "bg-white border border-[#ddd8ce] text-slate-800 hover:border-amber-400 hover:shadow-md"}`}>
+                    <span className="text-2xl shrink-0">📐</span>
+                    Моменты затяжки
+                  </button>
+                  <button onClick={() => { setServiceCode(""); setServiceCodeInput(""); localStorage.removeItem("2ls_service_code"); localStorage.removeItem("2ls_service_name"); localStorage.removeItem(PERSIST_KEY); setScreen("code"); setCredits(null); }}
+                    className={`text-center text-[10px] py-1 ${isDark ? "text-slate-600 hover:text-slate-400" : "text-slate-400 hover:text-slate-500"} transition-colors`}>
+                    Изменить код сервиса
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* ══ SCREEN: FORM (vehicle) ══ */}
             {screen === "form" && (
               <div className={`flex-1 flex flex-col overflow-hidden px-4 ${isDesktop ? "max-w-xl mx-auto w-full" : ""}`}>
+                <button onClick={() => setScreen("menu")}
+                  className={`flex items-center gap-1 text-xs font-semibold self-start px-1 py-0.5 rounded-lg transition-colors ${isDesktop ? "mt-1 mb-0.5" : "mt-2 mb-1"} ${isDark ? "text-slate-400 hover:text-slate-200 hover:bg-slate-800" : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"}`}>
+                  <ArrowLeft className="w-3.5 h-3.5" /> Меню
+                </button>
                 {/* Скроллируемая область формы */}
-                <div className={`flex-1 overflow-y-auto pt-2 pb-2 flex flex-col ${isDesktop ? "gap-1.5" : "gap-2"}`}>
+                <div className={`flex-1 overflow-y-auto pt-1 pb-2 flex flex-col ${isDesktop ? "gap-1.5" : "gap-2"}`}>
                   {credits !== null && (
                     <div className={`flex items-center justify-between px-3 py-1.5 rounded-xl text-[10px] ${credits > 0 ? (isDark ? "bg-emerald-500/5 border border-emerald-500/20 text-emerald-400" : "bg-emerald-50 border border-emerald-100 text-emerald-700") : "bg-red-500/5 border border-red-500/20 text-red-400"}`}>
                       <div className="flex items-center gap-1.5"><CreditCard className="w-3 h-3" /><span className="font-semibold truncate max-w-[140px]">{serviceName || serviceCode}</span></div>
@@ -1098,10 +1286,6 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                   <button onClick={goToProblem} disabled={!brand || credits === 0}
                     className={`w-full font-extrabold rounded-2xl flex items-center justify-center gap-2 uppercase tracking-wider transition-all ${isDesktop ? "py-2 h-10 text-xs" : "py-3.5 h-12 text-[14px]"} ${!brand || credits === 0 ? "bg-slate-400 text-slate-200 cursor-not-allowed opacity-60" : isDark ? "bg-emerald-500 hover:bg-emerald-600 text-slate-950" : "bg-[#7ec8f0] hover:bg-[#5cb8e8] text-white"}`}>
                     Далее → Описание проблемы
-                  </button>
-                  <button onClick={() => { setServiceCode(""); setServiceCodeInput(""); localStorage.removeItem("2ls_service_code"); localStorage.removeItem("2ls_service_name"); localStorage.removeItem(PERSIST_KEY); setScreen("code"); setCredits(null); }}
-                    className="text-center text-[10px] text-slate-400 hover:text-slate-300 transition-colors py-1">
-                    Изменить код сервиса
                   </button>
                 </div>
               </div>
@@ -1777,6 +1961,204 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                   className={`w-full py-4 rounded-2xl font-extrabold text-sm uppercase tracking-wider transition-all ${isDark ? "bg-slate-900 border border-slate-800 text-slate-200 hover:bg-slate-800" : "bg-slate-100 text-slate-700 hover:bg-slate-200"}`}>
                   Новая диагностика
                 </button>
+              </div>
+            )}
+
+            {/* ══ SCREEN: TORQUE FORM ══ */}
+            {screen === "torque_form" && (
+              <div className={`flex-1 flex flex-col overflow-hidden px-4 ${isDesktop ? "max-w-xl mx-auto w-full" : ""}`}>
+                <button onClick={() => setScreen("menu")}
+                  className={`flex items-center gap-1 text-xs font-semibold self-start px-1 py-0.5 rounded-lg transition-colors ${isDesktop ? "mt-1 mb-0.5" : "mt-2 mb-1"} ${isDark ? "text-slate-400 hover:text-slate-200 hover:bg-slate-800" : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"}`}>
+                  <ArrowLeft className="w-3.5 h-3.5" /> Меню
+                </button>
+                <div className={`flex-1 overflow-y-auto pt-1 pb-2 flex flex-col ${isDesktop ? "gap-1.5" : "gap-2"}`}>
+                  {/* Vehicle — same as diagnostics form */}
+                  <div className={`${isDesktop ? "p-2" : "p-3"} rounded-3xl border ${isDark ? "bg-slate-900/40 border-slate-800/80" : "bg-white border-[#ddd8ce] shadow-sm"}`}>
+                    <div className={`flex flex-col ${isDesktop ? "gap-1.5" : "gap-2"}`}>
+                      <div className="flex flex-col gap-0.5">
+                        <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">Марка *</label>
+                        <div className={`flex rounded-xl border overflow-hidden text-xs font-semibold mb-0.5 ${isDark ? "border-slate-700" : "border-slate-200"}`}>
+                          <button type="button" onClick={() => { setBrandCategory("regular"); setBrand(""); setModel(""); setEngine(""); }}
+                            className={`flex-1 py-1.5 transition-colors ${brandCategory === "regular" ? (isDark ? "bg-emerald-600 text-white" : "bg-[#7ec8f0] text-white") : (isDark ? "bg-slate-800 text-slate-400" : "bg-slate-50 text-slate-500")}`}>Обычные</button>
+                          <button type="button" onClick={() => { setBrandCategory("chinese"); setBrand(""); setModel(""); setEngine(""); }}
+                            className={`flex-1 py-1.5 transition-colors ${brandCategory === "chinese" ? "bg-red-500 text-white" : (isDark ? "bg-slate-800 text-slate-400" : "bg-slate-50 text-slate-500")}`}>🇨🇳 Китайские</button>
+                        </div>
+                        <select value={brand} onChange={e => { setBrand(e.target.value); setModel(""); setEngine(""); }} className={fieldCls}>
+                          <option value="">Выберите марку...</option>
+                          {(brandCategory === "chinese" ? CHINESE_BRANDS_LIST : Object.keys(VEHICLE_DATA)).map(b => <option key={b} value={b}>{b}</option>)}
+                        </select>
+                      </div>
+                      <div className="flex flex-col gap-0.5">
+                        <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">Модель</label>
+                        {getModels(brand).length > 0
+                          ? <select value={model} onChange={e => { setModel(e.target.value); setEngine(""); }} className={fieldCls}>
+                              <option value="">Выберите модель...</option>
+                              {getModels(brand).map(m => <option key={m} value={m}>{m}</option>)}
+                            </select>
+                          : <input type="text" placeholder="Введите модель" value={model} onChange={e => setModel(e.target.value)} className={fieldCls} />}
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="flex flex-col gap-0.5">
+                          <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">Год</label>
+                          <input type="number" min="1990" max="2030" placeholder="2020" value={year} onChange={e => setYear(e.target.value)} className={fieldCls} />
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                          <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">Двигатель</label>
+                          {getEngines(brand, model).length > 0
+                            ? <select value={engine} onChange={e => setEngine(e.target.value)} className={fieldCls}>
+                                <option value="">Выбрать...</option>
+                                {getEngines(brand, model).map(eng => <option key={eng} value={eng}>{eng}</option>)}
+                              </select>
+                            : <input type="text" placeholder="1ZZ-FE 1.8" value={engine} onChange={e => setEngine(e.target.value)} className={fieldCls} />}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {/* Node selection */}
+                  <div className={`${isDesktop ? "p-2" : "p-3"} rounded-3xl border ${isDark ? "bg-slate-900/40 border-slate-800/80" : "bg-white border-[#ddd8ce] shadow-sm"}`}>
+                    <div className="flex flex-col gap-0.5">
+                      <label className="text-[10px] uppercase font-semibold text-slate-400 px-1">Узел *</label>
+                      <select value={torqueNode} onChange={e => setTorqueNode(e.target.value)} className={fieldCls}>
+                        <option value="">Выберите узел...</option>
+                        {TORQUE_NODES.map(n => <option key={n.id} value={n.id}>{n.label}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div className={`${isDesktop ? "pb-3 pt-1" : "pb-6 pt-2"}`}>
+                  <button onClick={handleTorqueQuery} disabled={!brand || !torqueNode}
+                    className={`w-full font-extrabold rounded-2xl flex items-center justify-center gap-2 uppercase tracking-wider transition-all ${isDesktop ? "py-2 h-10 text-xs" : "py-3.5 h-12 text-[14px]"} ${!brand || !torqueNode ? "bg-slate-400 text-slate-200 cursor-not-allowed opacity-60" : isDark ? "bg-amber-500 hover:bg-amber-600 text-slate-950" : "bg-amber-400 hover:bg-amber-500 text-white"}`}>
+                    <span>📐</span> Получить моменты
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ══ SCREEN: TORQUE RESULT ══ */}
+            {screen === "torque_result" && (
+              <div className={`flex-1 flex flex-col overflow-hidden px-4 ${isDesktop ? "max-w-xl mx-auto w-full" : ""}`}>
+                <button onClick={() => setScreen("torque_form")}
+                  className={`flex items-center gap-1 text-xs font-semibold self-start px-1 py-0.5 rounded-lg transition-colors ${isDesktop ? "mt-1 mb-0.5" : "mt-2 mb-1"} ${isDark ? "text-slate-400 hover:text-slate-200 hover:bg-slate-800" : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"}`}>
+                  <ArrowLeft className="w-3.5 h-3.5" /> Назад
+                </button>
+                <div className="flex-1 overflow-y-auto pb-4 flex flex-col gap-3">
+                  {/* Vehicle + node header */}
+                  <div className={`px-3 py-2 rounded-xl border text-[11px] flex items-center gap-2 ${isDark ? "bg-slate-900/40 border-slate-800" : "bg-white border-[#ddd8ce] shadow-sm"}`}>
+                    <span className="text-base">📐</span>
+                    <div>
+                      <span className={`font-bold ${isDark ? "text-slate-200" : "text-slate-700"}`}>{brand} {model}{year ? ` · ${year}г.` : ""}{engine ? ` · ${engine}` : ""}</span>
+                      <span className={`ml-2 ${isDark ? "text-slate-400" : "text-slate-500"}`}>{TORQUE_NODES.find(n => n.id === torqueNode)?.label}</span>
+                    </div>
+                  </div>
+
+                  {/* Loading */}
+                  {torqueLoading && (
+                    <div className="flex-1 flex flex-col items-center justify-center gap-3 py-10">
+                      <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
+                      <p className={`text-sm font-semibold ${isDark ? "text-slate-400" : "text-slate-500"}`}>Запрашиваю базу данных...</p>
+                    </div>
+                  )}
+
+                  {/* Error */}
+                  {torqueError && !torqueLoading && (
+                    <div className={`p-4 rounded-2xl border text-sm ${isDark ? "bg-red-500/10 border-red-500/30 text-red-400" : "bg-red-50 border-red-200 text-red-600"}`}>
+                      {torqueError}
+                    </div>
+                  )}
+
+                  {/* Result card */}
+                  {torqueResult && !torqueLoading && (
+                    <>
+                      {/* Confidence badge */}
+                      <div className={`inline-flex self-start items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold ${torqueResult.confidence === "high" ? (isDark ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border border-emerald-200") : (isDark ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" : "bg-amber-50 text-amber-700 border border-amber-200")}`}>
+                        {torqueResult.confidence === "high" ? "✓ Проверено (OLP)" : "⚠ Данные ИИ-поиска"}
+                      </div>
+
+                      {/* Main torque value */}
+                      <div className={`p-4 rounded-3xl border ${isDark ? "bg-slate-900/60 border-slate-800" : "bg-white border-[#ddd8ce] shadow-sm"}`}>
+                        <p className={`text-[10px] uppercase font-bold tracking-wider mb-1 ${isDark ? "text-slate-500" : "text-slate-400"}`}>Момент затяжки</p>
+                        <p className={`text-3xl font-black ${isDark ? "text-white" : "text-slate-800"}`}>
+                          {torqueResult.torque_nm.min}–{torqueResult.torque_nm.max} <span className="text-lg font-bold text-[#7ec8f0]">Н·м</span>
+                        </p>
+                        {torqueResult.angle_degrees && (
+                          <p className={`mt-1 text-sm font-semibold ${isDark ? "text-amber-400" : "text-amber-600"}`}>+ угол доворота: {torqueResult.angle_degrees}°</p>
+                        )}
+                      </div>
+
+                      {/* Stages */}
+                      {torqueResult.stages && torqueResult.stages.length > 0 && (
+                        <div className={`p-3 rounded-2xl border ${isDark ? "bg-slate-900/40 border-slate-800" : "bg-white border-[#ddd8ce] shadow-sm"}`}>
+                          <p className={`text-[10px] uppercase font-bold tracking-wider mb-2 ${isDark ? "text-slate-500" : "text-slate-400"}`}>Этапы затяжки</p>
+                          <div className="flex flex-col gap-1.5">
+                            {torqueResult.stages.map((s, i) => (
+                              <div key={i} className="flex items-center gap-2">
+                                <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${isDark ? "bg-amber-500/20 text-amber-400" : "bg-amber-50 text-amber-700"}`}>{i + 1}</span>
+                                <span className={`text-xs ${isDark ? "text-slate-300" : "text-slate-600"}`}><span className="font-semibold">{s.step}:</span> {s.value}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Details grid */}
+                      <div className="grid grid-cols-2 gap-2">
+                        {torqueResult.bolt_class && (
+                          <div className={`p-3 rounded-2xl border ${isDark ? "bg-slate-900/40 border-slate-800" : "bg-white border-[#ddd8ce] shadow-sm"}`}>
+                            <p className={`text-[10px] uppercase font-bold tracking-wider mb-1 ${isDark ? "text-slate-500" : "text-slate-400"}`}>Класс прочности</p>
+                            <p className={`text-base font-black ${isDark ? "text-slate-100" : "text-slate-800"}`}>{torqueResult.bolt_class}</p>
+                          </div>
+                        )}
+                        {torqueResult.reusable !== undefined && torqueResult.reusable !== null && (
+                          <div className={`p-3 rounded-2xl border ${isDark ? "bg-slate-900/40 border-slate-800" : "bg-white border-[#ddd8ce] shadow-sm"}`}>
+                            <p className={`text-[10px] uppercase font-bold tracking-wider mb-1 ${isDark ? "text-slate-500" : "text-slate-400"}`}>Повторное использование</p>
+                            <p className={`text-sm font-bold ${torqueResult.reusable ? "text-emerald-500" : "text-red-400"}`}>{torqueResult.reusable ? "Допускается" : "Нет — замените болт"}</p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Tightening order description */}
+                      {torqueResult.tightening_order_desc && (
+                        <div className={`p-3 rounded-2xl border ${isDark ? "bg-slate-900/40 border-slate-800" : "bg-white border-[#ddd8ce] shadow-sm"}`}>
+                          <p className={`text-[10px] uppercase font-bold tracking-wider mb-1 ${isDark ? "text-slate-500" : "text-slate-400"}`}>Порядок затяжки</p>
+                          <p className={`text-xs ${isDark ? "text-slate-300" : "text-slate-600"}`}>{torqueResult.tightening_order_desc}</p>
+                        </div>
+                      )}
+
+                      {/* SVG scheme */}
+                      {torqueResult.pattern && torqueResult.pattern !== "single" && (
+                        <div className={`p-3 rounded-2xl border ${isDark ? "bg-slate-900/40 border-slate-800" : "bg-white border-[#ddd8ce] shadow-sm"}`}>
+                          <p className={`text-[10px] uppercase font-bold tracking-wider mb-2 ${isDark ? "text-slate-500" : "text-slate-400"}`}>Схема затяжки</p>
+                          <TorqueSVG pattern={torqueResult.pattern} patternData={torqueResult.pattern_data} />
+                          <p className={`text-[10px] text-center mt-1 ${isDark ? "text-slate-600" : "text-slate-400"}`}>Цифры — порядок затяжки</p>
+                        </div>
+                      )}
+
+                      {/* Note */}
+                      {torqueResult.note && (
+                        <div className={`p-3 rounded-2xl border text-xs ${isDark ? "bg-amber-500/5 border-amber-500/20 text-amber-300" : "bg-amber-50 border-amber-200 text-amber-800"}`}>
+                          ⚠ {torqueResult.note}
+                        </div>
+                      )}
+
+                      {/* Confidence disclaimer */}
+                      {torqueResult.confidence === "medium" && (
+                        <p className={`text-[10px] text-center ${isDark ? "text-slate-600" : "text-slate-400"}`}>
+                          Рекомендуем сверить с сервисным мануалом для ответственных узлов
+                        </p>
+                      )}
+                    </>
+                  )}
+                </div>
+
+                {/* Bottom button */}
+                {!torqueLoading && (
+                  <div className={`${isDesktop ? "pb-3 pt-1" : "pb-4 pt-1"}`}>
+                    <button onClick={() => { setTorqueNode(""); setTorqueResult(null); setTorqueError(""); setScreen("torque_form"); }}
+                      className={`w-full font-extrabold rounded-2xl flex items-center justify-center gap-2 uppercase tracking-wider transition-all ${isDesktop ? "py-2 h-10 text-xs" : "py-3 h-11 text-[13px]"} ${isDark ? "bg-slate-900 border border-slate-700 text-slate-200 hover:bg-slate-800" : "bg-slate-100 text-slate-700 hover:bg-slate-200"}`}>
+                      Другой узел
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
