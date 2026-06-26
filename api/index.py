@@ -33,10 +33,16 @@ DB_NAME = os.environ.get("DATABASE_NAME", "autodiag")
 COLLECTION = "atoms"
 VECTOR_INDEX = "Diagnostik"
 
-# Модель для синтеза — gemini-2.0-flash-001 дешёвая и хорошо работает с русским
-LLM_MODEL = "google/gemini-2.5-pro"
+# Диагностика — Perplexity Sonar Pro (веб-поиск, лучший по качеству ответов)
+LLM_MODEL = "perplexity/sonar-pro"
+# Для vision-запросов (изображения) — Sonar Pro не поддерживает картинки
+LLM_VISION_MODEL = "google/gemini-2.5-pro"
 LLM_FALLBACK_MODEL = "deepseek/deepseek-chat"
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+
+# OLP API — моменты затяжки, DTC, fluid specs
+OLP_API_KEY = os.environ.get("OLP_API_KEY", "")
+OLP_BASE_URL = "https://api.openlaborproject.com/v1"
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -1387,6 +1393,10 @@ def chat_endpoint(req: ChatRequest):
     else:
         llm_msgs.append({"role": "user", "content": req.message})
 
+    # Sonar Pro не поддерживает vision — при изображении используем Gemini
+    has_image = bool(req.image_base64 and req.image_mime)
+    primary_model = LLM_VISION_MODEL if has_image else LLM_MODEL
+
     def _call_llm(model: str) -> str:
         r = requests.post(
             OPENROUTER_URL,
@@ -1395,7 +1405,7 @@ def chat_endpoint(req: ChatRequest):
                 "Content-Type": "application/json",
                 "HTTP-Referer": "https://2ls.app",
             },
-            json={"model": model, "messages": llm_msgs, "temperature": 0.3, "max_tokens": 4000},
+            json={"model": model, "messages": llm_msgs, "temperature": 0.3, "max_tokens": 6000},
             timeout=90,
         )
         r.raise_for_status()
@@ -1403,9 +1413,9 @@ def chat_endpoint(req: ChatRequest):
 
     fallback_model = False
     try:
-        reply = _call_llm(LLM_MODEL)
+        reply = _call_llm(primary_model)
     except Exception as e:
-        logger.warning(f"Primary LLM error ({LLM_MODEL}): {type(e).__name__}: {e}. Trying fallback.")
+        logger.warning(f"Primary LLM error ({primary_model}): {type(e).__name__}: {e}. Trying fallback.")
         try:
             reply = _call_llm(LLM_FALLBACK_MODEL)
             fallback_model = True
@@ -2458,6 +2468,51 @@ def _call_llm_json(prompt: str, model: str = "google/gemini-2.5-flash-lite") -> 
         raise ValueError("No JSON in LLM response")
     return json.loads(match.group())
 
+def _olp_torque(brand: str, model: str, year: str, engine: str, node: str) -> dict | None:
+    """Запрос к OLP API. Возвращает None если не найдено или ошибка."""
+    if not OLP_API_KEY:
+        return None
+    try:
+        resp = requests.get(
+            f"{OLP_BASE_URL}/torque-specs",
+            headers={"Authorization": f"Bearer {OLP_API_KEY}", "Accept": "application/json"},
+            params={"make": brand, "model": model, "year": year, "engine": engine, "component": node},
+            timeout=10,
+        )
+        if resp.status_code == 429:
+            logger.warning("OLP rate limit hit — falling back to AI")
+            return None
+        if resp.status_code == 404:
+            return None
+        if not resp.ok:
+            logger.warning(f"OLP error {resp.status_code}: {resp.text[:200]}")
+            return None
+        data = resp.json()
+        if not data:
+            return None
+        # Нормализуем ответ OLP в наш формат
+        torque_min = data.get("torque_min") or data.get("min_nm") or data.get("torque_nm_min")
+        torque_max = data.get("torque_max") or data.get("max_nm") or data.get("torque_nm_max")
+        if not torque_min or not torque_max:
+            return None
+        return {
+            "torque_nm": {"min": float(torque_min), "max": float(torque_max)},
+            "angle_degrees": data.get("angle_degrees") or data.get("torque_angle"),
+            "stages": data.get("stages") or [],
+            "tightening_order_desc": data.get("tightening_order") or data.get("sequence_description"),
+            "bolt_class": data.get("bolt_class") or data.get("fastener_class"),
+            "reusable": data.get("reusable"),
+            "pattern": data.get("pattern") or "single",
+            "pattern_data": data.get("pattern_data") or {},
+            "confidence": "high",
+            "source": "olp",
+            "note": data.get("note") or data.get("warning"),
+        }
+    except Exception as e:
+        logger.warning(f"OLP request failed: {e}")
+        return None
+
+
 @app.post("/api/torque")
 def get_torque(req: TorqueRequest):
     node_label = _NODE_LABELS.get(req.node, req.node.replace("_", " "))
@@ -2474,7 +2529,17 @@ def get_torque(req: TorqueRequest):
     except Exception:
         pass
 
-    # 2. Call LLM (Gemini Flash — cheap, fast)
+    # 2. OLP API — заводские данные для европейских/американских/японских/корейских марок
+    olp_result = _olp_torque(req.brand, req.model, req.year, req.engine, req.node)
+    if olp_result:
+        try:
+            cache_col = _db()["torque_cache"]
+            cache_col.insert_one({**olp_result, "brand": req.brand, "model": req.model, "year": req.year, "engine": req.engine, "node": req.node, "created_at": datetime.utcnow().isoformat()})
+        except Exception:
+            pass
+        return olp_result
+
+    # 3. AI fallback (Gemini Flash Lite — cheap, fast)
     prompt = f"""Ты эксперт по техническому обслуживанию автомобилей. Предоставь точные данные о моментах затяжки.
 
 Автомобиль: {vehicle}
