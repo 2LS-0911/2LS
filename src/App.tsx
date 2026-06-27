@@ -1030,45 +1030,93 @@ ${recommendedWorks.length > 0 ? `<div class="section">
     torque_result: TORQUE_NODES.find(n => n.id === torqueNode)?.label || "Результат",
   }[screen];
 
+  // Генерирует правильный порядок затяжки крест-накрест когда OLP не даёт sequence
+  function defaultGridSequence(rows: number, cols: number): number[] {
+    const seq: number[] = [];
+    const center = Math.floor(cols / 2);
+    // Обходим колонки от центра наружу: center, center+1, center-1, center+2, ...
+    const colOrder: number[] = [center];
+    for (let d = 1; d < cols; d++) {
+      if (center + d < cols) colOrder.push(center + d);
+      if (center - d >= 0) colOrder.push(center - d);
+    }
+    for (const c of colOrder) {
+      for (let r = 0; r < rows; r++) {
+        seq.push(r * cols + c + 1);
+      }
+    }
+    return seq;
+  }
+
+  function defaultCircleSequence(n: number): number[] {
+    // Стандартный паттерн "звезда": через одну позицию
+    const step = Math.ceil(n / 2);
+    const seq: number[] = [];
+    const used = new Set<number>();
+    let pos = 1;
+    while (seq.length < n) {
+      if (!used.has(pos)) { seq.push(pos); used.add(pos); }
+      const next = ((pos - 1 + step) % n) + 1;
+      pos = used.has(next) ? ((pos % n) + 1) : next;
+      if (seq.length < n && used.size < n) {
+        // перебор если зациклились
+        for (let i = 1; i <= n; i++) { if (!used.has(i)) { pos = i; break; } }
+      }
+    }
+    return seq;
+  }
+
   function TorqueSVG({ pattern, patternData }: { pattern: string; patternData?: TorqueData["pattern_data"] }) {
     const blue = "#0088cc";
+
+    // Вычисляет метки болтов: boltLabel[i] = порядковый номер затяжки болта i
+    function makeBoltLabels(total: number, seq: number[]): number[] {
+      const labels = Array(total).fill(0);
+      if (seq.length === total) {
+        seq.forEach((boltIdx, step) => { labels[boltIdx - 1] = step + 1; });
+      } else {
+        labels.forEach((_, i) => { labels[i] = i + 1; });
+      }
+      return labels;
+    }
+
     if (pattern === "circle") {
       const n = patternData?.points || 5;
-      const seq = patternData?.sequence || [];
-      const cx = 90, cy = 90, r = 65;
+      const rawSeq = patternData?.sequence || [];
+      const seq = rawSeq.length === n ? rawSeq : defaultCircleSequence(n);
+      const boltLabel = makeBoltLabels(n, seq);
+      const cx = 80, cy = 80, r = 58;
       const pts = Array.from({ length: n }, (_, i) => {
         const a = (i * 2 * Math.PI / n) - Math.PI / 2;
         return { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) };
       });
-      const boltLabel: number[] = Array(n).fill(0);
-      if (seq.length === n) { seq.forEach((boltIdx, step) => { boltLabel[boltIdx - 1] = step + 1; }); }
-      else { boltLabel.forEach((_, i) => { boltLabel[i] = i + 1; }); }
       return (
-        <svg viewBox="0 0 180 180" className="w-full max-w-[200px] mx-auto">
-          <circle cx={cx} cy={cy} r={22} fill={isDark ? "#334155" : "#f1f5f9"} stroke="#94a3b8" strokeWidth="1.5" />
-          <circle cx={cx} cy={cy} r={r} fill="none" stroke={isDark ? "#334155" : "#e2e8f0"} strokeWidth="1" strokeDasharray="4 4" />
+        <svg viewBox="0 0 160 160" className="w-full max-w-[180px] mx-auto">
+          <circle cx={cx} cy={cy} r={18} fill={isDark ? "#334155" : "#f1f5f9"} stroke="#94a3b8" strokeWidth="1.5" />
+          <circle cx={cx} cy={cy} r={r} fill="none" stroke={isDark ? "#334155" : "#e2e8f0"} strokeWidth="1" strokeDasharray="3 3" />
           {pts.map((p, i) => (
             <g key={i}>
-              <circle cx={p.x} cy={p.y} r={14} fill={blue} fillOpacity={0.15} stroke={blue} strokeWidth="1.5" />
-              <text x={p.x} y={p.y + 4.5} textAnchor="middle" fontSize="12" fontWeight="bold" fill={blue}>{boltLabel[i]}</text>
+              <circle cx={p.x} cy={p.y} r={13} fill={blue} fillOpacity={0.15} stroke={blue} strokeWidth="1.5" />
+              <text x={p.x} y={p.y + 4.5} textAnchor="middle" fontSize="11" fontWeight="bold" fill={blue}>{boltLabel[i]}</text>
             </g>
           ))}
         </svg>
       );
     }
+
     if (pattern === "rectangle_grid") {
       const rows = patternData?.rows || 2;
       const cols = patternData?.cols || 5;
       const total = rows * cols;
-      const seq = patternData?.sequence || [];
-      const boltLabel: number[] = Array(total).fill(0);
-      if (seq.length === total) { seq.forEach((boltIdx, step) => { boltLabel[boltIdx - 1] = step + 1; }); }
-      else { boltLabel.forEach((_, i) => { boltLabel[i] = i + 1; }); }
-      const W = 220, H = 100, padX = 22, padY = 20;
+      const rawSeq = patternData?.sequence || [];
+      const seq = rawSeq.length === total ? rawSeq : defaultGridSequence(rows, cols);
+      const boltLabel = makeBoltLabels(total, seq);
+      const W = 240, padX = 18, padY = 18;
+      const H = rows > 1 ? 80 : 50;
       const cellW = cols > 1 ? (W - 2 * padX) / (cols - 1) : 0;
       const cellH = rows > 1 ? (H - 2 * padY) / (rows - 1) : 0;
       return (
-        <svg viewBox={`0 0 ${W} ${H}`} className="w-full max-w-[260px] mx-auto">
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-full mx-auto">
           {Array.from({ length: rows }, (_, r) =>
             Array.from({ length: cols }, (_, c) => {
               const idx = r * cols + c;
@@ -1076,7 +1124,7 @@ ${recommendedWorks.length > 0 ? `<div class="section">
               const y = rows > 1 ? padY + r * cellH : H / 2;
               return (
                 <g key={idx}>
-                  <circle cx={x} cy={y} r={11} fill={blue} fillOpacity={0.15} stroke={blue} strokeWidth="1.5" />
+                  <circle cx={x} cy={y} r={12} fill={blue} fillOpacity={0.15} stroke={blue} strokeWidth="1.5" />
                   <text x={x} y={y + 4} textAnchor="middle" fontSize="9" fontWeight="bold" fill={blue}>{boltLabel[idx]}</text>
                 </g>
               );
@@ -1085,22 +1133,22 @@ ${recommendedWorks.length > 0 ? `<div class="section">
         </svg>
       );
     }
+
     if (pattern === "linear_row") {
       const n = patternData?.points || 4;
-      const seq = patternData?.sequence || [];
-      const boltLabel: number[] = Array(n).fill(0);
-      if (seq.length === n) { seq.forEach((boltIdx, step) => { boltLabel[boltIdx - 1] = step + 1; }); }
-      else { boltLabel.forEach((_, i) => { boltLabel[i] = i + 1; }); }
-      const W = 220, H = 60, padX = 22, cy2 = 30;
+      const rawSeq = patternData?.sequence || [];
+      const seq = rawSeq.length === n ? rawSeq : Array.from({ length: n }, (_, i) => i + 1);
+      const boltLabel = makeBoltLabels(n, seq);
+      const W = 240, H = 54, padX = 18, cy2 = 27;
       const spacing = n > 1 ? (W - 2 * padX) / (n - 1) : 0;
       return (
-        <svg viewBox={`0 0 ${W} ${H}`} className="w-full max-w-[260px] mx-auto">
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-full mx-auto">
           <line x1={padX} y1={cy2} x2={W - padX} y2={cy2} stroke={isDark ? "#334155" : "#e2e8f0"} strokeWidth="1.5" />
           {Array.from({ length: n }, (_, i) => {
             const x = n > 1 ? padX + i * spacing : W / 2;
             return (
               <g key={i}>
-                <circle cx={x} cy={cy2} r={11} fill={blue} fillOpacity={0.15} stroke={blue} strokeWidth="1.5" />
+                <circle cx={x} cy={cy2} r={12} fill={blue} fillOpacity={0.15} stroke={blue} strokeWidth="1.5" />
                 <text x={x} y={cy2 + 4} textAnchor="middle" fontSize="9" fontWeight="bold" fill={blue}>{boltLabel[i]}</text>
               </g>
             );
@@ -1108,10 +1156,11 @@ ${recommendedWorks.length > 0 ? `<div class="section">
         </svg>
       );
     }
+
     return (
-      <svg viewBox="0 0 80 80" className="w-20 h-20 mx-auto">
-        <circle cx={40} cy={40} r={30} fill={blue} fillOpacity={0.15} stroke={blue} strokeWidth="2" />
-        <text x={40} y={45} textAnchor="middle" fontSize="13" fill={blue} fontWeight="bold">1</text>
+      <svg viewBox="0 0 70 70" className="w-16 h-16 mx-auto">
+        <circle cx={35} cy={35} r={28} fill={blue} fillOpacity={0.15} stroke={blue} strokeWidth="2" />
+        <text x={35} y={40} textAnchor="middle" fontSize="13" fill={blue} fontWeight="bold">1</text>
       </svg>
     );
   }
@@ -2044,16 +2093,16 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                   className={`flex items-center gap-1 text-xs font-semibold self-start px-1 py-0.5 rounded-lg transition-colors ${isDesktop ? "mt-1 mb-0.5" : "mt-2 mb-1"} ${isDark ? "text-slate-400 hover:text-slate-200 hover:bg-slate-800" : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"}`}>
                   <ArrowLeft className="w-3.5 h-3.5" /> Назад
                 </button>
-                <div className="flex-1 overflow-y-auto pb-4 flex flex-col gap-3">
-                  {/* Vehicle + node header */}
-                  <div className={`px-3 py-2 rounded-xl border text-[11px] flex items-center gap-2 ${isDark ? "bg-slate-900/40 border-slate-800" : "bg-white border-[#ddd8ce] shadow-sm"}`}>
-                    <span className="text-base">📐</span>
-                    <div>
-                      <span className={`font-bold ${isDark ? "text-slate-200" : "text-slate-700"}`}>{brand} {model}{year ? ` · ${year}г.` : ""}{engine ? ` · ${engine}` : ""}</span>
-                      <span className={`ml-2 ${isDark ? "text-slate-400" : "text-slate-500"}`}>{TORQUE_NODES.find(n => n.id === torqueNode)?.label}</span>
-                    </div>
-                  </div>
 
+                {/* Compact header */}
+                <div className={`px-3 py-1.5 rounded-xl border text-[11px] flex items-center gap-2 mb-2 ${isDark ? "bg-slate-900/40 border-slate-800" : "bg-white border-[#ddd8ce] shadow-sm"}`}>
+                  <span className="text-sm shrink-0">📐</span>
+                  <span className={`font-semibold truncate ${isDark ? "text-slate-300" : "text-slate-600"}`}>
+                    {brand} {model}{engine ? ` · ${engine}` : ""} · <span className="font-bold">{TORQUE_NODES.find(n => n.id === torqueNode)?.label}</span>
+                  </span>
+                </div>
+
+                <div className="flex-1 overflow-y-auto pb-2 flex flex-col gap-2">
                   {/* Loading */}
                   {torqueLoading && (
                     <div className="flex-1 flex flex-col items-center justify-center gap-3 py-10">
@@ -2064,73 +2113,72 @@ ${recommendedWorks.length > 0 ? `<div class="section">
 
                   {/* Error */}
                   {torqueError && !torqueLoading && (
-                    <div className={`p-4 rounded-2xl border text-sm ${isDark ? "bg-red-500/10 border-red-500/30 text-red-400" : "bg-red-50 border-red-200 text-red-600"}`}>
+                    <div className={`p-3 rounded-2xl border text-sm ${isDark ? "bg-red-500/10 border-red-500/30 text-red-400" : "bg-red-50 border-red-200 text-red-600"}`}>
                       {torqueError}
                     </div>
                   )}
 
-                  {/* Result card */}
                   {torqueResult && !torqueLoading && (
                     <>
-                      {/* Confidence badge */}
-                      <div className={`inline-flex self-start items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold ${torqueResult.confidence === "high" ? (isDark ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border border-emerald-200") : (isDark ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" : "bg-amber-50 text-amber-700 border border-amber-200")}`}>
-                        {torqueResult.confidence === "high" ? "✓ Проверено (OLP)" : "⚠ Данные ИИ-поиска"}
-                      </div>
+                      {/* Compact main card: момент + этапы + детали */}
+                      <div className={`p-3 rounded-2xl border ${isDark ? "bg-slate-900/60 border-slate-800" : "bg-white border-[#ddd8ce] shadow-sm"}`}>
+                        {/* Badge + момент в одну строку */}
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <div>
+                            <div className="flex items-baseline gap-1.5 flex-wrap">
+                              <span className={`text-2xl font-black ${isDark ? "text-white" : "text-slate-800"}`}>
+                                {torqueResult.torque_nm.min}–{torqueResult.torque_nm.max}
+                              </span>
+                              <span className="text-base font-bold text-[#7ec8f0]">Н·м</span>
+                              {torqueResult.angle_degrees && (
+                                <span className={`text-sm font-semibold ${isDark ? "text-amber-400" : "text-amber-600"}`}>+{torqueResult.angle_degrees}°</span>
+                              )}
+                            </div>
+                          </div>
+                          <span className={`shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold border ${torqueResult.confidence === "high" ? (isDark ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200") : (isDark ? "bg-amber-500/20 text-amber-400 border-amber-500/30" : "bg-amber-50 text-amber-700 border-amber-200")}`}>
+                            {torqueResult.confidence === "high" ? "✓ OLP" : "⚠ ИИ"}
+                          </span>
+                        </div>
 
-                      {/* Main torque value */}
-                      <div className={`p-4 rounded-3xl border ${isDark ? "bg-slate-900/60 border-slate-800" : "bg-white border-[#ddd8ce] shadow-sm"}`}>
-                        <p className={`text-[10px] uppercase font-bold tracking-wider mb-1 ${isDark ? "text-slate-500" : "text-slate-400"}`}>Момент затяжки</p>
-                        <p className={`text-3xl font-black ${isDark ? "text-white" : "text-slate-800"}`}>
-                          {torqueResult.torque_nm.min}–{torqueResult.torque_nm.max} <span className="text-lg font-bold text-[#7ec8f0]">Н·м</span>
-                        </p>
-                        {torqueResult.angle_degrees && (
-                          <p className={`mt-1 text-sm font-semibold ${isDark ? "text-amber-400" : "text-amber-600"}`}>+ угол доворота: {torqueResult.angle_degrees}°</p>
-                        )}
-                      </div>
-
-                      {/* Stages */}
-                      {torqueResult.stages && torqueResult.stages.length > 0 && (
-                        <div className={`p-3 rounded-2xl border ${isDark ? "bg-slate-900/40 border-slate-800" : "bg-white border-[#ddd8ce] shadow-sm"}`}>
-                          <p className={`text-[10px] uppercase font-bold tracking-wider mb-2 ${isDark ? "text-slate-500" : "text-slate-400"}`}>Этапы затяжки</p>
-                          <div className="flex flex-col gap-1.5">
+                        {/* Этапы — компактно горизонтально */}
+                        {torqueResult.stages && torqueResult.stages.length > 0 && (
+                          <div className={`flex flex-wrap gap-1.5 pt-2 border-t ${isDark ? "border-slate-800" : "border-slate-100"}`}>
                             {torqueResult.stages.map((s, i) => (
-                              <div key={i} className="flex items-center gap-2">
-                                <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${isDark ? "bg-amber-500/20 text-amber-400" : "bg-amber-50 text-amber-700"}`}>{i + 1}</span>
-                                <span className={`text-xs ${isDark ? "text-slate-300" : "text-slate-600"}`}><span className="font-semibold">{s.step}:</span> {s.value}</span>
-                              </div>
+                              <span key={i} className={`flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] ${isDark ? "bg-slate-800 text-slate-300" : "bg-slate-50 border border-slate-200 text-slate-600"}`}>
+                                <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 ${isDark ? "bg-amber-500/30 text-amber-400" : "bg-amber-100 text-amber-700"}`}>{i + 1}</span>
+                                <span className="font-semibold">{s.value}</span>
+                              </span>
                             ))}
                           </div>
-                        </div>
-                      )}
-
-                      {/* Details grid */}
-                      <div className="grid grid-cols-2 gap-2">
-                        {torqueResult.bolt_class && (
-                          <div className={`p-3 rounded-2xl border ${isDark ? "bg-slate-900/40 border-slate-800" : "bg-white border-[#ddd8ce] shadow-sm"}`}>
-                            <p className={`text-[10px] uppercase font-bold tracking-wider mb-1 ${isDark ? "text-slate-500" : "text-slate-400"}`}>Класс прочности</p>
-                            <p className={`text-base font-black ${isDark ? "text-slate-100" : "text-slate-800"}`}>{torqueResult.bolt_class}</p>
-                          </div>
                         )}
-                        {torqueResult.reusable !== undefined && torqueResult.reusable !== null && (
-                          <div className={`p-3 rounded-2xl border ${isDark ? "bg-slate-900/40 border-slate-800" : "bg-white border-[#ddd8ce] shadow-sm"}`}>
-                            <p className={`text-[10px] uppercase font-bold tracking-wider mb-1 ${isDark ? "text-slate-500" : "text-slate-400"}`}>Повторное использование</p>
-                            <p className={`text-sm font-bold ${torqueResult.reusable ? "text-emerald-500" : "text-red-400"}`}>{torqueResult.reusable ? "Допускается" : "Нет — замените болт"}</p>
+
+                        {/* Болт + повторное использование */}
+                        {(torqueResult.bolt_class || torqueResult.reusable !== null && torqueResult.reusable !== undefined) && (
+                          <div className={`flex gap-4 pt-2 border-t mt-2 ${isDark ? "border-slate-800" : "border-slate-100"}`}>
+                            {torqueResult.bolt_class && (
+                              <div>
+                                <span className={`text-[10px] uppercase font-bold ${isDark ? "text-slate-500" : "text-slate-400"}`}>Болт </span>
+                                <span className={`text-sm font-black ${isDark ? "text-slate-100" : "text-slate-800"}`}>{torqueResult.bolt_class}</span>
+                              </div>
+                            )}
+                            {torqueResult.reusable !== null && torqueResult.reusable !== undefined && (
+                              <div>
+                                <span className={`text-[10px] uppercase font-bold ${isDark ? "text-slate-500" : "text-slate-400"}`}>Повтор </span>
+                                <span className={`text-sm font-bold ${torqueResult.reusable ? "text-emerald-500" : "text-red-400"}`}>{torqueResult.reusable ? "Да" : "Нет"}</span>
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
 
-                      {/* Tightening order description */}
-                      {torqueResult.tightening_order_desc && (
+                      {/* Схема затяжки — всегда показываем если pattern есть */}
+                      {torqueResult.pattern && (
                         <div className={`p-3 rounded-2xl border ${isDark ? "bg-slate-900/40 border-slate-800" : "bg-white border-[#ddd8ce] shadow-sm"}`}>
-                          <p className={`text-[10px] uppercase font-bold tracking-wider mb-1 ${isDark ? "text-slate-500" : "text-slate-400"}`}>Порядок затяжки</p>
-                          <p className={`text-xs ${isDark ? "text-slate-300" : "text-slate-600"}`}>{torqueResult.tightening_order_desc}</p>
-                        </div>
-                      )}
-
-                      {/* SVG scheme */}
-                      {torqueResult.pattern && torqueResult.pattern !== "single" && (
-                        <div className={`p-3 rounded-2xl border ${isDark ? "bg-slate-900/40 border-slate-800" : "bg-white border-[#ddd8ce] shadow-sm"}`}>
-                          <p className={`text-[10px] uppercase font-bold tracking-wider mb-2 ${isDark ? "text-slate-500" : "text-slate-400"}`}>Схема затяжки</p>
+                          {torqueResult.tightening_order_desc && (
+                            <p className={`text-[11px] font-semibold mb-2 ${isDark ? "text-slate-300" : "text-slate-600"}`}>
+                              {torqueResult.tightening_order_desc}
+                            </p>
+                          )}
                           <TorqueSVG pattern={torqueResult.pattern} patternData={torqueResult.pattern_data} />
                           <p className={`text-[10px] text-center mt-1 ${isDark ? "text-slate-600" : "text-slate-400"}`}>Цифры — порядок затяжки</p>
                         </div>
@@ -2138,22 +2186,20 @@ ${recommendedWorks.length > 0 ? `<div class="section">
 
                       {/* Note */}
                       {torqueResult.note && (
-                        <div className={`p-3 rounded-2xl border text-xs ${isDark ? "bg-amber-500/5 border-amber-500/20 text-amber-300" : "bg-amber-50 border-amber-200 text-amber-800"}`}>
+                        <div className={`px-3 py-2 rounded-xl text-[11px] ${isDark ? "bg-amber-500/5 border border-amber-500/20 text-amber-300" : "bg-amber-50 border border-amber-200 text-amber-800"}`}>
                           ⚠ {torqueResult.note}
                         </div>
                       )}
 
-                      {/* Confidence disclaimer */}
                       {torqueResult.confidence === "medium" && (
                         <p className={`text-[10px] text-center ${isDark ? "text-slate-600" : "text-slate-400"}`}>
-                          Рекомендуем сверить с сервисным мануалом для ответственных узлов
+                          Сверьте с сервисным мануалом для ответственных узлов
                         </p>
                       )}
                     </>
                   )}
                 </div>
 
-                {/* Bottom button */}
                 {!torqueLoading && (
                   <div className={`${isDesktop ? "pb-3 pt-1" : "pb-4 pt-1"}`}>
                     <button onClick={() => { setTorqueNode(""); setTorqueResult(null); setTorqueError(""); setScreen("torque_form"); }}
