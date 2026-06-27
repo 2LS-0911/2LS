@@ -1090,13 +1090,27 @@ ${recommendedWorks.length > 0 ? `<div class="section">
 
   function TorqueSVG({ node, patternData }: { node: string; patternData?: TorqueData["pattern_data"] }) {
     const blue = "#0088cc";
-    // Паттерн — из NODE_SCHEME по типу узла, не нужен OLP
+    const arrowColor = "#0088cc";
     const nodeDefault = NODE_SCHEME[node] || { pattern: "single" as const };
     const pattern = nodeDefault.pattern;
-    // rows/cols/points: OLP данные имеют приоритет если есть, иначе дефолт из NODE_SCHEME
     const resolvedRows   = patternData?.rows   || nodeDefault.rows   || 2;
     const resolvedCols   = patternData?.cols   || nodeDefault.cols   || 5;
     const resolvedPoints = patternData?.points || nodeDefault.points || 5;
+
+    // Возвращает позиции болтов в порядке seq[0]→seq[1]→... (для рисования стрелок)
+    function makeArrowPaths(positions: {x:number;y:number}[], seq: number[], boltR: number): {x1:number;y1:number;x2:number;y2:number}[] {
+      const arrows = [];
+      for (let i = 0; i < seq.length - 1; i++) {
+        const from = positions[seq[i] - 1];
+        const to   = positions[seq[i + 1] - 1];
+        if (!from || !to) continue;
+        const dx = to.x - from.x, dy = to.y - from.y;
+        const len = Math.sqrt(dx * dx + dy * dy) || 1;
+        const nx = dx / len, ny = dy / len;
+        arrows.push({ x1: from.x + nx * (boltR + 2), y1: from.y + ny * (boltR + 2), x2: to.x - nx * (boltR + 5), y2: to.y - ny * (boltR + 5) });
+      }
+      return arrows;
+    }
 
     function makeBoltLabels(total: number, seq: number[]): number[] {
       const labels = Array(total).fill(0);
@@ -1108,24 +1122,37 @@ ${recommendedWorks.length > 0 ? `<div class="section">
       return labels;
     }
 
+    const arrowMarker = (id: string) => (
+      <defs>
+        <marker id={id} markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto">
+          <path d="M0,0 L5,2.5 L0,5 Z" fill={arrowColor} fillOpacity="0.6" />
+        </marker>
+      </defs>
+    );
+
     if (pattern === "circle") {
       const n = resolvedPoints;
       const rawSeq = patternData?.sequence || [];
       const seq = rawSeq.length === n ? rawSeq : defaultCircleSequence(n);
       const boltLabel = makeBoltLabels(n, seq);
-      const cx = 65, cy = 65, orbitR = 48;
+      const cx = 80, cy = 80, orbitR = 58, boltR = 13;
       const pts = Array.from({ length: n }, (_, i) => {
         const a = (i * 2 * Math.PI / n) - Math.PI / 2;
         return { x: cx + orbitR * Math.cos(a), y: cy + orbitR * Math.sin(a) };
       });
+      const arrows = makeArrowPaths(pts, seq, boltR);
       return (
-        <svg viewBox="0 0 130 130" className="w-full max-w-[130px] mx-auto">
-          <circle cx={cx} cy={cy} r={14} fill={isDark ? "#334155" : "#f1f5f9"} stroke="#94a3b8" strokeWidth="1.5" />
-          <circle cx={cx} cy={cy} r={orbitR} fill="none" stroke={isDark ? "#334155" : "#e2e8f0"} strokeWidth="1" strokeDasharray="3 3" />
+        <svg viewBox="0 0 160 160" className="w-full mx-auto" style={{ maxHeight: 140 }}>
+          {arrowMarker("arr-c")}
+          <circle cx={cx} cy={cy} r={18} fill={isDark ? "#334155" : "#f1f5f9"} stroke="#94a3b8" strokeWidth="1.5" />
+          <circle cx={cx} cy={cy} r={orbitR} fill="none" stroke={isDark ? "#334155" : "#e2e8f0"} strokeWidth="1" strokeDasharray="4 3" />
+          {arrows.map((a, i) => (
+            <line key={i} x1={a.x1} y1={a.y1} x2={a.x2} y2={a.y2} stroke={arrowColor} strokeWidth="1.2" strokeOpacity="0.5" markerEnd="url(#arr-c)" />
+          ))}
           {pts.map((p, i) => (
             <g key={i}>
-              <circle cx={p.x} cy={p.y} r={10} fill={blue} fillOpacity={0.15} stroke={blue} strokeWidth="1.5" />
-              <text x={p.x} y={p.y + 3.5} textAnchor="middle" fontSize="9" fontWeight="bold" fill={blue}>{boltLabel[i]}</text>
+              <circle cx={p.x} cy={p.y} r={boltR} fill={blue} fillOpacity={0.15} stroke={blue} strokeWidth="1.5" />
+              <text x={p.x} y={p.y + 4.5} textAnchor="middle" fontSize="11" fontWeight="bold" fill={blue}>{boltLabel[i]}</text>
             </g>
           ))}
         </svg>
@@ -1139,24 +1166,26 @@ ${recommendedWorks.length > 0 ? `<div class="section">
       const rawSeq = patternData?.sequence || [];
       const seq = rawSeq.length === total ? rawSeq : defaultGridSequence(rows, cols);
       const boltLabel = makeBoltLabels(total, seq);
-      const padX = 14, padY = 12, cellW2 = 40, cellH2 = 28;
+      const padX = 18, padY = 16, cellW2 = 42, cellH2 = 36, boltR = 12;
       const W = 2 * padX + (cols - 1) * cellW2;
       const H = 2 * padY + (rows - 1) * cellH2;
+      const pts = Array.from({ length: total }, (_, idx) => ({
+        x: padX + (idx % cols) * cellW2,
+        y: padY + Math.floor(idx / cols) * cellH2,
+      }));
+      const arrows = makeArrowPaths(pts, seq, boltR);
       return (
-        <svg viewBox={`0 0 ${W} ${H}`} className="w-full mx-auto" style={{ maxHeight: 64 }}>
-          {Array.from({ length: rows }, (_, r) =>
-            Array.from({ length: cols }, (_, c) => {
-              const idx = r * cols + c;
-              const x = padX + c * cellW2;
-              const y = padY + r * cellH2;
-              return (
-                <g key={idx}>
-                  <circle cx={x} cy={y} r={9} fill={blue} fillOpacity={0.15} stroke={blue} strokeWidth="1.5" />
-                  <text x={x} y={y + 3.5} textAnchor="middle" fontSize="7.5" fontWeight="bold" fill={blue}>{boltLabel[idx]}</text>
-                </g>
-              );
-            })
-          )}
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-full mx-auto">
+          {arrowMarker("arr-g")}
+          {arrows.map((a, i) => (
+            <line key={i} x1={a.x1} y1={a.y1} x2={a.x2} y2={a.y2} stroke={arrowColor} strokeWidth="1.2" strokeOpacity="0.5" markerEnd="url(#arr-g)" />
+          ))}
+          {pts.map((p, idx) => (
+            <g key={idx}>
+              <circle cx={p.x} cy={p.y} r={boltR} fill={blue} fillOpacity={0.15} stroke={blue} strokeWidth="1.5" />
+              <text x={p.x} y={p.y + 4} textAnchor="middle" fontSize="10" fontWeight="bold" fill={blue}>{boltLabel[idx]}</text>
+            </g>
+          ))}
         </svg>
       );
     }
@@ -1166,29 +1195,32 @@ ${recommendedWorks.length > 0 ? `<div class="section">
       const rawSeq = patternData?.sequence || [];
       const seq = rawSeq.length === n ? rawSeq : Array.from({ length: n }, (_, i) => i + 1);
       const boltLabel = makeBoltLabels(n, seq);
-      const padX = 14, boltR = 9, spacing = Math.max(32, Math.min(52, (220 - 2 * padX) / Math.max(n - 1, 1)));
+      const padX = 16, boltR = 12, spacing = Math.max(36, Math.min(54, (240 - 2 * padX) / Math.max(n - 1, 1)));
       const W = 2 * padX + (n - 1) * spacing;
-      const H = 38, cy2 = 19;
+      const H = 44, cy2 = 22;
+      const pts = Array.from({ length: n }, (_, i) => ({ x: n > 1 ? padX + i * spacing : W / 2, y: cy2 }));
+      const arrows = makeArrowPaths(pts, seq, boltR);
       return (
-        <svg viewBox={`0 0 ${W} ${H}`} className="w-full mx-auto" style={{ maxHeight: 48 }}>
-          <line x1={padX} y1={cy2} x2={W - padX} y2={cy2} stroke={isDark ? "#334155" : "#e2e8f0"} strokeWidth="1.5" />
-          {Array.from({ length: n }, (_, i) => {
-            const x = n > 1 ? padX + i * spacing : W / 2;
-            return (
-              <g key={i}>
-                <circle cx={x} cy={cy2} r={boltR} fill={blue} fillOpacity={0.15} stroke={blue} strokeWidth="1.5" />
-                <text x={x} y={cy2 + 3.5} textAnchor="middle" fontSize="7.5" fontWeight="bold" fill={blue}>{boltLabel[i]}</text>
-              </g>
-            );
-          })}
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-full mx-auto">
+          {arrowMarker("arr-l")}
+          <line x1={padX} y1={cy2} x2={W - padX} y2={cy2} stroke={isDark ? "#334155" : "#e2e8f0"} strokeWidth="2" />
+          {arrows.map((a, i) => (
+            <line key={i} x1={a.x1} y1={a.y1} x2={a.x2} y2={a.y2} stroke={arrowColor} strokeWidth="1.2" strokeOpacity="0.5" markerEnd="url(#arr-l)" />
+          ))}
+          {pts.map((p, i) => (
+            <g key={i}>
+              <circle cx={p.x} cy={p.y} r={boltR} fill={blue} fillOpacity={0.15} stroke={blue} strokeWidth="1.5" />
+              <text x={p.x} y={p.y + 4} textAnchor="middle" fontSize="10" fontWeight="bold" fill={blue}>{boltLabel[i]}</text>
+            </g>
+          ))}
         </svg>
       );
     }
 
     return (
-      <svg viewBox="0 0 60 60" className="w-14 h-14 mx-auto">
-        <circle cx={30} cy={30} r={24} fill={blue} fillOpacity={0.15} stroke={blue} strokeWidth="2" />
-        <text x={30} y={35} textAnchor="middle" fontSize="12" fill={blue} fontWeight="bold">1</text>
+      <svg viewBox="0 0 70 70" className="w-16 h-16 mx-auto">
+        <circle cx={35} cy={35} r={28} fill={blue} fillOpacity={0.15} stroke={blue} strokeWidth="2" />
+        <text x={35} y={40} textAnchor="middle" fontSize="13" fill={blue} fontWeight="bold">1</text>
       </svg>
     );
   }
@@ -1264,26 +1296,26 @@ ${recommendedWorks.length > 0 ? `<div class="section">
 
             {/* ══ SCREEN: MENU ══ */}
             {screen === "menu" && (
-              <div className={`flex-1 flex flex-col items-center px-5 pt-3 pb-3 ${isDesktop ? "max-w-xl mx-auto w-full" : ""}`}>
+              <div className={`flex-1 flex flex-col items-center px-5 pt-2 pb-4 min-h-0 ${isDesktop ? "max-w-xl mx-auto w-full" : ""}`}>
                 {credits !== null && (
-                  <div className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-[11px] mb-3 ${credits > 0 ? (isDark ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400" : "bg-emerald-50 border border-emerald-100 text-emerald-700") : "bg-red-500/5 border border-red-500/20 text-red-400"}`}>
+                  <div className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] mb-2 ${credits > 0 ? (isDark ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400" : "bg-emerald-50 border border-emerald-100 text-emerald-700") : "bg-red-500/5 border border-red-500/20 text-red-400"}`}>
                     <div className="flex items-center gap-1.5"><CreditCard className="w-3 h-3" /><span className="font-semibold truncate max-w-[160px]">{serviceName || serviceCode}</span></div>
                     <span className="font-bold shrink-0">{credits > 0 ? `${credits} кр.` : "Кредиты закончились"}</span>
                   </div>
                 )}
-                <div className="flex-1 min-h-0 flex items-center justify-center w-full">
-                  <img src={logoImg} alt="2LS" className="w-3/4 object-contain" style={{ mixBlendMode: "multiply", maxHeight: "28vh" }} />
+                <div className="flex-1 min-h-0 flex items-center justify-center w-full" style={{ maxHeight: "38vh" }}>
+                  <img src={logoImg} alt="2LS" className="w-3/4 object-contain h-full" style={{ mixBlendMode: "multiply" }} />
                 </div>
-                <div className="w-full flex flex-col gap-3 pb-2">
+                <div className="w-full flex flex-col gap-2.5 shrink-0">
                   <p className={`text-center text-[10px] font-bold uppercase tracking-widest ${isDark ? "text-slate-500" : "text-slate-400"}`}>Выберите инструмент</p>
                   <button onClick={() => setScreen("form")}
-                    className={`w-full h-[72px] rounded-3xl flex items-center justify-center gap-3 font-extrabold text-base uppercase tracking-wider transition-all shadow-sm ${isDark ? "bg-slate-900 border border-slate-700 text-slate-100 hover:border-sky-500" : "bg-white border border-[#ddd8ce] text-slate-800 hover:border-[#7ec8f0] hover:shadow-md"}`}>
-                    <Wrench className="w-6 h-6 text-[#7ec8f0] shrink-0" />
+                    className={`w-full h-14 rounded-2xl flex items-center justify-center gap-3 font-extrabold text-base uppercase tracking-wider transition-all shadow-sm ${isDark ? "bg-slate-900 border border-slate-700 text-slate-100 hover:border-sky-500" : "bg-white border border-[#ddd8ce] text-slate-800 hover:border-[#7ec8f0] hover:shadow-md"}`}>
+                    <Wrench className="w-5 h-5 text-[#7ec8f0] shrink-0" />
                     Диагностика
                   </button>
                   <button onClick={() => setScreen("torque_form")}
-                    className={`w-full h-[72px] rounded-3xl flex items-center justify-center gap-3 font-extrabold text-base uppercase tracking-wider transition-all shadow-sm ${isDark ? "bg-slate-900 border border-slate-700 text-slate-100 hover:border-amber-500" : "bg-white border border-[#ddd8ce] text-slate-800 hover:border-amber-400 hover:shadow-md"}`}>
-                    <span className="text-2xl shrink-0">📐</span>
+                    className={`w-full h-14 rounded-2xl flex items-center justify-center gap-3 font-extrabold text-base uppercase tracking-wider transition-all shadow-sm ${isDark ? "bg-slate-900 border border-slate-700 text-slate-100 hover:border-amber-500" : "bg-white border border-[#ddd8ce] text-slate-800 hover:border-amber-400 hover:shadow-md"}`}>
+                    <span className="text-xl shrink-0">📐</span>
                     Моменты затяжки
                   </button>
                   <button onClick={() => { setServiceCode(""); setServiceCodeInput(""); localStorage.removeItem("2ls_service_code"); localStorage.removeItem("2ls_service_name"); localStorage.removeItem(PERSIST_KEY); setScreen("code"); setCredits(null); }}
@@ -2148,59 +2180,46 @@ ${recommendedWorks.length > 0 ? `<div class="section">
 
                   {torqueResult && !torqueLoading && (
                     <>
-                      {/* Два блока в одной строке: значения слева, схема справа */}
-                      <div className="flex gap-2">
-                        {/* Левый блок — значения */}
-                        <div className={`flex-1 p-3 rounded-2xl border flex flex-col gap-1.5 ${isDark ? "bg-slate-900/60 border-slate-800" : "bg-white border-[#ddd8ce] shadow-sm"}`}>
-                          {/* Источник */}
-                          <span className={`self-start px-2 py-0.5 rounded-full text-[10px] font-bold border ${torqueResult.confidence === "high" ? (isDark ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200") : (isDark ? "bg-amber-500/20 text-amber-400 border-amber-500/30" : "bg-amber-50 text-amber-700 border-amber-200")}`}>
-                            {torqueResult.confidence === "high" ? "✓ OLP" : "⚠ ИИ"}
-                          </span>
-
-                          {/* Момент затяжки */}
-                          <div>
-                            <div className={`text-[10px] uppercase font-bold mb-0.5 ${isDark ? "text-slate-500" : "text-slate-400"}`}>Момент затяжки</div>
-                            <div className="flex items-baseline gap-1">
-                              <span className={`text-xl font-black ${isDark ? "text-white" : "text-slate-800"}`}>{torqueResult.torque_nm.min}–{torqueResult.torque_nm.max}</span>
-                              <span className="text-sm font-bold text-[#7ec8f0]">Н·м</span>
-                            </div>
+                      {/* Блок 1: компактные значения в одну строку */}
+                      <div className={`px-3 py-2 rounded-2xl border flex items-center gap-3 flex-wrap ${isDark ? "bg-slate-900/60 border-slate-800" : "bg-white border-[#ddd8ce] shadow-sm"}`}>
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border shrink-0 ${torqueResult.confidence === "high" ? (isDark ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200") : (isDark ? "bg-amber-500/20 text-amber-400 border-amber-500/30" : "bg-amber-50 text-amber-700 border-amber-200")}`}>
+                          {torqueResult.confidence === "high" ? "✓ OLP" : "⚠ ИИ"}
+                        </span>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <span className={`text-[10px] font-semibold ${isDark ? "text-slate-500" : "text-slate-400"}`}>Момент:</span>
+                          <span className={`text-sm font-black ${isDark ? "text-white" : "text-slate-800"}`}>{torqueResult.torque_nm.min}–{torqueResult.torque_nm.max}</span>
+                          <span className={`text-[11px] font-bold text-[#7ec8f0]`}>Н·м</span>
+                        </div>
+                        {torqueResult.angle_degrees && (
+                          <div className="flex items-center gap-1 shrink-0">
+                            <span className={`text-[10px] font-semibold ${isDark ? "text-slate-500" : "text-slate-400"}`}>Угол:</span>
+                            <span className={`text-sm font-black ${isDark ? "text-amber-400" : "text-amber-600"}`}>+{torqueResult.angle_degrees}°</span>
                           </div>
-
-                          {/* Угол доворота */}
-                          {torqueResult.angle_degrees && (
-                            <div>
-                              <div className={`text-[10px] uppercase font-bold mb-0.5 ${isDark ? "text-slate-500" : "text-slate-400"}`}>Угол доворота</div>
-                              <div className={`text-lg font-black ${isDark ? "text-amber-400" : "text-amber-600"}`}>+{torqueResult.angle_degrees}°</div>
-                            </div>
-                          )}
-
-                          {/* Болт + повтор */}
-                          {(torqueResult.bolt_class || (torqueResult.reusable !== null && torqueResult.reusable !== undefined)) && (
-                            <div className={`flex gap-3 pt-1.5 border-t ${isDark ? "border-slate-800" : "border-slate-100"}`}>
-                              {torqueResult.bolt_class && (
-                                <div>
-                                  <div className={`text-[9px] uppercase font-bold ${isDark ? "text-slate-500" : "text-slate-400"}`}>Болт</div>
-                                  <div className={`text-sm font-black ${isDark ? "text-slate-100" : "text-slate-800"}`}>{torqueResult.bolt_class}</div>
-                                </div>
-                              )}
-                              {torqueResult.reusable !== null && torqueResult.reusable !== undefined && (
-                                <div>
-                                  <div className={`text-[9px] uppercase font-bold ${isDark ? "text-slate-500" : "text-slate-400"}`}>Повтор</div>
-                                  <div className={`text-sm font-bold ${torqueResult.reusable ? "text-emerald-500" : "text-red-400"}`}>{torqueResult.reusable ? "Да" : "Нет"}</div>
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Правый блок — схема (всегда, по типу узла) */}
-                        <div className={`w-[130px] shrink-0 p-2 rounded-2xl border flex flex-col items-center justify-center ${isDark ? "bg-slate-900/40 border-slate-800" : "bg-white border-[#ddd8ce] shadow-sm"}`}>
-                          <p className={`text-[9px] font-bold uppercase text-center mb-1 ${isDark ? "text-slate-500" : "text-slate-400"}`}>Порядок затяжки</p>
-                          <TorqueSVG node={torqueNode} patternData={torqueResult.pattern_data} />
-                        </div>
+                        )}
+                        {torqueResult.bolt_class && (
+                          <div className="flex items-center gap-1 shrink-0">
+                            <span className={`text-[10px] font-semibold ${isDark ? "text-slate-500" : "text-slate-400"}`}>Болт:</span>
+                            <span className={`text-sm font-black ${isDark ? "text-slate-100" : "text-slate-800"}`}>{torqueResult.bolt_class}</span>
+                          </div>
+                        )}
+                        {torqueResult.reusable !== null && torqueResult.reusable !== undefined && (
+                          <div className="flex items-center gap-1 shrink-0">
+                            <span className={`text-[10px] font-semibold ${isDark ? "text-slate-500" : "text-slate-400"}`}>Повтор:</span>
+                            <span className={`text-sm font-bold ${torqueResult.reusable ? "text-emerald-500" : "text-red-400"}`}>{torqueResult.reusable ? "Да" : "Нет"}</span>
+                          </div>
+                        )}
                       </div>
 
-                      {/* Этапы — расшифрованные */}
+                      {/* Блок 2: схема порядка затяжки (всегда, по типу узла) */}
+                      <div className={`p-3 rounded-2xl border ${isDark ? "bg-slate-900/40 border-slate-800" : "bg-white border-[#ddd8ce] shadow-sm"}`}>
+                        <div className={`text-[10px] uppercase font-bold mb-2 ${isDark ? "text-slate-500" : "text-slate-400"}`}>Порядок затяжки — крест-накрест</div>
+                        <TorqueSVG node={torqueNode} patternData={torqueResult.pattern_data} />
+                        <p className={`text-[10px] text-center mt-2 ${isDark ? "text-slate-500" : "text-slate-400"}`}>
+                          Цифра в круге — порядковый номер болта · стрелка — следующий шаг
+                        </p>
+                      </div>
+
+                      {/* Блок 3: этапы затяжки по-русски */}
                       {torqueResult.stages && torqueResult.stages.length > 0 && (
                         <div className={`p-3 rounded-2xl border ${isDark ? "bg-slate-900/60 border-slate-800" : "bg-white border-[#ddd8ce] shadow-sm"}`}>
                           <div className={`text-[10px] uppercase font-bold mb-2 ${isDark ? "text-slate-500" : "text-slate-400"}`}>Этапы затяжки</div>
@@ -2208,11 +2227,12 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                             {torqueResult.stages.map((s, i) => (
                               <div key={i} className="flex items-center gap-2">
                                 <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${isDark ? "bg-amber-500/30 text-amber-400" : "bg-amber-100 text-amber-700"}`}>{i + 1}</span>
-                                <span className={`text-[11px] font-semibold ${isDark ? "text-slate-300" : "text-slate-700"}`}>
-                                  {s.step ? <span className={`${isDark ? "text-slate-400" : "text-slate-500"}`}>{s.step}: </span> : null}{s.value}
-                                </span>
+                                <span className={`text-[11px] font-semibold ${isDark ? "text-slate-300" : "text-slate-700"}`}>{s.value}</span>
                               </div>
                             ))}
+                          </div>
+                          <div className={`mt-2 pt-2 border-t text-[10px] leading-relaxed ${isDark ? "border-slate-800 text-slate-500" : "border-slate-100 text-slate-400"}`}>
+                            Каждый этап — по схеме крест-накрест. Финальный момент — последний этап.
                           </div>
                         </div>
                       )}
