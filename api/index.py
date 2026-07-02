@@ -44,6 +44,15 @@ OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 OLP_API_KEY = os.environ.get("OLP_API_KEY", "")
 OLP_BASE_URL = "https://api.openlaborproject.com/v1"
 
+# «Любой вопрос» — поисковый ассистент на Perplexity Sonar Pro
+ASK_MODEL = "perplexity/sonar-pro"
+ASK_BUDGET_USD = 0.20          # жёсткий лимит расхода на один диалог
+ASK_CREDIT_COST = 0.5          # списание за один диалог «любой вопрос»
+# Резервная оценка стоимости, если OpenRouter не вернул usage.cost (USD за 1M токенов)
+ASK_PRICE_IN = 3.0 / 1_000_000
+ASK_PRICE_OUT = 15.0 / 1_000_000
+ASK_SEARCH_FEE = 0.008         # средняя доплата за веб-поиск Sonar Pro за запрос
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -2432,6 +2441,11 @@ class TorqueRequest(BaseModel):
     node: str
     service_code: Optional[str] = None
 
+class AskRequest(BaseModel):
+    service_code: str
+    question: str
+    ask_id: Optional[str] = None  # None → новый диалог (списывается 0.5 кредита)
+
 _NODE_LABELS = {
     "cylinder_head": "головка блока цилиндров (ГБЦ)",
     "wheel_bolts": "колёсные болты / гайки",
@@ -2597,6 +2611,155 @@ def get_torque(req: TorqueRequest):
     except Exception as e:
         logger.error(f"Torque LLM error: {e}")
         raise HTTPException(status_code=503, detail="Не удалось получить данные о моментах затяжки")
+
+
+ASK_SYSTEM_PROMPT = """Ты — поисковый ассистент для автомехаников (сервис 2LS). Механик в процессе работы задаёт короткий рабочий вопрос: сравнить, узнать факт, найти взаимозаменяемость, регламент, артикул, характеристику и т.п. Твоя задача — дать точный ответ на основе актуального веб-поиска.
+
+ПРАВИЛА ОТВЕТА:
+- Отвечай СРАЗУ по сути. Никаких вступлений, извинений, «как ИИ», воды.
+- Максимально экономно по словам, но без потери сути. Если ответ — это число/факт/список — дай его в 1–5 строк.
+- Формат для Telegram: без markdown-заголовков (#) и без таблиц. Для акцентов — *звёздочки*. Списки — короткими строками с «-».
+- Не выдумывай точные цифры (артикулы, моменты, объёмы, допуски). Если не уверен — назови метод/источник, где смотреть, и честно отметь неуверенность.
+- Единицы измерения и терминология — как принято в РФ (Н·м, км, л, бар).
+
+УТОЧНЕНИЯ (короткое анкетирование):
+- Если без уточнения ответ будет неверным или слишком общим — НЕ угадывай. Задай 1–2 максимально коротких уточняющих вопроса (например: «Двигатель бензин или дизель? Год?») и остановись. Не пиши длинных пояснений, зачем спрашиваешь.
+- Как только данных достаточно — сразу выдай финальный ответ.
+
+Помни: механик платит за скорость и точность. Каждое лишнее слово — против тебя."""
+
+
+def _get_ask_col():
+    return _db()["ask_sessions"]
+
+
+@app.post("/api/ask")
+def ask_question(req: AskRequest):
+    """«Любой вопрос» — поисковый ассистент на Perplexity Sonar Pro.
+    Новый диалог = 0.5 кредита, бюджет ASK_BUDGET_USD на весь диалог.
+    При исчерпании бюджета — просим начать новый вопрос (ещё 0.5 кредита)."""
+    if not OPENROUTER_API_KEY:
+        raise HTTPException(status_code=503, detail="OPENROUTER_API_KEY не настроен")
+
+    svc_col = _get_services_col()
+    ask_col = _get_ask_col()
+
+    # ── Загрузка / создание диалога ──────────────────────────────────
+    if req.ask_id:
+        dialog = ask_col.find_one({"ask_id": req.ask_id}, {"_id": 0})
+        if not dialog:
+            raise HTTPException(status_code=404, detail="Диалог не найден. Начните новый вопрос.")
+        # Бюджет исчерпан — новый запрос не выполняем
+        if dialog.get("cost_usd", 0) >= ASK_BUDGET_USD:
+            return {
+                "ask_id": req.ask_id,
+                "limit_reached": True,
+                "cost_usd": round(dialog.get("cost_usd", 0), 4),
+                "budget_usd": ASK_BUDGET_USD,
+                "message": "Лимит этой сессии исчерпан. Начните новый вопрос — будет списано ещё 0.5 кредита.",
+            }
+        history = dialog.get("messages", [])
+        credits_remaining = None
+    else:
+        # Новый диалог — проверяем и списываем 0.5 кредита атомарно
+        svc = svc_col.find_one({"service_id": req.service_code}, {"_id": 0})
+        if not svc:
+            raise HTTPException(status_code=404, detail="Неверный код сервиса")
+        if svc.get("status") == "blocked":
+            raise HTTPException(status_code=403, detail="Сервис заблокирован")
+        charge = svc_col.update_one(
+            {"service_id": req.service_code, "credits": {"$gte": ASK_CREDIT_COST}},
+            {"$inc": {"credits": -ASK_CREDIT_COST}, "$set": {"last_activity": datetime.utcnow().isoformat()}},
+        )
+        if charge.modified_count == 0:
+            raise HTTPException(status_code=402, detail="Недостаточно кредитов (нужно 0.5). Свяжитесь с администрацией.")
+        credits_remaining = svc.get("credits", 0) - ASK_CREDIT_COST
+        req.ask_id = _make_id("ask_", 10)
+        history = []
+        ask_col.insert_one({
+            "ask_id": req.ask_id,
+            "service_id": req.service_code,
+            "messages": [],
+            "cost_usd": 0.0,
+            "created_at": datetime.utcnow().isoformat(),
+        })
+        try:
+            _get_txn_col().insert_one({
+                "txn_id": _make_id("txn_"),
+                "service_id": req.service_code,
+                "type": "charge",
+                "credits_delta": -ASK_CREDIT_COST,
+                "kind": "ask",
+                "ask_id": req.ask_id,
+                "created_at": datetime.utcnow().isoformat(),
+            })
+        except Exception as e:
+            logger.warning(f"Ask txn log error (non-critical): {e}")
+
+    # ── Вызов Sonar Pro ──────────────────────────────────────────────
+    llm_msgs = [{"role": "system", "content": ASK_SYSTEM_PROMPT}]
+    llm_msgs += [{"role": m["role"], "content": m["content"]} for m in history]
+    llm_msgs.append({"role": "user", "content": req.question})
+
+    try:
+        resp = requests.post(
+            OPENROUTER_URL,
+            headers={"Authorization": f"Bearer {OPENROUTER_API_KEY}", "Content-Type": "application/json"},
+            json={
+                "model": ASK_MODEL,
+                "messages": llm_msgs,
+                "temperature": 0.2,
+                "max_tokens": 900,
+                "usage": {"include": True},  # просим OpenRouter вернуть реальную стоимость
+            },
+            timeout=40,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+    except Exception as e:
+        logger.error(f"Ask LLM error: {e}")
+        raise HTTPException(status_code=503, detail="Не удалось получить ответ. Попробуйте ещё раз.")
+
+    answer = data["choices"][0]["message"]["content"].strip()
+    usage = data.get("usage", {}) or {}
+
+    # Реальная стоимость из OpenRouter (USD). Если нет — оцениваем по токенам.
+    turn_cost = usage.get("cost")
+    if turn_cost is None:
+        p_tok = usage.get("prompt_tokens", 0)
+        c_tok = usage.get("completion_tokens", 0)
+        turn_cost = p_tok * ASK_PRICE_IN + c_tok * ASK_PRICE_OUT + ASK_SEARCH_FEE
+    turn_cost = float(turn_cost)
+
+    # ── Обновляем диалог ─────────────────────────────────────────────
+    new_total = 0.0
+    try:
+        updated = ask_col.find_one_and_update(
+            {"ask_id": req.ask_id},
+            {
+                "$push": {"messages": {"$each": [
+                    {"role": "user", "content": req.question},
+                    {"role": "assistant", "content": answer},
+                ]}},
+                "$inc": {"cost_usd": turn_cost},
+                "$set": {"updated_at": datetime.utcnow().isoformat()},
+            },
+            return_document=True,
+            projection={"_id": 0, "cost_usd": 1},
+        )
+        new_total = (updated or {}).get("cost_usd", turn_cost)
+    except Exception as e:
+        logger.warning(f"Ask dialog update error (non-critical): {e}")
+        new_total = turn_cost
+
+    return {
+        "ask_id": req.ask_id,
+        "answer": answer,
+        "limit_reached": new_total >= ASK_BUDGET_USD,
+        "cost_usd": round(new_total, 4),
+        "budget_usd": ASK_BUDGET_USD,
+        "credits_remaining": credits_remaining,
+    }
 
 
 @app.get("/api/manager/sessions")

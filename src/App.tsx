@@ -11,7 +11,7 @@ import StaffPortal from "./StaffPortal";
 
 const API_URL = "/api";
 
-type Screen = "code" | "menu" | "form" | "problem" | "chat" | "confirm" | "solved" | "torque_form" | "torque_result";
+type Screen = "code" | "menu" | "form" | "problem" | "chat" | "confirm" | "solved" | "torque_form" | "torque_result" | "ask";
 
 interface Message { role: "user" | "assistant"; content: string; }
 
@@ -202,6 +202,14 @@ function DiagApp() {
   const [torqueLoading, setTorqueLoading] = useState(false);
   const [torqueResult, setTorqueResult] = useState<TorqueData | null>(null);
   const [torqueError, setTorqueError] = useState("");
+
+  // «Любой вопрос» — поисковый ассистент (Sonar Pro)
+  const [askId, setAskId] = useState<string | null>(null);
+  const [askMessages, setAskMessages] = useState<Message[]>([]);
+  const [askInput, setAskInput] = useState("");
+  const [askLoading, setAskLoading] = useState(false);
+  const [askError, setAskError] = useState("");
+  const [askLimitReached, setAskLimitReached] = useState(false);
 
   // Screen 3 — Chat
   const [messages, setMessages] = useState<Message[]>([]);
@@ -985,6 +993,62 @@ ${recommendedWorks.length > 0 ? `<div class="section">
     }
   }
 
+  // ── «Любой вопрос» (Sonar Pro) ────────────────────────────────────
+  function startNewAsk() {
+    setAskId(null);
+    setAskMessages([]);
+    setAskInput("");
+    setAskError("");
+    setAskLimitReached(false);
+  }
+
+  async function handleAskSend() {
+    const q = askInput.trim();
+    if (!q || askLoading) return;
+    const isNewDialog = !askId;
+    // Новый диалог требует 0.5 кредита
+    if (isNewDialog && (credits === null || credits < 0.5)) {
+      setAskError("Недостаточно кредитов (нужно 0.5). Свяжитесь с администрацией.");
+      return;
+    }
+    setAskError("");
+    setAskLoading(true);
+    setAskMessages(prev => [...prev, { role: "user", content: q }]);
+    setAskInput("");
+    try {
+      const res = await fetch(`${API_URL}/ask`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ service_code: serviceCode, question: q, ask_id: askId }),
+      });
+      if (res.status === 402) {
+        setAskError("Недостаточно кредитов (нужно 0.5). Свяжитесь с администрацией.");
+        setAskMessages(prev => prev.slice(0, -1)); // откатываем вопрос
+        return;
+      }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const d = await res.json();
+      if (d.ask_id) setAskId(d.ask_id);
+      if (typeof d.credits_remaining === "number") setCredits(d.credits_remaining);
+      if (d.limit_reached && !d.answer) {
+        // Бюджет исчерпан ещё до ответа — откатываем вопрос
+        setAskMessages(prev => prev.slice(0, -1));
+        setAskLimitReached(true);
+        return;
+      }
+      if (d.answer) setAskMessages(prev => [...prev, { role: "assistant", content: d.answer }]);
+      setAskLimitReached(!!d.limit_reached);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      setAskError(msg.includes("Failed to fetch")
+        ? "Не удалось подключиться к серверу."
+        : "Ошибка при получении ответа. Попробуйте ещё раз.");
+      setAskMessages(prev => prev.slice(0, -1));
+    } finally {
+      setAskLoading(false);
+    }
+  }
+
   // ── Chat pagination ───────────────────────────────────────────────
   type ChatPage = { userMsg?: Message; aiMsg?: Message };
 
@@ -1050,6 +1114,7 @@ ${recommendedWorks.length > 0 ? `<div class="section">
     solved: "Кейс сохранён",
     torque_form: "Моменты затяжки",
     torque_result: TORQUE_NODES.find(n => n.id === torqueNode)?.label || "Результат",
+    ask: "Любой вопрос",
   }[screen];
 
   // Генерирует правильный порядок затяжки крест-накрест когда OLP не даёт sequence
@@ -1317,6 +1382,11 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                     className={`w-full h-14 rounded-2xl flex items-center justify-center gap-3 font-extrabold text-base uppercase tracking-wider transition-all shadow-sm ${isDark ? "bg-slate-900 border border-slate-700 text-slate-100 hover:border-amber-500" : "bg-white border border-[#ddd8ce] text-slate-800 hover:border-amber-400 hover:shadow-md"}`}>
                     <span className="text-xl shrink-0">📐</span>
                     Моменты затяжки
+                  </button>
+                  <button onClick={() => { startNewAsk(); setScreen("ask"); }}
+                    className={`w-full h-14 rounded-2xl flex items-center justify-center gap-3 font-extrabold text-base uppercase tracking-wider transition-all shadow-sm ${isDark ? "bg-slate-900 border border-slate-700 text-slate-100 hover:border-violet-500" : "bg-white border border-[#ddd8ce] text-slate-800 hover:border-violet-400 hover:shadow-md"}`}>
+                    <Sparkles className="w-5 h-5 text-violet-400 shrink-0" />
+                    Любой вопрос
                   </button>
                   <button onClick={() => { setServiceCode(""); setServiceCodeInput(""); localStorage.removeItem("2ls_service_code"); localStorage.removeItem("2ls_service_name"); localStorage.removeItem(PERSIST_KEY); setScreen("code"); setCredits(null); }}
                     className={`text-center text-[10px] py-1 ${isDark ? "text-slate-600 hover:text-slate-400" : "text-slate-400 hover:text-slate-500"} transition-colors`}>
@@ -2258,6 +2328,89 @@ ${recommendedWorks.length > 0 ? `<div class="section">
                     <button onClick={() => { setTorqueNode(""); setTorqueResult(null); setTorqueError(""); setScreen("torque_form"); }}
                       className={`w-full font-extrabold rounded-2xl flex items-center justify-center gap-2 uppercase tracking-wider transition-all ${isDesktop ? "py-2 h-10 text-xs" : "py-3 h-11 text-[13px]"} ${isDark ? "bg-slate-900 border border-slate-700 text-slate-200 hover:bg-slate-800" : "bg-slate-100 text-slate-700 hover:bg-slate-200"}`}>
                       Другой узел
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ══ SCREEN: ASK (любой вопрос — Sonar Pro) ══ */}
+            {screen === "ask" && (
+              <div className={`flex-1 flex flex-col overflow-hidden ${isDesktop ? "max-w-xl mx-auto w-full" : ""}`}>
+                <div className="px-4">
+                  <button onClick={() => setScreen("menu")}
+                    className={`flex items-center gap-1 text-xs font-semibold self-start px-1 py-0.5 rounded-lg transition-colors ${isDesktop ? "mt-1 mb-0.5" : "mt-2 mb-1"} ${isDark ? "text-slate-400 hover:text-slate-200 hover:bg-slate-800" : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"}`}>
+                    <ArrowLeft className="w-3.5 h-3.5" /> Меню
+                  </button>
+                </div>
+
+                {/* Info bar */}
+                <div className={`mx-4 mb-2 px-3 py-1.5 rounded-xl border text-[10px] flex items-center gap-2 ${isDark ? "bg-violet-500/5 border-violet-500/20 text-violet-300" : "bg-violet-50 border-violet-100 text-violet-700"}`}>
+                  <Sparkles className="w-3 h-3 shrink-0" />
+                  <span className="leading-tight">Поиск по актуальным данным. Один вопрос-сессия — 0.5 кредита.</span>
+                </div>
+
+                {/* Messages */}
+                <div className="flex-1 overflow-y-auto px-3 py-1 flex flex-col gap-2">
+                  {askMessages.length === 0 && !askLoading && (
+                    <div className="flex-1 flex flex-col items-center justify-center gap-2 py-8 text-center px-6">
+                      <Sparkles className={`w-8 h-8 ${isDark ? "text-violet-400/60" : "text-violet-300"}`} />
+                      <p className={`text-sm font-semibold ${isDark ? "text-slate-400" : "text-slate-500"}`}>Задайте любой рабочий вопрос</p>
+                      <p className={`text-[11px] leading-relaxed ${isDark ? "text-slate-600" : "text-slate-400"}`}>
+                        Сравнить, узнать факт, найти взаимозаменяемость, регламент, артикул. Короткий точный ответ — без форумов и звонков.
+                      </p>
+                    </div>
+                  )}
+                  {askMessages.map((m, i) => (
+                    <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+                      <div className={`max-w-[88%] px-3 py-2.5 text-[12px] ${m.role === "user"
+                        ? "rounded-2xl rounded-tr-sm bg-violet-600 text-white"
+                        : `rounded-2xl rounded-tl-sm ${isDark ? "bg-slate-800 text-slate-200" : "bg-white border border-violet-100 text-slate-800 shadow-sm"}`}`}>
+                        {renderContent(m.content)}
+                      </div>
+                    </div>
+                  ))}
+                  {askLoading && (
+                    <div className="flex justify-start">
+                      <div className={`px-4 py-3 rounded-2xl rounded-tl-sm text-xs flex items-center gap-2 ${isDark ? "bg-slate-800 text-slate-400" : "bg-white border border-violet-100 text-slate-500 shadow-sm"}`}>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" /> Ищу ответ...
+                      </div>
+                    </div>
+                  )}
+                  {askError && (
+                    <div className={`p-3 rounded-2xl border text-xs ${isDark ? "bg-red-500/10 border-red-500/30 text-red-400" : "bg-red-50 border-red-200 text-red-600"}`}>
+                      {askError}
+                    </div>
+                  )}
+                </div>
+
+                {/* Limit reached banner */}
+                {askLimitReached && (
+                  <div className={`mx-3 mb-2 p-3 rounded-2xl border text-center ${isDark ? "bg-amber-500/10 border-amber-500/30" : "bg-amber-50 border-amber-200"}`}>
+                    <p className={`text-[12px] font-semibold mb-2 ${isDark ? "text-amber-300" : "text-amber-800"}`}>
+                      Лимит этой сессии исчерпан. Начните новый вопрос — будет списано ещё 0.5 кредита.
+                    </p>
+                    <button onClick={startNewAsk} disabled={credits === null || credits < 0.5}
+                      className={`w-full py-2.5 rounded-xl font-extrabold text-[13px] uppercase tracking-wider transition-all ${(credits === null || credits < 0.5) ? "bg-slate-400 text-slate-200 opacity-60 cursor-not-allowed" : "bg-violet-600 hover:bg-violet-700 text-white"}`}>
+                      Новый вопрос (−0.5 кредита)
+                    </button>
+                  </div>
+                )}
+
+                {/* Input */}
+                {!askLimitReached && (
+                  <div className={`px-3 ${isDesktop ? "pb-3 pt-1" : "pb-4 pt-1"} flex items-end gap-2`}>
+                    <textarea
+                      value={askInput}
+                      onChange={e => setAskInput(e.target.value)}
+                      placeholder={askId ? "Уточнить или задать следующий вопрос..." : "Ваш вопрос..."}
+                      rows={1}
+                      disabled={askLoading || credits === null || credits < 0.5}
+                      className={`flex-1 resize-none px-3 py-2.5 rounded-2xl text-[13px] border outline-none transition-colors max-h-28 ${isDark ? "bg-slate-900 border-slate-800 text-slate-200 focus:border-violet-400" : "bg-white border-[#ddd8ce] text-slate-800 focus:border-violet-400"}`}
+                    />
+                    <button onClick={handleAskSend} disabled={!askInput.trim() || askLoading || credits === null || credits < 0.5}
+                      className={`shrink-0 w-11 h-11 rounded-2xl flex items-center justify-center transition-all ${(!askInput.trim() || askLoading || credits === null || credits < 0.5) ? "bg-slate-400 text-slate-200 opacity-60 cursor-not-allowed" : "bg-violet-600 hover:bg-violet-700 text-white"}`}>
+                      {askLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
                     </button>
                   </div>
                 )}
